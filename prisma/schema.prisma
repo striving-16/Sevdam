@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+
+// ─── Products ────────────────────────────────────────────────────────────────
+
+model Product {
+  id             String          @id @default(cuid())
+  name_en        String
+  name_ar        String          @default("")
+  slug           String          @unique
+  description_en String          @db.Text
+  description_ar String          @default("") @db.Text
+  price          Float
+  stock          Int             @default(0)
+  imageUrl       String
+  category       ProductCategory @default(SKINCARE)
+  brand          String?
+  tags           String[]        @default([])
+  benefits       String?         @db.Text
+  ingredients    String?         @db.Text
+  usage          String?         @db.Text
+  isBestseller   Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  orderItems     OrderItem[]
+
+  @@index([slug])
+  @@index([category])
+  @@index([brand])
+}
+
+// ─── Categories (admin-managed table) ────────────────────────────────────────
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+// ─── Orders ──────────────────────────────────────────────────────────────────
+
+model Order {
+  id              String      @id @default(cuid())
+  customerName    String
+  customerPhone   String
+  customerAddress String      @default("")
+  deliveryType    String      @default("home")
+  totalPrice      Float
+  status          OrderStatus @default(PENDING)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           OrderItem[]
+  customerId      String?
+  customer        Customer?   @relation(fields: [customerId], references: [id])
+
+  @@index([customerPhone])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// ─── Customers ───────────────────────────────────────────────────────────────
+
+model Customer {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String   @unique
+  totalOrders Int      @default(0)
+  createdAt   DateTime @default(now())
+  orders      Order[]
+}
+
+// ─── Admin Users ─────────────────────────────────────────────────────────────
+
+model AdminUser {
+  id           String @id @default(cuid())
+  email        String @unique
+  passwordHash String
+  role         String @default("ADMIN")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PREPARING
+  DELIVERED
+  CANCELLED
+}
+
+enum ProductCategory {
+  SKINCARE
+  HAIRCARE
+  PERFUMES
+  MAKEUP
+  BODYCARE
+  MENCARE
+  BABYCARE
+  TOOLS
+}

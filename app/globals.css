@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+/* ── Beauty Brand Design Tokens ─────────────────────────────────────────────── */
+@layer base {
+  :root {
+    /* shadcn required vars — mapped to beauty palette */
+    --background: oklch(0.99 0.004 80);       /* warm white #FAFAF8 */
+    --foreground: oklch(0.17 0.01 50);         /* warm black #1C1917 */
+    --card: oklch(0.99 0.004 80);
+    --card-foreground: oklch(0.17 0.01 50);
+    --popover: oklch(0.99 0.004 80);
+    --popover-foreground: oklch(0.17 0.01 50);
+    --primary: oklch(0.17 0.01 50);
+    --primary-foreground: oklch(0.99 0.004 80);
+    --secondary: oklch(0.96 0.01 70);
+    --secondary-foreground: oklch(0.17 0.01 50);
+    --muted: oklch(0.96 0.01 70);
+    --muted-foreground: oklch(0.52 0.02 55);
+    --accent: oklch(0.80 0.06 65);             /* warm gold */
+    --accent-foreground: oklch(0.17 0.01 50);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.91 0.01 75);             /* warm border */
+    --input: oklch(0.91 0.01 75);
+    --ring: oklch(0.80 0.06 65);
+    --radius: 0.5rem;
+  }
+}
+
+/* ── Tailwind v4 theme bridge ───────────────────────────────────────────────── */
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cormorant), Georgia, serif;
+
+  /* Core */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  /* Beauty brand palette — use as bg-cream, text-stone, etc. */
+  --color-cream: #FAFAF8;
+  --color-cream-dark: #F5F0EB;
+  --color-stone: #78716C;
+  --color-stone-dark: #44403C;
+  --color-gold: #C9A882;
+  --color-gold-light: #F0E4D4;
+  --color-rose: #E8C4B8;
+  --color-rose-dark: #C49A8A;
+  --color-warm-border: #E8E0D8;
+
+  /* Radii */
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 10px);
+  --radius-2xl: calc(var(--radius) + 18px);
+}
+
+/* ── Base reset ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #FFFFFF;
+  color: #1D1D1F;
+}
+
+::selection {
+  background-color: #E5E5E5;
+  color: #1D1D1F;
+}
+
+/* ── Scrollbar (subtle, on-brand) ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E8E0D8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #C9A882; }
+
+/* ── Smooth scroll ───────────────────────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+
+/* ── Ticker / marquee animation ──────────────────────────────────────────────── */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-ticker {
+  display: flex;
+  width: max-content;
+  animation: ticker 38s linear infinite;
+  will-change: transform;
+}
+.animate-ticker:hover { animation-play-state: paused; }
+
+/* ── Dot-pattern utility ─────────────────────────────────────────────────────── */
+.dot-pattern {
+  background-image: radial-gradient(circle, rgba(0,0,0,0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* ── Arabic / RTL global overrides ──────────────────────────────────────────── */
+
+/* Switch body + display font to Tajawal for Arabic */
+[dir="rtl"] body,
+[dir="rtl"] {
+  font-family: var(--font-tajawal), system-ui, sans-serif;
+  line-height: 1.9;
+}
+
+/* Tajawal as the display font in RTL — Cormorant has no Arabic glyphs */
+[dir="rtl"] .font-display {
+  font-family: var(--font-tajawal), system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 300;
+}
+
+/* No italic in Arabic — it doesn't exist in the same way */
+[dir="rtl"] em,
+[dir="rtl"] .italic {
+  font-style: normal;
+}
+
+/* Arabic letter-spacing must always be 0 — extra spacing breaks glyph connections */
+[dir="rtl"] * {
+  letter-spacing: 0 !important;
+}
+
+/* Reverse ticker direction for RTL */
+[dir="rtl"] .animate-ticker {
+  animation-direction: reverse;
+}
