@@ -64,7 +64,7 @@ export const useCart = create<CartStore>()(
         get().items.reduce((sum, i) => sum + i.product.price * i.quantity, 0),
     }),
     {
-      name: 'dreamshop-cart',
+      name: 'store-cart',
       storage: createJSONStorage(() => localStorage),
     }
   )

@@ -31,14 +31,14 @@ export default function AdminSettingsPage() {
           <p className="border-b border-neutral-100 pb-4 pt-5 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">
             Store Info
           </p>
-          <SettingRow label="Store Name" value="Dreamshop" />
+          <SettingRow label="Store Name" value="[Configure in lib/config.ts]" />
           <SettingRow
             label="WhatsApp Number"
             value={`+${WHATSAPP_NUMBER}`}
             note="Used for customer orders"
           />
-          <SettingRow label="Currency" value="MRU â€” Mauritanian Ouguiya" />
-          <SettingRow label="Country" value="Mauritania" />
+          <SettingRow label=”Currency” value=”[Configure in lib/config.ts]” />
+          <SettingRow label=”Country” value=”[Configure in lib/config.ts]” />
         </div>
 
         {/* Social Links */}

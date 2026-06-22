@@ -13,7 +13,7 @@ interface Props {
   params: Promise<{ id: string }>
 }
 
-export const metadata: Metadata = { title: 'Order Confirmed — Dreamshop' }
+export const metadata: Metadata = { title: 'Order Confirmed' }
 
 export default async function OrderConfirmationPage({ params }: Props) {
   const { id } = await params

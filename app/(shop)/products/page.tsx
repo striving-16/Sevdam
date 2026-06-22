@@ -9,7 +9,7 @@ interface Props {
   searchParams: Promise<{ q?: string; category?: string }>
 }
 
-export const metadata = { title: 'Products — Dreamshop' }
+export const metadata = { title: 'Products' }
 
 export default async function ProductsPage({ searchParams }: Props) {
   const { q, category } = await searchParams

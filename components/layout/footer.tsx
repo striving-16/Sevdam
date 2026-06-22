@@ -31,7 +31,7 @@ export function Footer() {
           {/* Brand */}
           <div className={`lg:col-span-2 ${isRtl ? 'text-right' : ''}`}>
             <div className="mb-6">
-              <p className="font-display text-[30px] font-light italic text-white rtl:not-italic">Dreamshop</p>
+              <p className="font-display text-[30px] font-light italic text-white rtl:not-italic">Store</p>
               <p className="mt-0.5 text-[9px] font-light uppercase text-[#C9A882]" style={{ letterSpacing: '0.4em' }}>
                 {t.nav.tagline}
               </p>
@@ -67,7 +67,7 @@ export function Footer() {
 
             {/* Google Maps */}
             <a
-              href="https://maps.app.goo.gl/rkVQ1mkCL8X7bMCF7?g_st=ic"
+              href="#"
               target="_blank"
               rel="noopener noreferrer"
               className={`mt-7 inline-flex items-center gap-2.5 rounded-full border border-white/10 px-4 py-2.5 text-[11px] font-light text-white/40 transition-all duration-200 hover:border-[#C9A882]/40 hover:text-[#C9A882] ${isRtl ? 'flex-row-reverse' : ''}`}
@@ -129,13 +129,7 @@ export function Footer() {
             </p>
           </div>
           <p className="mt-4 text-center text-[9px] font-light tracking-[0.12em] text-white/12">
-            Designed &amp; developed by{' '}
-            <a
-              href="mailto:aichaelatigh7@gmail.com"
-              className="transition-colors duration-200 hover:text-white/30"
-            >
-              aichaelatigh7@gmail.com
-            </a>
+            Designed &amp; developed for your brand
           </p>
         </div>
       </div>

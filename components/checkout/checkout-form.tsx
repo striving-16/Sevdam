@@ -40,7 +40,7 @@ function buildMessage(
   )
 
   const lines = [
-    '🛍️ New Order — Dreamshop',
+    '🛍️ New Order',
     '',
     `Name: ${name}`,
     `Phone: ${phone}`,

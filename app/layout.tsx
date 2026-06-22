@@ -29,17 +29,17 @@ const tajawal = Tajawal({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Dreamshop — Beauty & Personal Care',
-    template: '%s | Dreamshop',
+    default: 'Store — Beauty & Personal Care',
+    template: '%s | Store',
   },
   description:
-    'Authentic skincare, haircare, perfumes, makeup and more. Delivered across Mauritania. 100% genuine products at the best prices.',
-  keywords: ['beauty', 'skincare', 'haircare', 'perfumes', 'makeup', 'mauritania', 'dreamshop'],
+    'Authentic skincare, haircare, perfumes, makeup and more. 100% genuine products at the best prices.',
+  keywords: ['beauty', 'skincare', 'haircare', 'perfumes', 'makeup'],
   openGraph: {
     type: 'website',
-    siteName: 'Dreamshop',
-    title: 'Dreamshop — Beauty & Personal Care',
-    description: 'Authentic beauty products delivered across Mauritania.',
+    siteName: 'Store',
+    title: 'Store — Beauty & Personal Care',
+    description: 'Authentic beauty products at the best prices.',
   },
 }
 
@@ -49,7 +49,7 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const store = await cookies()
-  const raw = store.get('dreamshop-locale')?.value as Locale | undefined
+  const raw = store.get('store-locale')?.value as Locale | undefined
   const initialLocale: Locale = raw && VALID_LOCALES.includes(raw) ? raw : 'en'
   const dir = initialLocale === 'ar' ? 'rtl' : 'ltr'
 

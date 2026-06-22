@@ -10,8 +10,8 @@ const pool = new Pool({
 const db = new PrismaClient({ adapter: new PrismaPg(pool) })
 
 async function main() {
-  const email = 'admin@dreamshop.com'
-  const password = 'Dreamshop2024!'
+  const email = process.env.ADMIN_SEED_EMAIL ?? 'admin@example.com'
+  const password = process.env.ADMIN_SEED_PASSWORD ?? 'ChangeMe123!'
 
   const existing = await db.adminUser.findUnique({ where: { email } })
   if (existing) {

@@ -9,7 +9,7 @@ cloudinary.config({
 
 export async function uploadProductImage(dataUrl: string): Promise<string> {
   const result = await cloudinary.uploader.upload(dataUrl, {
-    folder: 'dreamshop/products',
+    folder: 'store/products',
     transformation: [
       {
         width: 1200,
@@ -25,7 +25,7 @@ export async function uploadProductImage(dataUrl: string): Promise<string> {
 }
 
 export async function deleteProductImage(url: string): Promise<void> {
-  const match = url.match(/dreamshop\/products\/([^.]+)/)
+  const match = url.match(/store\/products\/([^.]+)/)
   if (!match) return
-  await cloudinary.uploader.destroy(`dreamshop/products/${match[1]}`)
+  await cloudinary.uploader.destroy(`store/products/${match[1]}`)
 }

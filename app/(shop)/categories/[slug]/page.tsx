@@ -149,7 +149,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params
   const cat = CATEGORY_MAP[slug]
   if (!cat) return {}
-  return { title: `${cat.label} — Dreamshop` }
+  return { title: cat.label }
 }
 
 export default async function CategoryPage({ params, searchParams }: Props) {

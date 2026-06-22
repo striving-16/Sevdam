@@ -3,8 +3,8 @@ import { MapPin, Clock, MessageCircle } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Contact Us — Dreamshop',
-  description: 'Get in touch with Dreamshop — we reply on WhatsApp within minutes.',
+  title: 'Contact Us',
+  description: 'Get in touch — we reply on WhatsApp within minutes.',
 }
 
 function WhatsAppSVG({ size = 22 }: { size?: number }) {
@@ -19,19 +19,19 @@ const CONTACT_DETAILS = [
   {
     Icon: MessageCircle,
     label: 'WhatsApp',
-    value: '+213 42 63 16 57',
+    value: '[Your WhatsApp number]',
     sub: 'Fastest way to reach us — we reply within minutes',
   },
   {
     Icon: MapPin,
     label: 'Location',
-    value: 'Mauritania',
+    value: '[Your location]',
     sub: 'Find us on Google Maps',
   },
   {
     Icon: Clock,
     label: 'Hours',
-    value: 'Sat – Thu, 9am – 9pm',
+    value: '[Opening hours]',
     sub: 'Orders via WhatsApp anytime',
   },
 ]
@@ -63,7 +63,7 @@ export default function ContactPage() {
           {/* WhatsApp CTA */}
           <div>
             <a
-              href="https://wa.me/21342631657"
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? ''}`}
               target="_blank"
               rel="noopener noreferrer"
               className="group flex w-full items-center justify-center gap-3.5 rounded-2xl py-6 text-[14px] font-light text-white transition-all duration-300 hover:brightness-105 active:scale-[0.99]"
@@ -100,7 +100,7 @@ export default function ContactPage() {
           <div className="flex flex-col gap-8">
             {/* Google Maps embed card */}
             <a
-              href="https://maps.app.goo.gl/rkVQ1mkCL8X7bMCF7?g_st=ic"
+              href="#"
               target="_blank"
               rel="noopener noreferrer"
               className="group relative flex items-center justify-center overflow-hidden rounded-2xl bg-[#F7F4F0] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)]"
@@ -124,7 +124,7 @@ export default function ContactPage() {
                   { label: 'Track my order', href: '/track-order' },
                   { label: 'Returns & exchanges', href: '/returns' },
                   { label: 'Browse all products', href: '/products' },
-                  { label: 'About Dreamshop', href: '/about' },
+                  { label: 'About Us', href: '/about' },
                 ].map(({ label, href }) => (
                   <Link
                     key={href}

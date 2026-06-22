@@ -35,7 +35,7 @@ export function I18nProvider({ children, initialLocale = 'en' }: I18nProviderPro
 
   /* Sync from localStorage on mount (client only) */
   useEffect(() => {
-    const saved = localStorage.getItem('dreamshop-locale') as Locale | null
+    const saved = localStorage.getItem('store-locale') as Locale | null
     if (saved && VALID.includes(saved)) {
       setLocaleState(saved)
     }
@@ -51,9 +51,9 @@ export function I18nProvider({ children, initialLocale = 'en' }: I18nProviderPro
 
   function setLocale(l: Locale) {
     setLocaleState(l)
-    localStorage.setItem('dreamshop-locale', l)
+    localStorage.setItem('store-locale', l)
     /* Cookie so server components can read it without a full reload */
-    document.cookie = `dreamshop-locale=${l}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`
+    document.cookie = `store-locale=${l}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`
   }
 
   return (

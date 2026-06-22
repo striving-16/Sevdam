@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const product = await getProductBySlug(slug)
   if (!product) return { title: 'Product not found' }
-  return { title: `${product.name_en} — Dreamshop`, description: product.description_en }
+  return { title: product.name_en, description: product.description_en }
 }
 
 export async function generateStaticParams() {

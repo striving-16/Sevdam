@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Returns & Exchanges — Dreamshop',
+  title: 'Returns & Exchanges',
   description: 'Our 30-day hassle-free return and exchange policy.',
 }
 
@@ -100,7 +100,7 @@ export default function ReturnsPage() {
               Ready to return or exchange? Contact us on WhatsApp and we&apos;ll take care of the rest.
             </p>
             <a
-              href="https://wa.me/21342631657?text=Hi%2C%20I%20would%20like%20to%20return%20my%20order."
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? ''}?text=Hi%2C%20I%20would%20like%20to%20return%20my%20order.`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2.5 rounded-full bg-[#1C1917] px-7 py-3 text-[12px] font-light uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#3D3530]"

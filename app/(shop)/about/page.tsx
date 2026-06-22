@@ -3,7 +3,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'About Us — Dreamshop',
+  title: 'About Us',
   description: 'Our story, our values, and our mission to bring the best beauty products to you.',
 }
 
@@ -11,7 +11,7 @@ const VALUES = [
   {
     number: '01',
     title: 'Curated with care',
-    body: 'Every product on Dreamshop is hand-picked. We test, verify authenticity, and only list what we would use ourselves.',
+    body: 'Every product we carry is hand-picked. We test, verify authenticity, and only list what we would use ourselves.',
   },
   {
     number: '02',
@@ -21,7 +21,7 @@ const VALUES = [
   {
     number: '03',
     title: 'Fast to your door',
-    body: 'We deliver across Mauritania — home delivery, express options, or pick up in-store at your convenience.',
+    body: 'We offer home delivery, express options, or pick up in-store — at your convenience.',
   },
 ]
 
@@ -44,13 +44,13 @@ export default function AboutPage() {
             </h1>
             <div className="mt-8 space-y-5 text-[14px] font-light leading-[1.9] text-[#78716C]">
               <p>
-                Dreamshop was born from a simple belief — that everyone deserves access to genuinely
+                We were born from a simple belief — that everyone deserves access to genuinely
                 good beauty products, without confusion, without compromise.
               </p>
               <p>
-                Based in Mauritania, we started as a small passion project among friends who were
-                tired of guessing which products were real, effective, or worth the price. We decided
-                to do the work ourselves: research, source, and stand behind every single item we sell.
+                We started as a small passion project, tired of guessing which products were real,
+                effective, or worth the price. We decided to do the work ourselves: research, source,
+                and stand behind every single item we sell.
               </p>
               <p>
                 Today we carry skincare, haircare, perfumes, makeup, and more — all curated with
@@ -79,7 +79,7 @@ export default function AboutPage() {
             <div className="relative overflow-hidden rounded-2xl bg-[#F7F4F0]" style={{ aspectRatio: '4/5' }}>
               <Image
                 src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=800&q=80"
-                alt="Dreamshop — beauty products"
+                alt="Beauty products"
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -88,7 +88,7 @@ export default function AboutPage() {
             </div>
             {/* Floating badge */}
             <div className="absolute -bottom-5 -left-5 rounded-2xl border border-[#F0EAE0] bg-white px-6 py-5 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
-              <p className="font-display text-[28px] font-light italic text-[#1C1917]">Dreamshop</p>
+              <p className="font-display text-[28px] font-light italic text-[#1C1917]">Store</p>
               <p className="mt-0.5 text-[9px] font-light uppercase tracking-[0.38em] text-[#C9A882]">
                 Beauty &amp; Wellness
               </p>

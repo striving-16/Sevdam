@@ -88,7 +88,7 @@ export function Navbar() {
               {/* Brand */}
               <Link href="/" className="flex flex-col leading-none flex-shrink-0">
                 <span className="font-display text-[18px] font-light italic tracking-wide text-[#1C1917] hover:opacity-60 transition-opacity duration-300">
-                  Dreamshop
+                  Store
                 </span>
                 <span className="text-[6.5px] font-light uppercase text-[#C9A882]" style={{ letterSpacing: '0.42em' }}>
                   Beauty & Care

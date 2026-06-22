@@ -120,7 +120,7 @@ export function AdminSidebar() {
           <Menu size={18} strokeWidth={1.5} />
         </button>
         <p className="ml-3 text-[11px] font-light uppercase tracking-[0.3em] text-neutral-300">
-          Dreamshop
+          Store Admin
         </p>
         <Link
           href="/"
@@ -152,7 +152,7 @@ export function AdminSidebar() {
         <div className="flex items-center justify-between border-b border-white/5 px-5 py-5">
           <div>
             <p className="text-[12px] font-light tracking-[0.3em] uppercase text-neutral-200">
-              Dreamshop
+              Store Admin
             </p>
             <p className="mt-0.5 text-[10px] font-light text-neutral-600">Admin Panel</p>
           </div>

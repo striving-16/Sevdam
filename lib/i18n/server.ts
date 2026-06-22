@@ -9,7 +9,7 @@ const VALID: Locale[] = ['en', 'fr', 'ar']
  */
 export async function getServerT() {
   const store = await cookies()
-  const raw = store.get('dreamshop-locale')?.value as Locale | undefined
+  const raw = store.get('store-locale')?.value as Locale | undefined
   const locale: Locale = raw && VALID.includes(raw) ? raw : 'en'
   return {
     t: translations[locale],

@@ -1,7 +1,7 @@
 ﻿import { getAdminUsers } from '@/actions/admin-user-actions'
 import { AccountsPanel } from './accounts-panel'
 
-export const metadata = { title: 'Admin Accounts â€” Dreamshop' }
+export const metadata = { title: 'Admin Accounts' }
 
 export default async function AccountsPage() {
   const users = await getAdminUsers()

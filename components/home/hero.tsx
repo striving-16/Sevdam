@@ -81,7 +81,7 @@ export function Hero() {
           </Link>
 
           <a
-            href={whatsAppUrl("Hi! I'd like to browse Dreamshop's products.")}
+            href={whatsAppUrl("Hi! I'd like to browse your products.")}
             target="_blank"
             rel="noopener noreferrer"
             className="group inline-flex items-center gap-3 rounded-full border border-[#E5E5E5] bg-white px-8 py-[14px] text-[12px] font-light uppercase tracking-[0.12em] text-[#1D1D1F] shadow-sm transition-all duration-300 hover:border-[#ccc] hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)]"

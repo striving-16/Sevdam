@@ -4,8 +4,8 @@ import { BestSellers } from '@/components/home/best-sellers'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Best Prices — Dreamshop',
-  description: 'The best prices on authentic beauty products in Mauritania. Updated daily.',
+  title: 'Best Prices',
+  description: 'The best prices on authentic beauty products. Updated daily.',
 }
 
 export default async function OffersPage() {
@@ -26,7 +26,7 @@ export default async function OffersPage() {
           </h1>
           <p className="mt-6 text-[14px] font-light leading-[1.9] text-[#78716C]">
             We work directly with distributors to guarantee you the lowest prices
-            on authentic beauty products — no compromise on quality, ever.
+            on authentic products — no compromise on quality, ever.
           </p>
           <div className="mt-8 flex items-center gap-6">
             <Link

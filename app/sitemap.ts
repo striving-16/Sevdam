@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { getProducts } from '@/actions/product-actions'
 
-const BASE_URL = 'https://dreamshop.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://your-domain.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const products = await getProducts()

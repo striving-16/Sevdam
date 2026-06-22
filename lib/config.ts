@@ -1,8 +1,8 @@
-export const WHATSAPP_NUMBER = '22242631657'
+export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? ''
 
 export const SOCIAL_LINKS = {
-  tiktok:   'https://www.tiktok.com/@dreamshop_shop?_r=1&_t=ZS-97LFTu4DGLc',
-  facebook: 'https://www.facebook.com/share/1Gc5Z93G38/?mibextid=wwXIfr',
+  tiktok:   process.env.NEXT_PUBLIC_TIKTOK_URL   ?? '',
+  facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL ?? '',
 }
 
 export function whatsAppUrl(message?: string) {

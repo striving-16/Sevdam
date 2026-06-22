@@ -1,7 +1,7 @@
 import { CartContents } from '@/components/cart/cart-contents'
 import { getServerT } from '@/lib/i18n/server'
 
-export const metadata = { title: 'Cart — Dreamshop' }
+export const metadata = { title: 'Cart' }
 
 export default async function CartPage() {
   const { t, dir } = await getServerT()
