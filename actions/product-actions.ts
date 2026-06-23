@@ -69,13 +69,14 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 export async function getFeaturedProducts(limit = 4): Promise<Product[]> {
   return db.product.findMany({
     where: {
+      isBestseller: true,
       OR: [
         { hasVariants: false, stock: { gt: 0 } },
         { hasVariants: true, variants: { some: { stock: { gt: 0 } } } },
       ],
     },
     include: WITH_VARIANTS,
-    orderBy: [{ isBestseller: 'desc' }, { createdAt: 'desc' }],
+    orderBy: { createdAt: 'desc' },
     take: limit,
   }) as unknown as Promise<Product[]>
 }
@@ -85,6 +86,14 @@ export async function getOfferProducts(limit = 8): Promise<Product[]> {
     where: { isOffer: true },
     include: WITH_VARIANTS,
     orderBy: { updatedAt: 'desc' },
+    take: limit,
+  }) as unknown as Promise<Product[]>
+}
+
+export async function getNewArrivals(limit = 4): Promise<Product[]> {
+  return db.product.findMany({
+    include: WITH_VARIANTS,
+    orderBy: { createdAt: 'desc' },
     take: limit,
   }) as unknown as Promise<Product[]>
 }
