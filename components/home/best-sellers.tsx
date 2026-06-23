@@ -63,10 +63,20 @@ export function BestSellers({ products }: { products: Product[] }) {
         </motion.div>
       </div>
 
-      {/* Product grid */}
-      <div className="grid grid-cols-2 items-stretch gap-x-4 gap-y-6 sm:gap-x-5 lg:grid-cols-4">
+      {/*
+        Magazine grid: first product is the featured hero (col-span-2 on desktop).
+        Mobile: 2-column equal grid. Desktop: 5 columns — featured takes 2, rest take 1 each.
+      */}
+      <div className="grid grid-cols-2 items-start gap-4 lg:grid-cols-5 lg:gap-5">
         {display.map((product, i) => (
-          <ProductCard key={product.id} product={product} index={i} />
+          <ProductCard
+            key={product.id}
+            product={product}
+            index={i}
+            mode="editorial"
+            featured={i === 0}
+            className={i === 0 ? 'lg:col-span-2' : ''}
+          />
         ))}
       </div>
 

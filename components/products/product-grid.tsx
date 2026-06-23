@@ -12,9 +12,9 @@ export function ProductGrid({ products }: { products: Product[] }) {
   }
 
   return (
-    <div className="grid grid-cols-2 items-stretch gap-x-4 gap-y-6 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-7">
+    <div className="grid grid-cols-2 items-start gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 lg:gap-5">
       {products.map((product, i) => (
-        <ProductCard key={product.id} product={product} index={i} />
+        <ProductCard key={product.id} product={product} index={i} mode="shop" />
       ))}
     </div>
   )

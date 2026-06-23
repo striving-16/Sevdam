@@ -53,9 +53,9 @@ export function NewArrivals({ products }: Props) {
 
       {/* Product grid */}
       <div className="mx-auto max-w-screen-xl">
-        <div className="grid grid-cols-2 items-stretch gap-x-4 gap-y-6 sm:gap-x-5 lg:grid-cols-4">
+        <div className="grid grid-cols-2 items-start gap-4 lg:grid-cols-4 lg:gap-5">
           {display.map((product, i) => (
-            <ProductCard key={product.id} product={product} index={i} />
+            <ProductCard key={product.id} product={product} index={i} mode="editorial" />
           ))}
         </div>
       </div>
