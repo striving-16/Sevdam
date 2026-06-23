@@ -79,24 +79,6 @@ export default async function ProductPage({ params }: Props) {
         isRtl={isRtl}
       />
 
-      {/* ── Brand promise strip ─────────────────────────────────────────────── */}
-      <div className="border-t border-[#EDE5DA] bg-white">
-        <div className="mx-auto grid max-w-screen-xl grid-cols-2 px-6 py-12 sm:px-10 md:grid-cols-4 lg:px-14">
-          {[
-            { icon: '✦', headline: 'Cruelty-Free',          sub: 'Never tested on animals' },
-            { icon: '✦', headline: 'Dermatologist Tested',  sub: 'Safe for all skin types' },
-            { icon: '✦', headline: 'Premium Formulas',      sub: 'Luxury cosmetic-grade ingredients' },
-            { icon: '✦', headline: 'Made with Care',        sub: 'Crafted with intention, always' },
-          ].map((item) => (
-            <div key={item.headline} className="border-r border-[#EDE5DA] py-6 pr-4 text-center last:border-r-0">
-              <p className="mb-2 text-[13px] text-[#C9A96E]">{item.icon}</p>
-              <p className="font-display text-[13px] font-light italic text-[#1A1714]">{item.headline}</p>
-              <p className="mt-1 text-[10.5px] font-light text-[#9E8E80]">{item.sub}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
     </div>
   )
 }

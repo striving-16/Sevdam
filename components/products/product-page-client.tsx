@@ -224,6 +224,9 @@ export function ProductPageClient({
             </div>
           )}
 
+          {/* Push Add to Bag to a consistent position regardless of shade count */}
+          <div className="flex-1" />
+
           {/* Gold hairline */}
           <div className="my-7 h-px bg-[#EDE5DA]" />
 
@@ -232,28 +235,6 @@ export function ProductPageClient({
             <AddToCartButton product={product} selectedVariant={selectedVariant} />
             <ProductWhatsAppButton product={product} selectedVariant={selectedVariant} />
           </div>
-
-          {/* Trust badges */}
-          <div className={`mt-7 grid grid-cols-3 gap-3 ${isRtl ? 'text-right' : ''}`}>
-            {[
-              { symbol: '✓', text: '100% Authentic' },
-              { symbol: '↩', text: '30-Day Returns'  },
-              { symbol: '⚡', text: 'Fast Delivery'   },
-            ].map((badge) => (
-              <div
-                key={badge.text}
-                className="rounded-xl border border-[#EDE5DA] bg-[#FDF9F4] p-3 text-center"
-              >
-                <p className="text-[13px] text-[#C9A96E]">{badge.symbol}</p>
-                <p className="mt-1 text-[9.5px] font-light text-[#9E8E80]">{badge.text}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* SKU */}
-          <p className="mt-6 text-[10px] font-light text-[#C9A96E]/40">
-            SKU: {(selectedVariant?.sku ?? product.id.slice(-8)).toUpperCase()}
-          </p>
         </div>
       </div>
 

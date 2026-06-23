@@ -13,10 +13,18 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-export const metadata = { title: 'Products â€” Admin' }
+export const metadata = { title: 'Products — Admin' }
 
 export default async function AdminProductsPage() {
-  const products = await getProducts()
+  let products: Awaited<ReturnType<typeof getProducts>> = []
+  let dbError = false
+
+  try {
+    products = await getProducts()
+  } catch (err) {
+    console.error('[AdminProducts] DB error:', err)
+    dbError = true
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -35,7 +43,12 @@ export default async function AdminProductsPage() {
         </Button>
       </div>
 
-      {products.length === 0 ? (
+      {dbError ? (
+        <div className="rounded-xl border border-red-100 bg-red-50 px-6 py-10 text-center">
+          <p className="text-[14px] font-light text-red-600">Could not load products — database connection failed.</p>
+          <p className="mt-2 text-[12px] font-light text-red-400">Check that DATABASE_URL is set in your Vercel environment variables, then redeploy.</p>
+        </div>
+      ) : products.length === 0 ? (
         <div className="rounded-xl border border-neutral-100 bg-white py-16 text-center">
           <p className="text-[13px] font-light text-neutral-400">No products yet.</p>
           <Link href="/admin/products/new" className="mt-3 inline-block text-[13px] font-light text-neutral-600 underline underline-offset-2">

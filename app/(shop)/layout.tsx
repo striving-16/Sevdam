@@ -1,6 +1,7 @@
-import { Navbar } from '@/components/layout/navbar'
-import { Footer } from '@/components/layout/footer'
-import { CartDrawer } from '@/components/cart/cart-drawer'
+import { Navbar }             from '@/components/layout/navbar'
+import { Footer }             from '@/components/layout/footer'
+import { CartDrawer }         from '@/components/cart/cart-drawer'
+import { FloatingCartButton } from '@/components/cart/floating-cart-button'
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,6 +10,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       <main className="min-h-screen">{children}</main>
       <Footer />
       <CartDrawer />
+      <FloatingCartButton />
     </>
   )
 }
