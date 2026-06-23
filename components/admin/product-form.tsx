@@ -339,6 +339,7 @@ export function ProductForm({ product }: { product?: Product }) {
 
   const [imageUrl, setImageUrl]       = useState(product?.imageUrl ?? '')
   const [nameValue, setNameValue]     = useState(product?.name_en ?? '')
+  const [stockValue, setStockValue]   = useState(product?.stock ?? 0)
   const [isBestseller, setBestseller] = useState(product?.isBestseller ?? false)
   const [hasVariants, setHasVariants] = useState(product?.hasVariants ?? false)
   const [isOffer, setIsOffer]         = useState(product?.isOffer ?? false)
@@ -369,7 +370,7 @@ export function ProductForm({ product }: { product?: Product }) {
       description_en: formData.get('description_en') as string,
       description_ar: (formData.get('description_ar') as string) || '',
       price:          Number(formData.get('price')),
-      stock:          hasVariants ? 0 : Number(formData.get('stock')),
+      stock:          hasVariants ? 0 : stockValue,
       imageUrl,
       gallery:        [] as string[],
       hasVariants,
@@ -483,14 +484,15 @@ export function ProductForm({ product }: { product?: Product }) {
           <div className="space-y-2">
             <Label htmlFor="stock" className="text-[12px] font-light tracking-wide text-neutral-600">
               Stock Quantity <span className="text-red-400">*</span>
+              <span className="ml-2 text-[10px] font-light text-neutral-400">(0 = sold out)</span>
             </Label>
             <Input
               id="stock"
               name="stock"
               type="number"
               min="0"
-              defaultValue={product?.stock}
-              placeholder="0"
+              value={stockValue}
+              onChange={(e) => setStockValue(Math.max(0, Number(e.target.value) || 0))}
               className={FIELD_CLS}
             />
           </div>
