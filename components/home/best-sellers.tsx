@@ -1,15 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import Image from 'next/image'
-import { toast } from 'sonner'
 import { useTranslation } from '@/lib/i18n/context'
-import { useCart } from '@/hooks/use-cart'
-import { formatPrice } from '@/lib/utils'
+import { ProductCard } from '@/components/products/product-card'
 import { DEMO_FEATURED } from '@/lib/demo-products'
-import type { Product, Variant } from '@/types'
+import type { Product } from '@/types'
 
 export function BestSellers({ products }: { products: Product[] }) {
   const { dir } = useTranslation()
@@ -68,9 +64,9 @@ export function BestSellers({ products }: { products: Product[] }) {
       </div>
 
       {/* Product grid */}
-      <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:gap-x-6 lg:grid-cols-4">
+      <div className="grid grid-cols-2 items-stretch gap-x-4 gap-y-6 sm:gap-x-5 lg:grid-cols-4">
         {display.map((product, i) => (
-          <EditorialCard key={product.id} product={product} index={i} />
+          <ProductCard key={product.id} product={product} index={i} />
         ))}
       </div>
 
@@ -87,163 +83,5 @@ export function BestSellers({ products }: { products: Product[] }) {
         </Link>
       </motion.div>
     </section>
-  )
-}
-
-/* ── Editorial product card ────────────────────────────────────────────────── */
-function EditorialCard({ product, index }: { product: Product; index: number }) {
-  const addItem  = useCart((s) => s.addItem)
-  const { locale } = useTranslation()
-  const isAr     = locale === 'ar'
-  const name     = (isAr && product.name_ar) ? product.name_ar : product.name_en
-
-  const hasVariants   = product.hasVariants && product.variants.length > 0
-  const firstVariant  = hasVariants ? product.variants[0] : null
-
-  const [selected, setSelected] = useState<Variant | null>(firstVariant)
-  const [added,    setAdded]    = useState(false)
-
-  const displayImage = (selected?.image ?? null) || product.imageUrl
-  const stock        = selected ? selected.stock : product.stock
-  const soldOut      = stock === 0
-
-  function handleShadeClick(e: React.MouseEvent, v: Variant) {
-    e.preventDefault()
-    e.stopPropagation()
-    setSelected(v)
-  }
-
-  function handleAdd(e: React.MouseEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    if (soldOut) return
-    addItem(product, selected, 1)
-    const shade = selected ? ` — ${selected.shadeName}` : ''
-    toast.success(`${name}${shade}`, { description: 'Added to your bag' })
-    setAdded(true)
-    setTimeout(() => setAdded(false), 2000)
-  }
-
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group flex h-full flex-col overflow-hidden rounded-[3px] bg-[#FBF9F7] shadow-[0_1px_6px_rgba(0,0,0,0.05),0_6px_20px_rgba(0,0,0,0.04)] transition-shadow duration-500 hover:shadow-[0_4px_28px_rgba(0,0,0,0.10)]"
-    >
-      <Link href={`/products/${product.slug}`} className="block flex-shrink-0">
-        <div
-          className="grain relative overflow-hidden"
-          style={{
-            aspectRatio: '3/4',
-            background: 'radial-gradient(ellipse 80% 70% at 50% 40%, #F0EAE0 0%, #E8E0D4 55%, #DDD5C8 100%)',
-          }}
-        >
-          <Image
-            src={displayImage}
-            alt={name}
-            fill
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            loading="lazy"
-          />
-
-          {product.isBestseller && !soldOut && (
-            <div className="absolute left-3 top-3 z-10">
-              <span
-                className="block rounded-full bg-white/80 px-2.5 py-1 text-[8px] font-light uppercase backdrop-blur-sm"
-                style={{ letterSpacing: '0.18em', color: '#C7A98B' }}
-              >
-                Bestseller
-              </span>
-            </div>
-          )}
-
-          {soldOut && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[2px]">
-              <span className="text-[9px] font-light uppercase tracking-[0.3em] text-[#8A8A8A]">
-                Sold Out
-              </span>
-            </div>
-          )}
-
-          {!soldOut && (
-            <div className="absolute inset-x-0 bottom-0 z-10 translate-y-full transition-all duration-500 group-hover:translate-y-0">
-              <button
-                onClick={handleAdd}
-                className="w-full bg-[#111111]/90 py-3 text-[9px] font-light uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-colors hover:bg-[#111111]"
-              >
-                {added ? '✓ Added' : 'Add to Bag'}
-              </button>
-            </div>
-          )}
-        </div>
-      </Link>
-
-      {/* Card body */}
-      <div className="flex flex-1 flex-col px-3 pb-3.5 pt-3" dir={isAr ? 'rtl' : 'ltr'}>
-
-        {/* Shade circles */}
-        {hasVariants && (
-          <div className="mb-2.5 flex items-center gap-1.5">
-            {product.variants.slice(0, 8).map((v) => (
-              <button
-                key={v.id}
-                title={v.shadeName}
-                onClick={(e) => handleShadeClick(e, v)}
-                className="relative flex-shrink-0 rounded-full transition-transform duration-200 hover:scale-110 focus:outline-none"
-                style={{
-                  width: 13,
-                  height: 13,
-                  backgroundColor: v.hexColor,
-                  boxShadow:
-                    selected?.id === v.id
-                      ? `0 0 0 1.5px #FBF9F7, 0 0 0 3px ${v.hexColor}`
-                      : '0 0 0 0.5px rgba(0,0,0,0.12)',
-                }}
-                aria-label={v.shadeName}
-                aria-pressed={selected?.id === v.id}
-              />
-            ))}
-            {product.variants.length > 8 && (
-              <Link href={`/products/${product.slug}`} className="text-[9px] font-light text-[#8A8A8A] hover:text-[#C7A98B]">
-                +{product.variants.length - 8}
-              </Link>
-            )}
-          </div>
-        )}
-
-        <p className="text-[7.5px] font-light uppercase tracking-[0.32em] text-[#C7A98B]">
-          Besma Sevdam Beauty
-        </p>
-        <Link href={`/products/${product.slug}`}>
-          <h3 className="mt-1 font-display text-[clamp(14px,1.4vw,18px)] font-light italic leading-[1.25] text-[#111111] transition-colors hover:text-[#C7A98B]">
-            {name}
-          </h3>
-        </Link>
-        {hasVariants && selected && (
-          <p className="mt-1 text-[9px] font-light tracking-[0.06em] text-[#9A9A9A]">{selected.shadeName}</p>
-        )}
-
-        {/* Price + quick-add */}
-        <div className="mt-auto flex items-center justify-between gap-2 border-t border-[#EDE7DF] pt-3">
-          <p className="text-[15px] font-medium tracking-[0.01em] text-[#111111]">
-            {formatPrice(product.price)}
-          </p>
-          {!soldOut && (
-            <button
-              onClick={handleAdd}
-              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#111111] text-white transition-all duration-300 hover:scale-105 hover:bg-[#C7A98B]"
-              aria-label="Add to bag"
-            >
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden>
-                <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </button>
-          )}
-        </div>
-      </div>
-    </motion.article>
   )
 }

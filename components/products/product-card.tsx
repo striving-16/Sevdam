@@ -1,20 +1,33 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
 import { toast } from 'sonner'
 import { useCart } from '@/hooks/use-cart'
+import { useTranslation } from '@/lib/i18n/context'
 import { formatPrice } from '@/lib/utils'
+import { CATEGORY_LABELS } from '@/lib/validations'
 import type { Product, Variant } from '@/types'
 
-export function ProductCard({ product }: { product: Product }) {
-  const addItem = useCart((s) => s.addItem)
+export function ProductCard({
+  product,
+  index = 0,
+}: {
+  product: Product
+  index?: number
+}) {
+  const addItem          = useCart((s) => s.addItem)
+  const { locale }       = useTranslation()
+  const isAr             = locale === 'ar'
+  const name             = (isAr && product.name_ar) ? product.name_ar : product.name_en
+  const categoryLabel    = CATEGORY_LABELS[product.category] ?? product.category
 
-  const hasVariants    = product.hasVariants && product.variants.length > 0
-  const firstVariant   = hasVariants ? product.variants[0] : null
-  const [selected, setSelected]   = useState<Variant | null>(firstVariant)
-  const [added, setAdded]         = useState(false)
+  const hasVariants  = product.hasVariants && product.variants.length > 0
+  const firstVariant = hasVariants ? product.variants[0] : null
+  const [selected, setSelected] = useState<Variant | null>(firstVariant)
+  const [added, setAdded]       = useState(false)
 
   const displayImage = (selected?.image ?? null) || product.imageUrl
   const stock        = selected ? selected.stock : product.stock
@@ -32,121 +45,153 @@ export function ProductCard({ product }: { product: Product }) {
     if (soldOut) return
     addItem(product, selected, 1)
     const shade = selected ? ` — ${selected.shadeName}` : ''
-    toast.success(`${product.name_en}${shade}`, { description: 'Added to your bag' })
+    toast.success(`${name}${shade}`, { description: 'Added to your bag' })
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
 
   return (
-    <article className="group">
-      {/* ── Image ────────────────────────────────────────────────────────────── */}
-      <Link href={`/products/${product.slug}`} className="block">
-        <div
-          className="grain relative overflow-hidden bg-[#F2EBE2]"
-          style={{ aspectRatio: '3/4' }}
-        >
-          <Image
-            src={displayImage}
-            alt={product.name_en}
-            fill
-            className="object-cover transition-all duration-700 ease-out group-hover:scale-[1.05]"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            loading="lazy"
-          />
+    <motion.article
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.55, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
+      className="group flex h-full flex-col overflow-hidden rounded-[28px] bg-[#F7F5F2] shadow-[0_2px_12px_rgba(0,0,0,0.04),0_8px_40px_rgba(0,0,0,0.07)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1.5 hover:shadow-[0_16px_60px_rgba(0,0,0,0.11)]"
+    >
+      {/* ── Image ──────────────────────────────────────────────────────────── */}
+      <Link
+        href={`/products/${product.slug}`}
+        className="relative block flex-shrink-0 overflow-hidden"
+        style={{ aspectRatio: '1 / 1' }}
+        tabIndex={-1}
+        aria-label={name}
+      >
+        {/*
+          mix-blend-multiply erases the white product background on our cream
+          card. scale-[1.08] by default trims excess white padding in the photo.
+        */}
+        <Image
+          src={displayImage}
+          alt={name}
+          fill
+          className="scale-[1.08] object-contain mix-blend-multiply transition-transform duration-700 ease-out group-hover:scale-[1.13]"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          loading="lazy"
+        />
 
-          {/* Badges */}
-          {product.isBestseller && !soldOut && (
-            <div className="absolute left-3 top-3 z-10">
-              <span
-                className="block rounded-full bg-white/85 px-2.5 py-1 text-[8px] font-light uppercase backdrop-blur-sm"
-                style={{ letterSpacing: '0.2em', color: '#C9A96E' }}
-              >
-                Bestseller
-              </span>
-            </div>
-          )}
-          {soldOut && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[2px]">
-              <span className="text-[9px] font-light uppercase tracking-[0.3em] text-[#9E8E80]">
-                Sold Out
-              </span>
-            </div>
-          )}
+        {/* Bestseller badge */}
+        {product.isBestseller && !soldOut && (
+          <div className="absolute left-3.5 top-3.5 z-10">
+            <span
+              className="block rounded-full bg-white/80 px-2.5 py-1 text-[7.5px] font-light uppercase backdrop-blur-sm"
+              style={{ letterSpacing: '0.22em', color: '#C7A98B' }}
+            >
+              Bestseller
+            </span>
+          </div>
+        )}
 
-          {/* Add to bag — hover reveal */}
-          {!soldOut && (
-            <div className="absolute inset-x-0 bottom-0 z-10 translate-y-full opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-              <button
-                onClick={handleAdd}
-                className="w-full bg-white/90 py-3 text-[9.5px] font-light uppercase tracking-[0.22em] text-[#1A1714] backdrop-blur-sm transition-colors hover:text-[#C9A96E]"
-              >
-                {added ? '✓ Added to Bag' : 'Add to Bag'}
-              </button>
-            </div>
-          )}
-        </div>
+        {/* New badge */}
+        {product.isOffer && !soldOut && !product.isBestseller && (
+          <div className="absolute right-3.5 top-3.5 z-10">
+            <span
+              className="block rounded-full bg-[#111111]/80 px-2.5 py-1 text-[7.5px] font-light uppercase text-white backdrop-blur-sm"
+              style={{ letterSpacing: '0.18em' }}
+            >
+              Offer
+            </span>
+          </div>
+        )}
+
+        {/* Sold out overlay */}
+        {soldOut && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[1px]">
+            <span className="text-[9px] font-light uppercase tracking-[0.32em] text-[#9A9A9A]">
+              Sold Out
+            </span>
+          </div>
+        )}
       </Link>
 
-      {/* ── Shade circles ────────────────────────────────────────────────────── */}
-      {hasVariants && (
-        <div className="mt-3 flex items-center gap-1.5">
-          {product.variants.slice(0, 8).map((v) => (
-            <button
-              key={v.id}
-              title={v.shadeName}
-              onClick={(e) => handleShadeClick(e, v)}
-              className="relative flex-shrink-0 rounded-full transition-transform duration-200 hover:scale-110 focus:outline-none"
-              style={{
-                width: 16,
-                height: 16,
-                backgroundColor: v.hexColor,
-                boxShadow:
-                  selected?.id === v.id
-                    ? `0 0 0 1.5px white, 0 0 0 3px ${v.hexColor}`
-                    : '0 0 0 0.5px rgba(0,0,0,0.12)',
-              }}
-              aria-label={v.shadeName}
-              aria-pressed={selected?.id === v.id}
-            />
-          ))}
-          {product.variants.length > 8 && (
-            <Link
-              href={`/products/${product.slug}`}
-              className="text-[9px] font-light text-[#9E8E80] hover:text-[#C9A96E]"
-            >
-              +{product.variants.length - 8}
-            </Link>
-          )}
-        </div>
-      )}
+      {/* ── Card body ──────────────────────────────────────────────────────── */}
+      <div className="flex flex-1 flex-col px-4 pb-5 pt-4" dir={isAr ? 'rtl' : 'ltr'}>
 
-      {/* ── Info ─────────────────────────────────────────────────────────────── */}
-      <div className="mt-2.5 space-y-0.5">
-        <p className="text-[8.5px] font-light uppercase tracking-[0.28em] text-[#C9A96E]">
-          Besma Sevdam
+        {/* Shade swatches */}
+        {hasVariants && (
+          <div className="mb-3 flex flex-wrap items-center gap-1.5">
+            {product.variants.slice(0, 7).map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                title={v.shadeName}
+                onClick={(e) => handleShadeClick(e, v)}
+                aria-label={v.shadeName}
+                aria-pressed={selected?.id === v.id}
+                className="flex-shrink-0 rounded-full focus:outline-none"
+                style={{
+                  width:           20,
+                  height:          20,
+                  backgroundColor: v.hexColor,
+                  boxShadow: selected?.id === v.id
+                    ? `0 0 0 2px #F7F5F2, 0 0 0 3.5px ${v.hexColor}`
+                    : '0 0 0 0.5px rgba(0,0,0,0.15)',
+                  transform:   selected?.id === v.id ? 'scale(1.15)' : 'scale(1)',
+                  transition:  'transform 0.2s ease, box-shadow 0.2s ease',
+                }}
+              />
+            ))}
+            {product.variants.length > 7 && (
+              <span className="text-[9px] font-light text-[#9E8E80]">
+                +{product.variants.length - 7}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Category label */}
+        <p className="text-[7.5px] font-light uppercase tracking-[0.42em] text-[#C7A98B]">
+          {categoryLabel}
         </p>
+
+        {/* Product name */}
         <Link href={`/products/${product.slug}`}>
-          <h3 className="font-display text-[clamp(13px,1.4vw,17px)] font-light italic leading-[1.3] text-[#1A1714] transition-colors hover:text-[#C9A96E]">
-            {product.name_en}
+          <h3 className="mt-1.5 line-clamp-2 font-display text-[clamp(14px,1.4vw,18px)] font-light italic leading-[1.25] text-[#111111] transition-colors duration-200 hover:text-[#C7A98B]">
+            {name}
           </h3>
         </Link>
+
+        {/* Selected shade name */}
         {hasVariants && selected && (
-          <p className="text-[10px] font-light text-[#9E8E80]">{selected.shadeName}</p>
+          <p className="mt-1 text-[9.5px] font-light tracking-[0.04em] text-[#9A9A9A]">
+            {selected.shadeName}
+          </p>
         )}
-        <p className="font-display text-[clamp(12px,1.3vw,15px)] font-light italic text-[#9E8E80]">
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Price */}
+        <p className="mt-3 text-[clamp(17px,1.6vw,21px)] font-semibold leading-none tracking-[0.01em] text-[#111111]">
           {formatPrice(product.price)}
         </p>
 
-        {/* Mobile add */}
-        {!soldOut && (
-          <button
-            onClick={handleAdd}
-            className="mt-1.5 block text-[9px] font-light uppercase tracking-[0.22em] text-[#C9A96E] underline underline-offset-3 decoration-[#C9A96E]/40 lg:hidden"
-          >
-            {added ? '✓ Added' : '+ Add to Bag'}
-          </button>
-        )}
+        {/* Add to Bag — full width */}
+        <button
+          type="button"
+          onClick={handleAdd}
+          disabled={soldOut}
+          className={[
+            'mt-3 w-full rounded-[14px] py-2.5 text-[9px] font-light uppercase tracking-[0.3em] transition-all duration-300 active:scale-[0.98]',
+            soldOut
+              ? 'cursor-not-allowed bg-neutral-100 text-neutral-400'
+              : added
+              ? 'bg-[#111111] text-white'
+              : 'bg-[#C7A98B] text-white hover:bg-[#B8967A]',
+          ].join(' ')}
+        >
+          {soldOut ? 'Sold Out' : added ? '✓ Added to Bag' : 'Add to Bag'}
+        </button>
       </div>
-    </article>
+    </motion.article>
   )
 }
