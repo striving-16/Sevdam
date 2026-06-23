@@ -84,16 +84,14 @@ export default function OurStoryPage() {
               className="relative overflow-hidden rounded-[28px] bg-[#F0EAE2]"
               style={{ aspectRatio: '4/5' }}
             >
-              {/*
-                Replace the src below with the actual founder image URL.
-                Upload it via Cloudinary or admin panel and paste the URL here.
-              */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                <div className="h-24 w-24 rounded-full bg-[#E2D8CC]" />
-                <p className="text-[11px] font-light tracking-[0.2em] text-[#B8AFA8] uppercase">
-                  Founder Portrait
-                </p>
-              </div>
+              <Image
+                src="/images/founder-story.jpeg"
+                alt="Besma Sevdam — Founder"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                priority
+              />
             </div>
 
             {/* Floating name badge */}
