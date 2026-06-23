@@ -1,6 +1,6 @@
 ﻿import { WHATSAPP_NUMBER, SOCIAL_LINKS } from '@/lib/config'
 
-export const metadata = { title: 'Settings â€” Admin' }
+export const metadata = { title: 'Settings - Admin' }
 
 function SettingRow({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
@@ -37,8 +37,8 @@ export default function AdminSettingsPage() {
             value={`+${WHATSAPP_NUMBER}`}
             note="Used for customer orders"
           />
-          <SettingRow label=”Currency” value=”[Configure in lib/config.ts]” />
-          <SettingRow label=”Country” value=”[Configure in lib/config.ts]” />
+          <SettingRow label="Currency" value="[Configure in lib/config.ts]" />
+          <SettingRow label="Country" value="[Configure in lib/config.ts]" />
         </div>
 
         {/* Social Links */}
@@ -55,7 +55,7 @@ export default function AdminSettingsPage() {
           <p className="border-b border-neutral-100 pb-4 pt-5 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">
             System
           </p>
-          <SettingRow label="Database"   value="PostgreSQL â€” Supabase"     />
+          <SettingRow label="Database"   value="PostgreSQL - Supabase"     />
           <SettingRow label="Images"     value="Cloudinary CDN"            />
           <SettingRow label="Deployment" value="Vercel"                    />
           <SettingRow label="Framework"  value="Next.js 16 (App Router)"   />

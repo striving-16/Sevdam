@@ -1,132 +1,161 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
-import { useTranslation } from '@/lib/i18n/context'
-import { whatsAppUrl } from '@/lib/config'
-
-function WhatsAppLogo({ size = 15 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" />
-    </svg>
-  )
-}
+import Image from 'next/image'
 
 export function Hero() {
-  const { t, dir } = useTranslation()
-  const isRtl = dir === 'rtl'
+  const ref  = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
+
+  /* Very gentle parallax — image drifts up slightly on scroll */
+  const imageY   = useTransform(scrollYProgress, [0, 1], ['0%',  '12%'])
+  const contentY = useTransform(scrollYProgress, [0, 1], ['0%', '-6%'])
+  const fade     = useTransform(scrollYProgress, [0, 0.5], [1, 0])
 
   return (
-    <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white">
+    <section
+      ref={ref}
+      className="relative flex h-svh min-h-[640px] w-full overflow-hidden bg-white lg:h-screen"
+      aria-label="Besma Sevdam — Luxury Beauty"
+    >
 
-      {/* Very subtle background gradient */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ background: 'radial-gradient(ellipse 90% 70% at 50% 40%, #F5F5F7 0%, transparent 65%)' }}
-      />
+      {/* ─── RIGHT — Founder photograph ──────────────────────────────────────
+          Takes the entire right portion. No visible container.
+          The left-edge gradient creates the editorial bleed effect.
+      ──────────────────────────────────────────────────────────────────────── */}
+      <div className="absolute inset-0 lg:left-[40%]">
+        {/* Grain cinematic texture */}
+        <div className="grain absolute inset-0 z-10" />
 
-      <div className="relative z-10 mx-auto max-w-3xl px-5 pb-24 pt-[120px] text-center sm:px-8 lg:pt-[128px]">
+        {/* Warm gold atmospheric aura behind the portrait */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-[2]"
+          style={{
+            background: [
+              'radial-gradient(ellipse 65% 70% at 60% 35%, rgba(201,169,110,0.13) 0%, transparent 65%)',
+              'radial-gradient(ellipse 40% 50% at 80% 80%, rgba(201,169,110,0.07) 0%, transparent 60%)',
+            ].join(', '),
+          }}
+        />
 
-        {/* Eyebrow */}
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8 text-[10px] font-light uppercase tracking-[0.44em] text-[#6E6E73]"
-        >
-          {t.hero.eyebrow}
-        </motion.p>
+        {/* Founder portrait with parallax */}
+        <motion.div style={{ y: imageY }} className="absolute inset-0">
+          <Image
+            src="/founder.jpeg"
+            alt="Besma Sevdam"
+            fill
+            priority
+            className="object-cover object-top"
+            sizes="(max-width: 1024px) 100vw, 60vw"
+          />
+        </motion.div>
 
-        {/* Headline */}
-        <h1 className={`font-display text-[clamp(48px,7vw,96px)] font-light leading-[0.92] tracking-[-0.03em] text-[#1D1D1F] ${isRtl ? 'tracking-normal leading-[1.1]' : ''}`}>
-          {[t.hero.line1, t.hero.line2, t.hero.line3].map((line, i) => (
-            <span key={i} className="block overflow-hidden">
+        {/* Horizontal white blend on left — seamless merge with text panel */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 left-0 z-[3] w-[45%] lg:w-[30%]"
+          style={{ background: 'linear-gradient(to right, #ffffff 0%, rgba(255,255,255,0.8) 50%, transparent 100%)' }}
+        />
+
+        {/* Bottom vignette — elegant fade at section bottom */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute bottom-0 left-0 right-0 z-[3] h-36"
+          style={{ background: 'linear-gradient(to top, rgba(255,255,255,0.5) 0%, transparent 100%)' }}
+        />
+      </div>
+
+      {/* ─── LEFT — Brand content ────────────────────────────────────────────
+          White panel with massive brand name + minimal copy.
+          On mobile this sits below the image.
+      ──────────────────────────────────────────────────────────────────────── */}
+      <motion.div
+        style={{ y: contentY, opacity: fade }}
+        className="relative z-20 flex w-full flex-col justify-end pb-14 pl-8 pr-8 pt-[78px] sm:pl-12 sm:pr-0 lg:w-[48%] lg:justify-center lg:pb-0 lg:pl-16 lg:pt-0 xl:pl-24"
+      >
+        {/* Thin gold rule — editorial accent */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 1, delay: 0.3, ease: [0.76, 0, 0.24, 1] }}
+          className="mb-7 hidden h-px w-14 origin-left bg-[#C9A96E] lg:block"
+        />
+
+        {/* Brand name — the hero element */}
+        <h1 className="font-display leading-[0.87] tracking-[-0.01em] text-[#1A1714]">
+          {['BESMA', 'SEVDAM'].map((word, i) => (
+            <span key={word} className="block overflow-hidden">
               <motion.span
-                className="block"
-                initial={{ y: '110%' }}
+                className={[
+                  'block text-[clamp(58px,10.5vw,140px)] font-light',
+                  i === 1 ? 'italic' : '',
+                ].join(' ')}
+                initial={{ y: '105%' }}
                 animate={{ y: '0%' }}
-                transition={{ duration: 0.9, delay: 0.1 + i * 0.13, ease: [0.76, 0, 0.24, 1] }}
+                transition={{
+                  duration: 1.1,
+                  delay: 0.2 + i * 0.12,
+                  ease: [0.76, 0, 0.24, 1],
+                }}
               >
-                {line}
+                {word}
               </motion.span>
             </span>
           ))}
         </h1>
 
-        {/* Sub */}
+        {/* Tagline */}
         <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.55 }}
-          className="mx-auto mt-8 max-w-[480px] text-[16px] font-light leading-[1.75] text-[#6E6E73]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 0.72 }}
+          className="mt-5 font-display text-[clamp(15px,1.8vw,20px)] font-light italic leading-[1.7] text-[#9E8E80] lg:max-w-[320px]"
         >
-          {t.hero.sub}
+          Beauty Created to<br />Inspire Confidence
         </motion.p>
 
-        {/* CTAs */}
+        {/* Pill CTA buttons */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.72 }}
-          className={`mt-10 flex flex-wrap items-center justify-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}
+          transition={{ duration: 0.8, delay: 0.9 }}
+          className="mt-9 flex flex-col gap-3 sm:flex-row sm:gap-4"
         >
-          <Link
-            href="/products"
-            className="group inline-flex items-center gap-2.5 rounded-full bg-[#1D1D1F] px-9 py-[15px] text-[12px] font-light uppercase tracking-[0.14em] text-white transition-all duration-300 hover:bg-black hover:shadow-[0_8px_30px_rgba(0,0,0,0.18)]"
-          >
-            {t.hero.exploreCta}
-            <ArrowRight size={12} className={`transition-transform duration-300 group-hover:translate-x-0.5 ${isRtl ? 'rotate-180' : ''}`} />
+          <Link href="/products" className="btn-pill-dark">
+            Shop Collection
           </Link>
-
-          <a
-            href={whatsAppUrl("Hi! I'd like to browse your products.")}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center gap-3 rounded-full border border-[#E5E5E5] bg-white px-8 py-[14px] text-[12px] font-light uppercase tracking-[0.12em] text-[#1D1D1F] shadow-sm transition-all duration-300 hover:border-[#ccc] hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
-          >
-            <span className="text-[#25D366] transition-transform duration-300 group-hover:scale-110">
-              <WhatsAppLogo size={15} />
-            </span>
-            {t.hero.whatsappCta}
-          </a>
+          <Link href="/products" className="btn-pill-outline">
+            Explore Best Sellers
+          </Link>
         </motion.div>
 
-        {/* Stats */}
+        {/* Scroll nudge — shown only on desktop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.0, duration: 0.7 }}
-          className={`mx-auto mt-16 flex justify-center gap-12 border-t border-[#E8E8ED] pt-8 ${isRtl ? 'flex-row-reverse' : ''}`}
+          transition={{ delay: 2 }}
+          className="mt-16 hidden items-center gap-3 lg:flex"
         >
-          {[
-            { val: t.hero.stat1Val, label: t.hero.stat1Label },
-            { val: t.hero.stat2Val, label: t.hero.stat2Label },
-            { val: t.hero.stat3Val, label: t.hero.stat3Label },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="font-display text-[28px] font-light leading-none text-[#1D1D1F]">{s.val}</p>
-              <p className="mt-1.5 text-[9px] font-light uppercase tracking-[0.28em] text-[#6E6E73]">{s.label}</p>
-            </div>
-          ))}
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="h-10 w-px bg-[#C9A96E]"
+          />
+          <span className="text-[8px] font-light uppercase tracking-[0.38em] text-[#C9A96E]">
+            Scroll
+          </span>
         </motion.div>
-
-      </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.6 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
-        <motion.div
-          animate={{ scaleY: [1, 1.7, 1], opacity: [0.15, 0.4, 0.15] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-          className="h-8 w-px origin-top bg-[#1D1D1F]"
-        />
       </motion.div>
+
+      {/* Mobile gradient — makes text readable when image is behind */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[15] h-[60%] lg:hidden"
+        style={{ background: 'linear-gradient(to top, #ffffff 40%, rgba(255,255,255,0.85) 65%, transparent 100%)' }}
+      />
     </section>
   )
 }

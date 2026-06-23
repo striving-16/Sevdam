@@ -29,17 +29,17 @@ const tajawal = Tajawal({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Store — Beauty & Personal Care',
-    template: '%s | Store',
+    default: 'Besma Sevdam — Luxury Beauty & Cosmetics',
+    template: '%s | Besma Sevdam',
   },
   description:
-    'Authentic skincare, haircare, perfumes, makeup and more. 100% genuine products at the best prices.',
-  keywords: ['beauty', 'skincare', 'haircare', 'perfumes', 'makeup'],
+    'Besma Sevdam — A luxury beauty brand crafting premium makeup, skincare, and cosmetics for the confident modern woman.',
+  keywords: ['luxury beauty', 'makeup', 'skincare', 'cosmetics', 'foundation', 'lipstick', 'Besma Sevdam'],
   openGraph: {
     type: 'website',
-    siteName: 'Store',
-    title: 'Store — Beauty & Personal Care',
-    description: 'Authentic beauty products at the best prices.',
+    siteName: 'Besma Sevdam',
+    title: 'Besma Sevdam — Luxury Beauty & Cosmetics',
+    description: 'Premium beauty crafted for confidence, elegance, and timeless luxury.',
   },
 }
 
@@ -59,7 +59,7 @@ export default async function RootLayout({
       dir={dir}
       className={`${geist.variable} ${cormorant.variable} ${tajawal.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#FAFAF8] text-[#1C1917]">
+      <body className="min-h-full bg-white text-[#1A1A18]">
         <I18nProvider initialLocale={initialLocale}>
           {children}
         </I18nProvider>

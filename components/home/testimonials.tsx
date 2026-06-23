@@ -1,129 +1,118 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useTranslation } from '@/lib/i18n/context'
+
+/*
+  WHAT THEY SAY — pull-quote style testimonials.
+  Warm champagne background. No dark cards.
+  Think: editorial beauty magazine customer voices.
+  Large quote text, very minimal layout.
+*/
+
+const QUOTES = [
+  {
+    text:    'The foundation is unlike anything I have tried. It feels like wearing nothing while looking completely flawless.',
+    name:    'Sarah M.',
+    detail:  'Loyal Customer · Riyadh',
+    stars:   5,
+  },
+  {
+    text:    'I opened the package and immediately felt the quality. The lipstick colour is exactly as beautiful as it looks online.',
+    name:    'Layla K.',
+    detail:  'Verified Buyer · Dubai',
+    stars:   5,
+  },
+  {
+    text:    'Besma Sevdam changed how I do my makeup. Everything looks more refined, more elevated. Truly luxury.',
+    name:    'Amira T.',
+    detail:  'Verified Buyer · Casablanca',
+    stars:   5,
+  },
+]
 
 export function Testimonials() {
-  const { t, dir } = useTranslation()
-  const isRtl = dir === 'rtl'
-
-  const REVIEWS = [
-    {
-      name: t.testimonials.r1Name,
-      skin: t.testimonials.r1Skin,
-      text: t.testimonials.r1Text,
-      product: t.testimonials.r1Product,
-      initials: isRtl ? 'س' : 'SM',
-      rating: 5,
-    },
-    {
-      name: t.testimonials.r2Name,
-      skin: t.testimonials.r2Skin,
-      text: t.testimonials.r2Text,
-      product: t.testimonials.r2Product,
-      initials: isRtl ? 'ل' : 'LK',
-      rating: 5,
-    },
-    {
-      name: t.testimonials.r3Name,
-      skin: t.testimonials.r3Skin,
-      text: t.testimonials.r3Text,
-      product: t.testimonials.r3Product,
-      initials: isRtl ? 'أ' : 'AT',
-      rating: 5,
-    },
-  ]
-
   return (
-    <section className="bg-[#F5F5F7] py-24 sm:py-32">
-      <div className="mx-auto max-w-screen-xl px-5 sm:px-8 lg:px-12">
+    <section className="bg-[#FAF5EE] px-6 py-24 sm:px-10 sm:py-32 lg:px-14">
 
-        {/* Header */}
-        <div className="mb-14 text-center">
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-3 text-[10px] font-light uppercase tracking-[0.42em] text-[#6E6E73]"
-          >
-            {t.testimonials.eyebrow}
-          </motion.p>
-          <motion.h2
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.08, duration: 0.6 }}
-            className="font-display text-[clamp(26px,3.5vw,46px)] font-light tracking-[-0.02em] text-[#1D1D1F]"
-          >
-            {t.testimonials.title}
-          </motion.h2>
+      {/* Section header */}
+      <div className="mb-16 text-center">
+        <motion.p
+          initial={{ opacity: 0, y: 6 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-3 text-[8.5px] font-light uppercase tracking-[0.5em] text-[#C9A96E]"
+        >
+          What They Say
+        </motion.p>
+        <motion.h2
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.08, duration: 0.7 }}
+          className="font-display text-[clamp(32px,4.5vw,60px)] font-light italic leading-[0.95] text-[#1A1714]"
+        >
+          Loved By Thousands
+        </motion.h2>
 
+        {/* Gold stars aggregate */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.22 }}
+          className="mt-4 flex items-center justify-center gap-1.5"
+        >
+          {[...Array(5)].map((_, i) => (
+            <span key={i} className="text-[14px] text-[#C9A96E]">★</span>
+          ))}
+          <span className="ml-2 text-[11px] font-light text-[#9E8E80]">4.9 · 2,400+ reviews</span>
+        </motion.div>
+      </div>
+
+      {/* Pull quotes — stacked, centered, spacious */}
+      <div className="mx-auto max-w-3xl space-y-1">
+        {QUOTES.map((q, i) => (
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            key={q.name}
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="mt-4 inline-flex items-center gap-2"
+            transition={{ duration: 0.65, delay: i * 0.12 }}
+            className="border-b border-[#EDE5DA] py-10 last:border-none"
           >
-            <div className="flex gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <span key={i} className="text-[12px] text-[#1D1D1F]">★</span>
+            {/* Stars */}
+            <div className={`mb-5 flex gap-0.5 ${i % 2 === 1 ? 'justify-end' : 'justify-start'}`}>
+              {[...Array(q.stars)].map((_, j) => (
+                <span key={j} className="text-[11px] text-[#C9A96E]">★</span>
               ))}
             </div>
-            <span className="text-[12px] font-light text-[#6E6E73]">
-              {t.testimonials.aggregate}
-            </span>
-          </motion.div>
-        </div>
 
-        {/* Review cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {REVIEWS.map((review, i) => (
-            <motion.div
-              key={review.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.09 }}
-              className={`flex flex-col rounded-2xl border border-[#E8E8ED] bg-white p-6 shadow-[0_1px_8px_rgba(0,0,0,0.04)] ${isRtl ? 'text-right' : ''}`}
+            {/* Large quote text */}
+            <p
+              className={[
+                'font-display text-[clamp(17px,2.2vw,26px)] font-light italic leading-[1.7] text-[#1A1714]',
+                i % 2 === 1 ? 'text-right' : 'text-left',
+              ].join(' ')}
             >
-              {/* Stars */}
-              <div className={`flex gap-0.5 ${isRtl ? 'flex-row-reverse justify-end' : ''}`}>
-                {[...Array(review.rating)].map((_, j) => (
-                  <span key={j} className="text-[11px] text-[#1D1D1F]">★</span>
-                ))}
+              &ldquo;{q.text}&rdquo;
+            </p>
+
+            {/* Attribution */}
+            <div className={`mt-5 flex items-center gap-3 ${i % 2 === 1 ? 'flex-row-reverse' : ''}`}>
+              <div
+                className="h-px flex-1 bg-[#EDE5DA]"
+              />
+              <div className={i % 2 === 1 ? 'text-right' : ''}>
+                <p className="text-[11px] font-light text-[#1A1714]">{q.name}</p>
+                <p className="text-[9.5px] font-light uppercase tracking-[0.18em] text-[#9E8E80]">
+                  {q.detail}
+                </p>
               </div>
-
-              {/* Review text */}
-              <p className="mt-4 flex-1 text-[13.5px] font-light leading-[1.8] text-[#3C3C3C]">
-                {review.text}
-              </p>
-
-              {/* Product reviewed */}
-              <div className={`mt-4 inline-flex items-center gap-1.5 self-start rounded-full bg-[#F5F5F7] px-3 py-1.5 ${isRtl ? 'self-end flex-row-reverse' : ''}`}>
-                <span className="text-[9px] text-[#1D1D1F]">★</span>
-                <span className="text-[10px] font-light text-[#6E6E73] line-clamp-1">
-                  {review.product}
-                </span>
-              </div>
-
-              {/* Reviewer */}
-              <div className={`mt-4 flex items-center gap-3 border-t border-[#F0F0F0] pt-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#1D1D1F] text-[10px] font-light text-white">
-                  {review.initials}
-                </div>
-                <div className={isRtl ? 'text-right' : ''}>
-                  <p className="text-[12px] font-medium text-[#1D1D1F]">{review.name}</p>
-                  <p className="text-[10px] font-light text-[#8A8A8E]">
-                    {review.skin} · {t.testimonials.verifiedBuyer}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
+            </div>
+          </motion.div>
+        ))}
       </div>
+
     </section>
   )
 }

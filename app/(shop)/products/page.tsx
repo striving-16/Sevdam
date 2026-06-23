@@ -4,30 +4,51 @@ import { ProductGrid, ProductGridSkeleton } from '@/components/products/product-
 import { ProductSearch } from '@/components/products/product-search'
 import { CategoryFilter } from '@/components/products/category-filter'
 import { getServerT } from '@/lib/i18n/server'
+import { DEMO_PRODUCTS } from '@/lib/demo-products'
+import type { Product } from '@/types'
 
 interface Props {
   searchParams: Promise<{ q?: string; category?: string }>
 }
 
-export const metadata = { title: 'Products' }
+export const metadata = { title: 'Collection — Besma Sevdam' }
 
 export default async function ProductsPage({ searchParams }: Props) {
   const { q, category } = await searchParams
   const { t, dir } = await getServerT()
   const isRtl = dir === 'rtl'
 
-  const products = await getProducts(q, category)
+  let products: Product[] = []
+  try {
+    products = await getProducts(q, category)
+  } catch {
+    /* DB not connected — show demo products */
+    products = DEMO_PRODUCTS.filter((p) => {
+      if (q) {
+        const query = q.toLowerCase()
+        return p.name_en.toLowerCase().includes(query) || p.tags.some((tag) => tag.includes(query))
+      }
+      if (category) return p.category === category.toUpperCase()
+      return true
+    })
+  }
 
   return (
     <div className="mx-auto max-w-screen-xl px-5 pb-24 pt-[120px] sm:px-8" dir={dir}>
       {/* Header */}
-      <div className={`mb-8 ${isRtl ? 'text-right' : ''}`}>
-        <p className="mb-1.5 text-[10px] font-light uppercase text-[#C9A882]" style={{ letterSpacing: isRtl ? 0 : '0.4em' }}>
+      <div className={`mb-10 ${isRtl ? 'text-right' : ''}`}>
+        <p
+          className="mb-2 text-[8.5px] font-light uppercase text-[#C9A96E]"
+          style={{ letterSpacing: isRtl ? 0 : '0.5em' }}
+        >
           {t.products.eyebrow}
         </p>
-        <h1 className="font-display text-[clamp(24px,3.5vw,38px)] font-light italic text-[#1C1917]">
-          {t.products.title}
+        <h1 className="font-display text-[clamp(30px,4vw,54px)] font-light italic leading-[1.05] text-[#1A1714]">
+          The Full Collection
         </h1>
+        <p className="mt-3 max-w-[400px] text-[13px] font-light leading-[1.8] text-[#9E8E80]">
+          Every product crafted with uncompromising quality and feminine elegance.
+        </p>
       </div>
 
       {/* Search + Filters */}
