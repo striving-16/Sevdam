@@ -33,7 +33,7 @@ export function NewArrivals({ products }: Props) {
           viewport={{ once: true }}
           className="mb-3 text-[8.5px] font-light uppercase tracking-[0.5em] text-[#C7A98B]"
         >
-          Just Arrived
+          Fresh Picks
         </motion.p>
         <motion.h2
           initial={{ opacity: 0, y: 10 }}
@@ -42,7 +42,7 @@ export function NewArrivals({ products }: Props) {
           transition={{ delay: 0.08, duration: 0.7 }}
           className="font-display text-[clamp(34px,5vw,64px)] font-light italic leading-[0.95] text-[#111111]"
         >
-          New Arrivals
+          New Drops
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 8 }}
@@ -51,7 +51,7 @@ export function NewArrivals({ products }: Props) {
           transition={{ delay: 0.16, duration: 0.6 }}
           className="mx-auto mt-4 max-w-[380px] text-[13px] font-light leading-[1.8] text-[#8A8A8A]"
         >
-          The latest additions to our collection — luxury beauty innovations worth discovering.
+          The latest additions to the Besma Sevdam collection.
         </motion.p>
       </div>
 
@@ -72,12 +72,9 @@ export function NewArrivals({ products }: Props) {
         transition={{ delay: 0.3 }}
         className="mt-14 flex flex-col items-center gap-4 text-center"
       >
-        <Link href="/products" className="btn-pill-outline">
-          See All New Arrivals
+        <Link href="/products" className="btn-pill-dark">
+          See All Offers →
         </Link>
-        <p className="text-[11px] font-light text-[#C7A98B]">
-          New collections dropping every month
-        </p>
       </motion.div>
     </section>
   )
@@ -128,9 +125,9 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group"
+      className="group flex h-full flex-col"
     >
-      <Link href={`/products/${product.slug}`} className="block">
+      <Link href={`/products/${product.slug}`} className="block flex-shrink-0">
         <div
           className="grain relative overflow-hidden"
           style={{
@@ -180,7 +177,7 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
 
       {/* Shade circles */}
       {hasVariants && (
-        <div className="mt-3 flex items-center gap-1.5">
+        <div className="mt-3 flex flex-shrink-0 items-center gap-1.5">
           {product.variants.slice(0, 8).map((v) => (
             <button
               key={v.id}
@@ -211,33 +208,37 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
         </div>
       )}
 
-      {/* Info */}
-      <div className="mt-3 space-y-1" dir={isAr ? 'rtl' : 'ltr'}>
-        <p className="text-[8px] font-light uppercase tracking-[0.32em] text-[#C7A98B]">
-          {categoryLabel}
-        </p>
-        <Link href={`/products/${product.slug}`}>
-          <h3 className="font-display text-[clamp(14px,1.5vw,18px)] font-light italic leading-[1.25] text-[#111111] transition-colors hover:text-[#C7A98B]">
-            {name}
-          </h3>
-        </Link>
-        {hasVariants && selected && (
-          <p className="text-[9.5px] font-light tracking-[0.08em] text-[#8A8A8A]">{selected.shadeName}</p>
-        )}
+      {/* Info — stretches to fill remaining height */}
+      <div className="mt-3 flex flex-1 flex-col" dir={isAr ? 'rtl' : 'ltr'}>
+        <div>
+          <p className="text-[8px] font-light uppercase tracking-[0.32em] text-[#C7A98B]">
+            {categoryLabel}
+          </p>
+          <Link href={`/products/${product.slug}`}>
+            <h3 className="mt-1 font-display text-[clamp(14px,1.5vw,18px)] font-light italic leading-[1.25] text-[#111111] transition-colors hover:text-[#C7A98B]">
+              {name}
+            </h3>
+          </Link>
+          {hasVariants && selected && (
+            <p className="mt-1 text-[9.5px] font-light tracking-[0.08em] text-[#8A8A8A]">{selected.shadeName}</p>
+          )}
+        </div>
 
-        {/* Price — prominent, luxury */}
-        <p className="pt-1 text-[16px] font-light tracking-[0.02em] text-[#111111]">
-          {formatPrice(product.price)}
-        </p>
-
-        {!soldOut && (
-          <button
-            onClick={handleAdd}
-            className="mt-2 w-full rounded-full border border-[#111111] py-2.5 text-[9px] font-light uppercase tracking-[0.22em] text-[#111111] transition-all hover:bg-[#111111] hover:text-white lg:hidden"
-          >
-            {added ? '✓ Added' : 'Add to Bag'}
-          </button>
-        )}
+        {/* Price + quick-add — pinned to card bottom */}
+        <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+          <p className="text-[16px] font-medium tracking-[0.02em] text-[#111111]">
+            {formatPrice(product.price)}
+          </p>
+          {!soldOut && (
+            <button
+              onClick={handleAdd}
+              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#111111] text-white transition-colors hover:bg-[#333333]"
+              aria-label="Add to bag"
+            >
+              <span className="text-[16px] font-light leading-none">+</span>
+            </button>
+          )}
+        </div>
       </div>
     </motion.article>
   )

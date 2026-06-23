@@ -5,7 +5,6 @@ import { FounderStory }      from '@/components/home/founder-story'
 import { Offers }            from '@/components/home/offers'
 import { NewArrivals }       from '@/components/home/new-arrivals'
 import { Testimonials }      from '@/components/home/testimonials'
-import { Newsletter }        from '@/components/home/newsletter'
 import { getFeaturedProducts, getOfferProducts } from '@/actions/product-actions'
 import { DEMO_FEATURED, DEMO_NEW_ARRIVALS } from '@/lib/demo-products'
 import type { Product } from '@/types'
@@ -46,9 +45,6 @@ export default async function HomePage() {
 
       {/* 7 — Testimonials */}
       <Testimonials />
-
-      {/* 8 — Newsletter */}
-      <Newsletter />
     </>
   )
 }

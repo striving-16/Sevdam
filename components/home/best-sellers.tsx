@@ -82,8 +82,8 @@ export function BestSellers({ products }: { products: Product[] }) {
         transition={{ delay: 0.3 }}
         className="mt-12 text-center sm:hidden"
       >
-        <Link href="/products" className="btn-pill-outline">
-          View Full Collection
+        <Link href="/products" className="btn-pill-dark">
+          View Full Collection →
         </Link>
       </motion.div>
     </section>
@@ -130,9 +130,9 @@ function EditorialCard({ product, index }: { product: Product; index: number }) 
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group"
+      className="group flex h-full flex-col"
     >
-      <Link href={`/products/${product.slug}`} className="block">
+      <Link href={`/products/${product.slug}`} className="block flex-shrink-0">
         {/* Image container */}
         <div
           className="grain relative overflow-hidden"
@@ -184,7 +184,7 @@ function EditorialCard({ product, index }: { product: Product; index: number }) 
 
       {/* Shade circles */}
       {hasVariants && (
-        <div className="mt-3 flex items-center gap-1.5">
+        <div className="mt-3 flex flex-shrink-0 items-center gap-1.5">
           {product.variants.slice(0, 8).map((v) => (
             <button
               key={v.id}
@@ -215,33 +215,37 @@ function EditorialCard({ product, index }: { product: Product; index: number }) 
         </div>
       )}
 
-      {/* Card info */}
-      <div className="mt-3 space-y-1" dir={isAr ? 'rtl' : 'ltr'}>
-        <p className="text-[8px] font-light uppercase tracking-[0.32em] text-[#C7A98B]">
-          Besma Sevdam
-        </p>
-        <Link href={`/products/${product.slug}`}>
-          <h3 className="font-display text-[clamp(15px,1.5vw,19px)] font-light italic leading-[1.25] text-[#111111] transition-colors hover:text-[#C7A98B]">
-            {name}
-          </h3>
-        </Link>
-        {hasVariants && selected && (
-          <p className="text-[9.5px] font-light tracking-[0.08em] text-[#8A8A8A]">{selected.shadeName}</p>
-        )}
+      {/* Card info — stretches to fill remaining height */}
+      <div className="mt-3 flex flex-1 flex-col" dir={isAr ? 'rtl' : 'ltr'}>
+        <div>
+          <p className="text-[8px] font-light uppercase tracking-[0.32em] text-[#C7A98B]">
+            Besma Sevdam Beauty
+          </p>
+          <Link href={`/products/${product.slug}`}>
+            <h3 className="mt-1 font-display text-[clamp(15px,1.5vw,19px)] font-light italic leading-[1.25] text-[#111111] transition-colors hover:text-[#C7A98B]">
+              {name}
+            </h3>
+          </Link>
+          {hasVariants && selected && (
+            <p className="mt-1 text-[9.5px] font-light tracking-[0.08em] text-[#8A8A8A]">{selected.shadeName}</p>
+          )}
+        </div>
 
-        {/* Price — prominent, luxury */}
-        <p className="pt-1 text-[16px] font-light tracking-[0.02em] text-[#111111]">
-          {formatPrice(product.price)}
-        </p>
-
-        {!soldOut && (
-          <button
-            onClick={handleAdd}
-            className="mt-2 w-full rounded-full border border-[#111111] py-2.5 text-[9px] font-light uppercase tracking-[0.22em] text-[#111111] transition-all hover:bg-[#111111] hover:text-white lg:hidden"
-          >
-            {added ? '✓ Added' : 'Add to Bag'}
-          </button>
-        )}
+        {/* Price + quick-add — pinned to card bottom */}
+        <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+          <p className="text-[16px] font-medium tracking-[0.02em] text-[#111111]">
+            {formatPrice(product.price)}
+          </p>
+          {!soldOut && (
+            <button
+              onClick={handleAdd}
+              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#111111] text-white transition-colors hover:bg-[#333333]"
+              aria-label="Add to bag"
+            >
+              <span className="text-[16px] font-light leading-none">+</span>
+            </button>
+          )}
+        </div>
       </div>
     </motion.article>
   )

@@ -11,7 +11,6 @@ export function Hero() {
 
   const imageY   = useTransform(scrollYProgress, [0, 1], ['0%',  '14%'])
   const contentY = useTransform(scrollYProgress, [0, 1], ['0%', '-8%'])
-  const fade     = useTransform(scrollYProgress, [0, 0.45], [1, 0])
 
   return (
     <section
@@ -86,7 +85,7 @@ export function Hero() {
 
       {/* ── LEFT — Brand content ──────────────────────────────────────────── */}
       <motion.div
-        style={{ y: contentY, opacity: fade }}
+        style={{ y: contentY }}
         className="relative z-20 flex w-full flex-col justify-end pb-16 pl-8 pr-8 pt-[86px] sm:pl-14 sm:pr-0 lg:w-[50%] lg:justify-center lg:pb-0 lg:pl-16 lg:pt-0 xl:pl-28"
       >
         {/* Eyebrow label */}
@@ -152,7 +151,7 @@ export function Hero() {
           className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4"
         >
           <Link href="/products" className="btn-pill-dark">
-            Shop Collection
+            Shop Collection →
           </Link>
           <Link href="/about" className="btn-pill-outline">
             Explore Brand

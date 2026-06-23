@@ -28,7 +28,7 @@ export function FounderStory() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
-          className="flex flex-col justify-center px-8 py-20 sm:px-12 sm:py-24 lg:px-16 lg:py-0 xl:px-24"
+          className="flex flex-col justify-center px-8 py-16 sm:px-10 sm:py-20 lg:px-10 lg:py-0 xl:px-14"
         >
           {/* Small label */}
           <p className="mb-6 text-[8.5px] font-light uppercase tracking-[0.5em] text-[#C7A98B]">
@@ -50,35 +50,16 @@ export function FounderStory() {
           />
 
           {/* Story body */}
-          <div className="space-y-5 text-[14px] font-light leading-[2] text-[#5A5A5A]">
-            <p>
-              Born from a simple belief — that every woman deserves to feel extraordinary.
-              Besma Sevdam was created to bring luxury beauty within reach, without
-              ever compromising on quality or elegance.
-            </p>
-            <p>
-              Every formula is meticulously crafted. Every shade is chosen with intention.
-              Every product is an invitation to feel powerful, beautiful, and completely
-              yourself.
-            </p>
-          </div>
+          <p className="text-[14px] font-light leading-[2] text-[#5A5A5A]">
+            Born from a simple belief — that every woman deserves to feel extraordinary.
+            Besma Sevdam was created to bring luxury beauty within reach, without
+            ever compromising on quality or elegance.
+          </p>
 
-          {/* Large italic quote — the brand voice */}
-          <blockquote className="mt-10 border-l-2 border-[#C7A98B] pl-6">
-            <p className="font-display text-[clamp(18px,2.2vw,26px)] font-light italic leading-[1.6] text-[#111111]">
-              "Luxury is not a price. It is a feeling."
-            </p>
-            <footer className="mt-3">
-              <p className="font-display text-[14px] italic text-[#C7A98B]">
-                — Besma Sevdam
-              </p>
-            </footer>
-          </blockquote>
-
-          {/* CTA */}
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <Link href="/about" className="btn-pill-dark self-start">
-              Discover Our Story
+          {/* CTA — centered with arrow */}
+          <div className="mt-10 flex justify-center">
+            <Link href="/about" className="btn-pill-dark">
+              Discover Our Story →
             </Link>
           </div>
         </motion.div>
