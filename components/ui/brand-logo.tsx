@@ -57,10 +57,10 @@ export function BrandLogo({
         </span>
       </span>
 
-      {/* BEAUTY SKINCARE tagline */}
+      {/* BEAUTY tagline */}
       {showTagline && (
         <span
-          className="relative font-sans font-light uppercase"
+          className="relative text-center font-sans font-light uppercase"
           style={{
             fontSize: TAG_SIZES[size],
             color: accentColor,
@@ -68,7 +68,7 @@ export function BrandLogo({
             marginTop: '4px',
           }}
         >
-          Beauty Skincare
+          Beauty
         </span>
       )}
     </div>
