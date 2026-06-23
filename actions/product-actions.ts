@@ -18,6 +18,19 @@ const WITH_VARIANTS = {
   variants: { orderBy: { sortOrder: 'asc' as const } },
 }
 
+// ─── Shade input type (passed from product form) ──────────────────────────────
+
+export type ShadeInput = {
+  id?:       string
+  shadeName: string
+  hexColor:  string
+  stock:     number
+  image:     string
+  sku?:      string | null
+}
+
+// ─── Read ─────────────────────────────────────────────────────────────────────
+
 export async function getProducts(search?: string, category?: string): Promise<Product[]> {
   return db.product.findMany({
     where: {
@@ -31,7 +44,7 @@ export async function getProducts(search?: string, category?: string): Promise<P
               ],
             }
           : {},
-        category ? { category: category as Product['category'] } : {},
+        category ? { category } : {},
       ],
     },
     include: WITH_VARIANTS,
@@ -67,10 +80,39 @@ export async function getFeaturedProducts(limit = 4): Promise<Product[]> {
   }) as unknown as Promise<Product[]>
 }
 
-export async function createProduct(input: ProductInput) {
+export async function getOfferProducts(limit = 8): Promise<Product[]> {
+  return db.product.findMany({
+    where: { isOffer: true },
+    include: WITH_VARIANTS,
+    orderBy: { updatedAt: 'desc' },
+    take: limit,
+  }) as unknown as Promise<Product[]>
+}
+
+// ─── Write ────────────────────────────────────────────────────────────────────
+
+export async function createProduct(input: ProductInput, shades: ShadeInput[] = []) {
   await requireAdmin()
   const data = productSchema.parse(input)
-  const product = await db.product.create({ data })
+
+  const product = await db.product.create({
+    data: {
+      ...data,
+      ...(shades.length > 0 && {
+        variants: {
+          create: shades.map((s, idx) => ({
+            shadeName: s.shadeName,
+            hexColor:  s.hexColor  || '#000000',
+            stock:     s.stock     ?? 0,
+            image:     s.image     || null,
+            sku:       s.sku       || null,
+            sortOrder: idx,
+          })),
+        },
+      }),
+    },
+  })
+
   updateTag('products')
   revalidatePath('/products')
   revalidatePath('/')
@@ -78,10 +120,30 @@ export async function createProduct(input: ProductInput) {
   return product
 }
 
-export async function updateProduct(id: string, input: Partial<ProductInput>) {
+export async function updateProduct(id: string, input: Partial<ProductInput>, shades?: ShadeInput[]) {
   await requireAdmin()
   const data = productSchema.partial().parse(input)
+
   const product = await db.product.update({ where: { id }, data })
+
+  if (shades !== undefined) {
+    // Replace all variants atomically
+    await db.variant.deleteMany({ where: { productId: id } })
+    if (shades.length > 0) {
+      await db.variant.createMany({
+        data: shades.map((s, idx) => ({
+          productId: id,
+          shadeName: s.shadeName,
+          hexColor:  s.hexColor  || '#000000',
+          stock:     s.stock     ?? 0,
+          image:     s.image     || null,
+          sku:       s.sku       || null,
+          sortOrder: idx,
+        })),
+      })
+    }
+  }
+
   updateTag('products')
   revalidatePath('/products')
   revalidatePath(`/products/${product.slug}`)
@@ -117,15 +179,6 @@ export async function updateProductStock(id: string, stock: number) {
   revalidatePath('/')
 }
 
-export async function getOfferProducts(limit = 8): Promise<Product[]> {
-  return db.product.findMany({
-    where: { isOffer: true },
-    include: WITH_VARIANTS,
-    orderBy: { updatedAt: 'desc' },
-    take: limit,
-  }) as unknown as Promise<Product[]>
-}
-
 export async function toggleProductOffer(
   productId: string,
   isOffer: boolean,
@@ -134,7 +187,7 @@ export async function toggleProductOffer(
   await requireAdmin()
   await db.product.update({
     where: { id: productId },
-    data: { isOffer, salePrice: isOffer ? salePrice : null },
+    data:  { isOffer, salePrice: isOffer ? salePrice : null },
   })
   revalidatePath('/')
   revalidatePath('/products')

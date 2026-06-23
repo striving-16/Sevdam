@@ -3,28 +3,30 @@
 import { useActionState, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Loader2, Upload, X, Link as LinkIcon, Star, Palette, Plus, Tag } from 'lucide-react'
+import { Loader2, Upload, X, Link as LinkIcon, Star, Palette, Tag, Plus, Trash2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { createProduct, updateProduct, uploadProductImageAction } from '@/actions/product-actions'
+import { createProduct, updateProduct, uploadProductImageAction, type ShadeInput } from '@/actions/product-actions'
 import { slugify } from '@/lib/utils'
-import { PRODUCT_CATEGORIES } from '@/lib/validations'
+import { MAKEUP_CATEGORIES, CATEGORY_LABELS } from '@/lib/validations'
 import type { Product, ProductCategory } from '@/types'
 
 type State = { error?: string; success?: boolean } | null
 
 const FIELD_CLS = 'h-11 rounded-lg border-neutral-200 text-[14px] focus-visible:ring-neutral-300'
 
-// ── Image section ─────────────────────────────────────────────────────────────
+// ── Shared image upload widget ────────────────────────────────────────────────
 
 function ImageUpload({
   value,
   onChange,
+  compact = false,
 }: {
   value: string
   onChange: (url: string) => void
+  compact?: boolean
 }) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, startUpload] = useTransition()
@@ -41,7 +43,7 @@ function ImageUpload({
         const url = await uploadProductImageAction(fd)
         onChange(url)
         toast.success('Image uploaded')
-      } catch (err) {
+      } catch {
         toast.error('Upload failed — use the URL option instead')
       }
     })
@@ -56,15 +58,16 @@ function ImageUpload({
   }
 
   if (value) {
+    const size = compact ? 'h-16 w-16' : 'h-52 w-52'
     return (
-      <div className="relative h-52 w-52 overflow-hidden rounded-xl bg-neutral-100">
-        <img src={value} alt="Product" className="h-full w-full object-cover" />
+      <div className={`relative overflow-hidden rounded-xl bg-neutral-100 ${size}`}>
+        <img src={value} alt="" className="h-full w-full object-cover" />
         <button
           type="button"
           onClick={() => onChange('')}
-          className="absolute right-2 top-2 rounded-full bg-white/90 p-1 text-neutral-600 shadow-sm hover:bg-white"
+          className="absolute right-1 top-1 rounded-full bg-white/90 p-0.5 text-neutral-600 shadow-sm hover:bg-white"
         >
-          <X size={14} />
+          <X size={compact ? 10 : 14} />
         </button>
       </div>
     )
@@ -103,6 +106,30 @@ function ImageUpload({
     )
   }
 
+  if (compact) {
+    return (
+      <div className="flex gap-1">
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-neutral-200 text-neutral-400 transition-colors hover:border-neutral-400 hover:text-neutral-600"
+        >
+          {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} strokeWidth={1.5} />}
+        </button>
+        <button
+          type="button"
+          onClick={() => setUrlMode(true)}
+          className="flex h-16 w-6 items-center justify-center text-neutral-300 hover:text-neutral-500"
+          title="Paste URL"
+        >
+          <LinkIcon size={12} strokeWidth={1.5} />
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-2">
       <button
@@ -137,99 +164,147 @@ function ImageUpload({
   )
 }
 
-// ── Gallery URL list ─────────────────────────────────────────────────────────
+// ── Shade editor ──────────────────────────────────────────────────────────────
 
-function GalleryEditor({
-  urls,
+function ShadeRow({
+  shade,
   onChange,
+  onRemove,
 }: {
-  urls: string[]
-  onChange: (urls: string[]) => void
+  shade: ShadeInput
+  onChange: (patch: Partial<ShadeInput>) => void
+  onRemove: () => void
 }) {
-  const [input, setInput] = useState('')
-
-  function addUrl() {
-    const trimmed = input.trim()
-    if (!trimmed || urls.includes(trimmed)) return
-    onChange([...urls, trimmed])
-    setInput('')
-  }
-
-  function removeUrl(idx: number) {
-    onChange(urls.filter((_, i) => i !== idx))
-  }
-
   return (
-    <div className="space-y-2">
-      {urls.map((url, i) => (
-        <div key={i} className="flex items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50 px-3 py-2">
-          <img src={url} alt="" className="h-10 w-10 flex-shrink-0 rounded object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-          <span className="min-w-0 flex-1 truncate text-[11px] font-light text-neutral-500">{url}</span>
-          <button type="button" onClick={() => removeUrl(i)} className="flex-shrink-0 text-neutral-300 hover:text-red-500">
-            <X size={12} />
-          </button>
-        </div>
-      ))}
-      <div className="flex gap-2">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addUrl())}
-          placeholder="https://... (paste gallery image URL)"
-          className="h-9 rounded-lg border-neutral-200 text-[13px]"
+    <div className="flex items-start gap-3 rounded-xl border border-neutral-100 bg-neutral-50/60 p-3">
+      {/* Shade image */}
+      <div className="flex-shrink-0">
+        <ImageUpload
+          compact
+          value={shade.image}
+          onChange={(url) => onChange({ image: url })}
         />
-        <Button type="button" onClick={addUrl} disabled={!input.trim()} className="h-9 flex-shrink-0 rounded-full bg-neutral-900 px-3 text-white hover:bg-neutral-700 disabled:opacity-50">
-          <Plus size={13} />
-        </Button>
       </div>
+
+      <div className="flex flex-1 flex-col gap-2">
+        {/* Name + color */}
+        <div className="flex gap-2">
+          <Input
+            value={shade.shadeName}
+            onChange={(e) => onChange({ shadeName: e.target.value })}
+            placeholder="Shade name e.g. Rose Nude"
+            className="h-9 flex-1 rounded-lg border-neutral-200 text-[13px]"
+          />
+          <div className="flex h-9 items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2">
+            <input
+              type="color"
+              value={shade.hexColor}
+              onChange={(e) => onChange({ hexColor: e.target.value })}
+              className="h-5 w-5 cursor-pointer rounded border-0 bg-transparent p-0"
+              title="Pick shade colour"
+            />
+            <input
+              type="text"
+              value={shade.hexColor}
+              onChange={(e) => onChange({ hexColor: e.target.value })}
+              maxLength={7}
+              className="w-[72px] border-0 bg-transparent text-[12px] font-mono text-neutral-600 outline-none"
+              placeholder="#000000"
+            />
+          </div>
+        </div>
+
+        {/* Stock */}
+        <div className="flex items-center gap-2">
+          <Label className="shrink-0 text-[11px] font-light text-neutral-500">Stock</Label>
+          <Input
+            type="number"
+            min="0"
+            value={shade.stock}
+            onChange={(e) => onChange({ stock: Number(e.target.value) })}
+            className="h-8 w-24 rounded-lg border-neutral-200 text-[13px]"
+          />
+          {!shade.image && (
+            <span className="text-[10px] text-amber-500">← shade image required</span>
+          )}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onRemove}
+        className="mt-0.5 flex-shrink-0 rounded-lg p-1.5 text-neutral-300 transition-colors hover:bg-red-50 hover:text-red-400"
+      >
+        <Trash2 size={14} strokeWidth={1.5} />
+      </button>
     </div>
   )
 }
 
-// ── Variants toggle ──────────────────────────────────────────────────────────
-
-function VariantsToggle({
-  value,
+function ShadeEditor({
+  shades,
   onChange,
 }: {
-  value: boolean
-  onChange: (v: boolean) => void
+  shades: ShadeInput[]
+  onChange: (shades: ShadeInput[]) => void
 }) {
+  function addShade() {
+    onChange([...shades, { shadeName: '', hexColor: '#C7A98B', stock: 0, image: '' }])
+  }
+
+  function updateShade(idx: number, patch: Partial<ShadeInput>) {
+    const next = shades.map((s, i) => (i === idx ? { ...s, ...patch } : s))
+    onChange(next)
+  }
+
+  function removeShade(idx: number) {
+    onChange(shades.filter((_, i) => i !== idx))
+  }
+
   return (
-    <button
-      type="button"
-      onClick={() => onChange(!value)}
-      className={[
-        'flex w-full items-center justify-between rounded-xl border px-4 py-3.5 transition-all duration-200',
-        value
-          ? 'border-[#C9A96E]/40 bg-[#FDF9F4]'
-          : 'border-neutral-200 bg-white hover:border-neutral-300',
-      ].join(' ')}
-    >
-      <div className={`flex items-center gap-3 ${value ? 'text-[#8B6E3E]' : 'text-neutral-700'}`}>
-        <Palette size={15} strokeWidth={1.5} className={value ? 'text-[#C9A96E]' : 'text-neutral-400'} />
-        <div className="text-left">
-          <p className="text-[13px] font-normal">Has Shades / Variants</p>
-          <p className={`text-[11px] font-light ${value ? 'text-[#9E8E80]' : 'text-neutral-400'}`}>
-            {value ? 'Stock managed per shade — use the Shades panel below' : 'Single stock quantity, no shade options'}
-          </p>
-        </div>
-      </div>
-      <div className={['relative h-5 w-9 rounded-full transition-colors duration-200', value ? 'bg-[#C9A96E]' : 'bg-neutral-200'].join(' ')}>
-        <div className={['absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-200', value ? 'left-4' : 'left-0.5'].join(' ')} />
-      </div>
-    </button>
+    <div className="space-y-2.5">
+      {shades.map((shade, i) => (
+        <ShadeRow
+          key={i}
+          shade={shade}
+          onChange={(patch) => updateShade(i, patch)}
+          onRemove={() => removeShade(i)}
+        />
+      ))}
+      <button
+        type="button"
+        onClick={addShade}
+        className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-200 py-3 text-[12px] font-light text-neutral-400 transition-colors hover:border-[#C7A98B] hover:text-[#C7A98B]"
+      >
+        <Plus size={14} strokeWidth={1.5} />
+        Add shade
+      </button>
+    </div>
   )
 }
 
-// ── Best seller toggle ────────────────────────────────────────────────────────
+// ── Toggle button (shared pattern) ───────────────────────────────────────────
 
-function BestsellerToggle({
+function Toggle({
   value,
   onChange,
+  icon,
+  label,
+  description,
+  activeClass = 'border-neutral-900 bg-neutral-900',
+  pillClass = 'bg-white/30',
+  textClass = 'text-white',
+  subTextClass = 'text-white/60',
 }: {
   value: boolean
   onChange: (v: boolean) => void
+  icon: React.ReactNode
+  label: string
+  description: string
+  activeClass?: string
+  pillClass?: string
+  textClass?: string
+  subTextClass?: string
 }) {
   return (
     <button
@@ -237,38 +312,20 @@ function BestsellerToggle({
       onClick={() => onChange(!value)}
       className={[
         'flex w-full items-center justify-between rounded-xl border px-4 py-3.5 transition-all duration-200',
-        value
-          ? 'border-neutral-900 bg-neutral-900'
-          : 'border-neutral-200 bg-white hover:border-neutral-300',
+        value ? activeClass : 'border-neutral-200 bg-white hover:border-neutral-300',
       ].join(' ')}
     >
-      <div className={`flex items-center gap-3 ${value ? 'text-white' : 'text-neutral-700'}`}>
-        <Star
-          size={15}
-          strokeWidth={1.5}
-          className={value ? 'fill-white text-white' : 'text-neutral-400'}
-        />
+      <div className={`flex items-center gap-3 ${value ? textClass : 'text-neutral-700'}`}>
+        {icon}
         <div className="text-left">
-          <p className="text-[13px] font-normal">Best Seller</p>
-          <p className={`text-[11px] font-light ${value ? 'text-white/60' : 'text-neutral-400'}`}>
-            {value ? 'Shown in the Best Sellers section' : 'Not featured on homepage'}
+          <p className="text-[13px] font-normal">{label}</p>
+          <p className={`text-[11px] font-light ${value ? subTextClass : 'text-neutral-400'}`}>
+            {description}
           </p>
         </div>
       </div>
-
-      {/* Toggle pill */}
-      <div
-        className={[
-          'relative h-5 w-9 rounded-full transition-colors duration-200',
-          value ? 'bg-white/30' : 'bg-neutral-200',
-        ].join(' ')}
-      >
-        <div
-          className={[
-            'absolute top-0.5 h-4 w-4 rounded-full shadow-sm transition-all duration-200',
-            value ? 'left-4 bg-white' : 'left-0.5 bg-white',
-          ].join(' ')}
-        />
+      <div className={['relative h-5 w-9 rounded-full transition-colors duration-200', value ? pillClass : 'bg-neutral-200'].join(' ')}>
+        <div className={['absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-200', value ? 'left-4' : 'left-0.5'].join(' ')} />
       </div>
     </button>
   )
@@ -281,32 +338,47 @@ export function ProductForm({ product }: { product?: Product }) {
   const isEdit = !!product
 
   const [imageUrl, setImageUrl]       = useState(product?.imageUrl ?? '')
-  const [gallery, setGallery]         = useState<string[]>(product?.gallery ?? [])
   const [nameValue, setNameValue]     = useState(product?.name_en ?? '')
   const [isBestseller, setBestseller] = useState(product?.isBestseller ?? false)
   const [hasVariants, setHasVariants] = useState(product?.hasVariants ?? false)
   const [isOffer, setIsOffer]         = useState(product?.isOffer ?? false)
+  const [shades, setShades]           = useState<ShadeInput[]>(
+    product?.variants?.map((v) => ({
+      id:        v.id,
+      shadeName: v.shadeName,
+      hexColor:  v.hexColor,
+      stock:     v.stock,
+      image:     v.image ?? '',
+      sku:       v.sku,
+    })) ?? []
+  )
 
   async function formAction(_prev: State, formData: FormData): Promise<State> {
     if (!imageUrl) return { error: 'Please add a product image' }
 
+    if (hasVariants) {
+      if (shades.length === 0) return { error: 'Add at least one shade for a variant product' }
+      const missing = shades.findIndex((s) => !s.shadeName.trim() || !s.image)
+      if (missing !== -1) return { error: `Shade ${missing + 1}: shade name and image are required` }
+    }
+
     const payload = {
       name_en:        formData.get('name_en')        as string,
       name_ar:        (formData.get('name_ar')        as string) || '',
-      slug:           slugify(formData.get('name_en') as string),
+      slug:           isEdit ? product.slug : slugify(formData.get('name_en') as string),
       description_en: formData.get('description_en') as string,
       description_ar: (formData.get('description_ar') as string) || '',
       price:          Number(formData.get('price')),
       stock:          hasVariants ? 0 : Number(formData.get('stock')),
       imageUrl,
-      gallery,
+      gallery:        [] as string[],
       hasVariants,
-      category:       ((formData.get('category') as string) || 'SKINCARE') as ProductCategory,
-      brand:          (formData.get('brand') as string) || null,
+      category:       ((formData.get('category') as string) || 'LIPSTICK') as ProductCategory,
+      brand:          'Besma Sevdam',
       tags:           [] as string[],
       isBestseller,
       isOffer,
-      salePrice:      isOffer ? (Number(formData.get('salePrice')) || null) : null,
+      salePrice:      null,
       benefits:       (formData.get('benefits') as string) || null,
       ingredients:    (formData.get('ingredients') as string) || null,
       usage:          (formData.get('usage') as string) || null,
@@ -314,9 +386,9 @@ export function ProductForm({ product }: { product?: Product }) {
 
     try {
       if (isEdit) {
-        await updateProduct(product.id, payload)
+        await updateProduct(product.id, payload, hasVariants ? shades : [])
       } else {
-        await createProduct(payload)
+        await createProduct(payload, hasVariants ? shades : [])
       }
       return { success: true }
     } catch (err) {
@@ -338,10 +410,10 @@ export function ProductForm({ product }: { product?: Product }) {
   return (
     <form action={action} className="max-w-2xl space-y-7">
 
-      {/* Image */}
+      {/* Cover image */}
       <div className="space-y-2">
         <Label className="text-[12px] font-light tracking-wide text-neutral-600">
-          Product Image <span className="text-red-400">*</span>
+          Cover Image <span className="text-red-400">*</span>
         </Label>
         <ImageUpload value={imageUrl} onChange={setImageUrl} />
       </div>
@@ -358,7 +430,7 @@ export function ProductForm({ product }: { product?: Product }) {
             required
             value={nameValue}
             onChange={(e) => setNameValue(e.target.value)}
-            placeholder="e.g. CeraVe Moisturising Cream"
+            placeholder="e.g. Mate Liquid Lipstick"
             className={FIELD_CLS}
           />
         </div>
@@ -367,7 +439,7 @@ export function ProductForm({ product }: { product?: Product }) {
             Slug <span className="text-[10px] text-neutral-400">(auto)</span>
           </Label>
           <Input
-            value={slugify(nameValue)}
+            value={isEdit ? product.slug : slugify(nameValue)}
             readOnly
             className={`${FIELD_CLS} cursor-default bg-neutral-50 text-neutral-400`}
           />
@@ -407,54 +479,41 @@ export function ProductForm({ product }: { product?: Product }) {
             className={FIELD_CLS}
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="stock" className="text-[12px] font-light tracking-wide text-neutral-600">
-            Stock Quantity <span className="text-red-400">*</span>
-          </Label>
-          <Input
-            id="stock"
-            name="stock"
-            type="number"
-            min="0"
-            required
-            defaultValue={product?.stock}
-            placeholder="0"
-            className={FIELD_CLS}
-          />
-        </div>
+        {!hasVariants && (
+          <div className="space-y-2">
+            <Label htmlFor="stock" className="text-[12px] font-light tracking-wide text-neutral-600">
+              Stock Quantity <span className="text-red-400">*</span>
+            </Label>
+            <Input
+              id="stock"
+              name="stock"
+              type="number"
+              min="0"
+              defaultValue={product?.stock}
+              placeholder="0"
+              className={FIELD_CLS}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Category + Brand */}
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="category" className="text-[12px] font-light tracking-wide text-neutral-600">
-            Category
-          </Label>
-          <select
-            id="category"
-            name="category"
-            defaultValue={product?.category ?? 'SKINCARE'}
-            className={`${FIELD_CLS} w-full cursor-pointer appearance-none rounded-lg border border-neutral-200 bg-white px-3 text-[14px]`}
-          >
-            {PRODUCT_CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {c.replace(/_/g, ' ')}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="brand" className="text-[12px] font-light tracking-wide text-neutral-600">
-            Brand
-          </Label>
-          <Input
-            id="brand"
-            name="brand"
-            defaultValue={product?.brand ?? ''}
-            placeholder="e.g. CeraVe, COSRX, L'Oréal"
-            className={FIELD_CLS}
-          />
-        </div>
+      {/* Category */}
+      <div className="space-y-2">
+        <Label htmlFor="category" className="text-[12px] font-light tracking-wide text-neutral-600">
+          Category
+        </Label>
+        <select
+          id="category"
+          name="category"
+          defaultValue={product?.category ?? 'LIPSTICK'}
+          className={`${FIELD_CLS} w-full cursor-pointer appearance-none rounded-lg border border-neutral-200 bg-white px-3 text-[14px]`}
+        >
+          {MAKEUP_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {CATEGORY_LABELS[c]}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Description EN */}
@@ -487,14 +546,6 @@ export function ProductForm({ product }: { product?: Product }) {
           rows={3}
           className="resize-none rounded-lg border-neutral-200 text-[14px] text-right focus-visible:ring-neutral-300"
         />
-      </div>
-
-      {/* Gallery */}
-      <div className="space-y-2">
-        <Label className="text-[12px] font-light tracking-wide text-neutral-600">
-          Gallery Images <span className="text-[10px] text-neutral-400">(optional — shown as thumbnails on product page)</span>
-        </Label>
-        <GalleryEditor urls={gallery} onChange={setGallery} />
       </div>
 
       {/* Benefits */}
@@ -542,70 +593,63 @@ export function ProductForm({ product }: { product?: Product }) {
         />
       </div>
 
-      {/* Has Variants toggle */}
-      <div className="space-y-2">
+      {/* Has Variants toggle + Shade editor */}
+      <div className="space-y-3">
         <Label className="text-[12px] font-light tracking-wide text-neutral-600">
           Product Type
         </Label>
-        <VariantsToggle value={hasVariants} onChange={setHasVariants} />
+        <Toggle
+          value={hasVariants}
+          onChange={setHasVariants}
+          icon={<Palette size={15} strokeWidth={1.5} className={hasVariants ? 'text-[#C9A96E]' : 'text-neutral-400'} />}
+          label="Has Shades / Variants"
+          description={hasVariants ? 'Stock managed per shade — add shades below' : 'Single stock quantity, no shade options'}
+          activeClass="border-[#C9A96E]/40 bg-[#FDF9F4]"
+          pillClass="bg-[#C9A96E]"
+          textClass="text-[#8B6E3E]"
+          subTextClass="text-[#9E8E80]"
+        />
+
         {hasVariants && (
-          <p className="text-[11px] font-light text-[#C9A96E]">
-            Stock quantity above will be ignored — stock is tracked per shade in the Shades panel.
-          </p>
+          <div className="rounded-xl border border-[#C9A96E]/20 bg-[#FDFAF6] p-4">
+            <p className="mb-3 text-[11px] font-light text-[#9E8E80]">
+              Each shade needs a name, hex colour, stock quantity, and a shade image (required — shown on product page when shade is selected).
+            </p>
+            <ShadeEditor shades={shades} onChange={setShades} />
+          </div>
         )}
       </div>
 
-      {/* Best seller toggle */}
+      {/* Best seller */}
       <div className="space-y-2">
         <Label className="text-[12px] font-light tracking-wide text-neutral-600">
           Homepage Visibility
         </Label>
-        <BestsellerToggle value={isBestseller} onChange={setBestseller} />
+        <Toggle
+          value={isBestseller}
+          onChange={setBestseller}
+          icon={<Star size={15} strokeWidth={1.5} className={isBestseller ? 'fill-white text-white' : 'text-neutral-400'} />}
+          label="Best Seller"
+          description={isBestseller ? 'Shown in the Best Sellers section on the homepage' : 'Not featured on homepage'}
+        />
       </div>
 
-      {/* Offer toggle + sale price */}
+      {/* Offer toggle */}
       <div className="space-y-2">
         <Label className="text-[12px] font-light tracking-wide text-neutral-600">
-          Offer / Promotion
+          Offer Section
         </Label>
-        <button
-          type="button"
-          onClick={() => setIsOffer((v) => !v)}
-          className={[
-            'flex w-full items-center justify-between rounded-xl border px-4 py-3.5 transition-all duration-200',
-            isOffer ? 'border-amber-300 bg-amber-50' : 'border-neutral-200 bg-white hover:border-neutral-300',
-          ].join(' ')}
-        >
-          <div className={`flex items-center gap-3 ${isOffer ? 'text-amber-800' : 'text-neutral-700'}`}>
-            <Tag size={15} strokeWidth={1.5} className={isOffer ? 'text-amber-500' : 'text-neutral-400'} />
-            <div className="text-left">
-              <p className="text-[13px] font-normal">On Offer</p>
-              <p className={`text-[11px] font-light ${isOffer ? 'text-amber-700' : 'text-neutral-400'}`}>
-                {isOffer ? 'Shown in the Offers section with sale price' : 'Not currently on offer'}
-              </p>
-            </div>
-          </div>
-          <div className={['relative h-5 w-9 rounded-full transition-colors duration-200', isOffer ? 'bg-amber-400' : 'bg-neutral-200'].join(' ')}>
-            <div className={['absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-200', isOffer ? 'left-4' : 'left-0.5'].join(' ')} />
-          </div>
-        </button>
-        {isOffer && (
-          <div className="flex items-center gap-2 pl-1">
-            <Label htmlFor="salePrice" className="shrink-0 text-[12px] font-light text-neutral-600">
-              Sale Price (MRU)
-            </Label>
-            <Input
-              id="salePrice"
-              name="salePrice"
-              type="number"
-              step="1"
-              min="1"
-              defaultValue={product?.salePrice ?? ''}
-              placeholder="e.g. 350"
-              className="h-9 w-36 rounded-lg border-neutral-200 text-[13px]"
-            />
-          </div>
-        )}
+        <Toggle
+          value={isOffer}
+          onChange={setIsOffer}
+          icon={<Tag size={15} strokeWidth={1.5} className={isOffer ? 'text-amber-500' : 'text-neutral-400'} />}
+          label="Featured in Offers"
+          description={isOffer ? 'Shown in the Offers section — a visibility flag, not a discount' : 'Not shown in Offers section'}
+          activeClass="border-amber-300 bg-amber-50"
+          pillClass="bg-amber-400"
+          textClass="text-amber-800"
+          subTextClass="text-amber-700"
+        />
       </div>
 
       {state?.error && (

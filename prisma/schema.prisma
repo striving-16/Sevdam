@@ -22,7 +22,7 @@ model Product {
   imageUrl       String                        // Primary / cover image
   gallery        String[]        @default([])  // Additional gallery images
   hasVariants    Boolean         @default(false)
-  category       ProductCategory @default(SKINCARE)
+  category       String          @default("LIPSTICK")
   brand          String?
   tags           String[]        @default([])
   benefits       String?         @db.Text
@@ -137,13 +137,3 @@ enum OrderStatus {
   CANCELLED
 }
 
-enum ProductCategory {
-  SKINCARE
-  HAIRCARE
-  PERFUMES
-  MAKEUP
-  BODYCARE
-  MENCARE
-  BABYCARE
-  TOOLS
-}

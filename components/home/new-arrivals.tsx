@@ -9,6 +9,7 @@ import { useTranslation } from '@/lib/i18n/context'
 import { useCart } from '@/hooks/use-cart'
 import { formatPrice } from '@/lib/utils'
 import { DEMO_NEW_ARRIVALS } from '@/lib/demo-products'
+import { CATEGORY_LABELS } from '@/lib/validations'
 import type { Product, Variant } from '@/types'
 
 interface Props {
@@ -114,10 +115,7 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
     setTimeout(() => setAdded(false), 2000)
   }
 
-  const categoryLabel =
-    product.category === 'SKINCARE' ? 'Skincare'
-    : product.category === 'TOOLS' ? 'Beauty Tools'
-    : 'Makeup'
+  const categoryLabel = CATEGORY_LABELS[product.category] ?? product.category
 
   return (
     <motion.article

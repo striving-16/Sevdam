@@ -1,12 +1,18 @@
 export type ProductCategory =
-  | 'SKINCARE'
-  | 'HAIRCARE'
-  | 'PERFUMES'
-  | 'MAKEUP'
-  | 'BODYCARE'
-  | 'MENCARE'
-  | 'BABYCARE'
-  | 'TOOLS'
+  | 'FOUNDATION'
+  | 'CONCEALER'
+  | 'PRIMER'
+  | 'LIPSTICK'
+  | 'LIP_GLOSS'
+  | 'LIP_LINER'
+  | 'BLUSH'
+  | 'EYESHADOW'
+  | 'MASCARA'
+  | 'EYELINER'
+  | 'SETTING_SPRAY'
+  | 'HIGHLIGHTER'
+  | 'BRONZER'
+  | 'POWDER'
 
 export type Variant = {
   id: string

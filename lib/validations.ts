@@ -1,15 +1,43 @@
 import { z } from 'zod'
 
-export const PRODUCT_CATEGORIES = [
-  'SKINCARE',
-  'HAIRCARE',
-  'PERFUMES',
-  'MAKEUP',
-  'BODYCARE',
-  'MENCARE',
-  'BABYCARE',
-  'TOOLS',
+// ─── Makeup category enum ─────────────────────────────────────────────────────
+
+export const MAKEUP_CATEGORIES = [
+  'FOUNDATION',
+  'CONCEALER',
+  'PRIMER',
+  'LIPSTICK',
+  'LIP_GLOSS',
+  'LIP_LINER',
+  'BLUSH',
+  'EYESHADOW',
+  'MASCARA',
+  'EYELINER',
+  'SETTING_SPRAY',
+  'HIGHLIGHTER',
+  'BRONZER',
+  'POWDER',
 ] as const
+
+export const CATEGORY_LABELS: Record<string, string> = {
+  FOUNDATION:    'Foundation',
+  CONCEALER:     'Concealer',
+  PRIMER:        'Primer',
+  LIPSTICK:      'Lipstick',
+  LIP_GLOSS:     'Lip Gloss',
+  LIP_LINER:     'Lip Liner',
+  BLUSH:         'Blush',
+  EYESHADOW:     'Eyeshadow',
+  MASCARA:       'Mascara',
+  EYELINER:      'Eyeliner',
+  SETTING_SPRAY: 'Setting Spray',
+  HIGHLIGHTER:   'Highlighter',
+  BRONZER:       'Bronzer',
+  POWDER:        'Powder',
+}
+
+// Keep legacy alias so existing imports don't break
+export const PRODUCT_CATEGORIES = MAKEUP_CATEGORIES
 
 export const DELIVERY_TYPES = ['home', 'express', 'pickup'] as const
 
@@ -26,7 +54,7 @@ export const productSchema = z.object({
   imageUrl:       z.string().min(1, 'Image is required'),
   gallery:        z.array(z.string()).default([]),
   hasVariants:    z.boolean().default(false),
-  category:       z.enum(PRODUCT_CATEGORIES).default('SKINCARE'),
+  category:       z.enum(MAKEUP_CATEGORIES).default('LIPSTICK'),
   brand:          z.string().optional().nullable(),
   tags:           z.array(z.string()).default([]),
   benefits:       z.string().optional().nullable(),
