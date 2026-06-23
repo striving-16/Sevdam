@@ -15,12 +15,12 @@ export function Footer() {
   const isRtl = dir === 'rtl'
 
   return (
-    <footer className="bg-[#1A1714]" dir={isRtl ? 'rtl' : 'ltr'}>
+    <footer className="bg-[#111111]" dir={isRtl ? 'rtl' : 'ltr'}>
 
       {/* Thin gold top accent */}
       <div
         className="h-px"
-        style={{ background: 'linear-gradient(to right, transparent, #C9A96E 40%, #C9A96E 60%, transparent)' }}
+        style={{ background: 'linear-gradient(to right, transparent, #C7A98B 40%, #C7A98B 60%, transparent)' }}
       />
 
       {/* Main footer content */}
@@ -32,7 +32,7 @@ export function Footer() {
             Besma Sevdam
           </p>
           <p
-            className="mt-2 text-[7.5px] font-light uppercase text-[#C9A96E]"
+            className="mt-2 text-[7.5px] font-light uppercase text-[#C7A98B]"
             style={{ letterSpacing: '0.55em' }}
           >
             Luxury Beauty
@@ -61,7 +61,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-white/30 transition-all duration-300 hover:border-[#C9A96E]/50 hover:text-[#C9A96E]"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-white/30 transition-all duration-300 hover:border-[#C7A98B]/50 hover:text-[#C7A98B]"
               >
                 {icon}
               </a>

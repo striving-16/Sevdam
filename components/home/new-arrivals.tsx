@@ -22,7 +22,7 @@ export function NewArrivals({ products }: Props) {
 
   return (
     <section
-      className="bg-[#FAF5EE] px-6 py-24 sm:px-10 sm:py-32 lg:px-14"
+      className="bg-[#E7E1DA] px-6 py-24 sm:px-10 sm:py-32 lg:px-14"
       dir={isRtl ? 'rtl' : 'ltr'}
     >
       {/* Header */}
@@ -31,7 +31,7 @@ export function NewArrivals({ products }: Props) {
           initial={{ opacity: 0, y: 6 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mb-3 text-[8.5px] font-light uppercase tracking-[0.5em] text-[#C9A96E]"
+          className="mb-3 text-[8.5px] font-light uppercase tracking-[0.5em] text-[#C7A98B]"
         >
           Just Arrived
         </motion.p>
@@ -40,7 +40,7 @@ export function NewArrivals({ products }: Props) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.08, duration: 0.7 }}
-          className="font-display text-[clamp(34px,5vw,64px)] font-light italic leading-[0.95] text-[#1A1714]"
+          className="font-display text-[clamp(34px,5vw,64px)] font-light italic leading-[0.95] text-[#111111]"
         >
           New Arrivals
         </motion.h2>
@@ -49,7 +49,7 @@ export function NewArrivals({ products }: Props) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.16, duration: 0.6 }}
-          className="mx-auto mt-4 max-w-[380px] text-[13px] font-light leading-[1.8] text-[#9E8E80]"
+          className="mx-auto mt-4 max-w-[380px] text-[13px] font-light leading-[1.8] text-[#8A8A8A]"
         >
           The latest additions to our collection — luxury beauty innovations worth discovering.
         </motion.p>
@@ -75,7 +75,7 @@ export function NewArrivals({ products }: Props) {
         <Link href="/products" className="btn-pill-outline">
           See All New Arrivals
         </Link>
-        <p className="text-[11px] font-light text-[#C9A96E]">
+        <p className="text-[11px] font-light text-[#C7A98B]">
           New collections dropping every month
         </p>
       </motion.div>
@@ -132,7 +132,7 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
     >
       <Link href={`/products/${product.slug}`} className="block">
         <div
-          className="grain relative overflow-hidden bg-[#EDE5DA]"
+          className="grain relative overflow-hidden bg-[rgba(17,17,17,0.08)]"
           style={{ aspectRatio: '2/3' }}
         >
           <Image
@@ -147,7 +147,7 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
           {/* NEW badge */}
           <div className="absolute right-3 top-3 z-10">
             <span
-              className="block rounded-full bg-[#1A1714]/80 px-2.5 py-1 text-[8px] font-light uppercase text-white backdrop-blur-sm"
+              className="block rounded-full bg-[#111111]/80 px-2.5 py-1 text-[8px] font-light uppercase text-white backdrop-blur-sm"
               style={{ letterSpacing: '0.18em' }}
             >
               New
@@ -156,7 +156,7 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
 
           {soldOut && (
             <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[2px]">
-              <span className="text-[9px] font-light uppercase tracking-[0.3em] text-[#9E8E80]">
+              <span className="text-[9px] font-light uppercase tracking-[0.3em] text-[#8A8A8A]">
                 Sold Out
               </span>
             </div>
@@ -167,7 +167,7 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
               <div className="mx-4 bg-white/90 py-3 backdrop-blur-sm">
                 <button
                   onClick={handleAdd}
-                  className="text-[9.5px] font-light uppercase tracking-[0.22em] text-[#1A1714] transition-colors hover:text-[#C9A96E]"
+                  className="text-[9.5px] font-light uppercase tracking-[0.22em] text-[#111111] transition-colors hover:text-[#C7A98B]"
                 >
                   {added ? '✓ Added to Bag' : 'Add to Bag'}
                 </button>
@@ -202,7 +202,7 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
           {product.variants.length > 8 && (
             <Link
               href={`/products/${product.slug}`}
-              className="text-[9px] font-light text-[#9E8E80] hover:text-[#C9A96E]"
+              className="text-[9px] font-light text-[#8A8A8A] hover:text-[#C7A98B]"
             >
               +{product.variants.length - 8}
             </Link>
@@ -212,25 +212,25 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
 
       {/* Info */}
       <div className="mt-4 space-y-1" dir={isAr ? 'rtl' : 'ltr'}>
-        <p className="text-[8.5px] font-light uppercase tracking-[0.28em] text-[#C9A96E]">
+        <p className="text-[8.5px] font-light uppercase tracking-[0.28em] text-[#C7A98B]">
           {categoryLabel}
         </p>
         <Link href={`/products/${product.slug}`}>
-          <h3 className="font-display text-[clamp(14px,1.5vw,18px)] font-light italic leading-[1.3] text-[#1A1714] transition-colors hover:text-[#C9A96E]">
+          <h3 className="font-display text-[clamp(14px,1.5vw,18px)] font-light italic leading-[1.3] text-[#111111] transition-colors hover:text-[#C7A98B]">
             {name}
           </h3>
         </Link>
         {hasVariants && selected && (
-          <p className="text-[10px] font-light text-[#9E8E80]">{selected.shadeName}</p>
+          <p className="text-[10px] font-light text-[#8A8A8A]">{selected.shadeName}</p>
         )}
-        <p className="font-display text-[clamp(13px,1.4vw,16px)] font-light italic text-[#9E8E80]">
+        <p className="font-display text-[clamp(13px,1.4vw,16px)] font-light italic text-[#8A8A8A]">
           {formatPrice(product.price)}
         </p>
 
         {!soldOut && (
           <button
             onClick={handleAdd}
-            className="mt-2 block text-[9px] font-light uppercase tracking-[0.22em] text-[#C9A96E] underline underline-offset-3 decoration-[#C9A96E]/40 transition-all hover:decoration-[#C9A96E] lg:hidden"
+            className="mt-2 block text-[9px] font-light uppercase tracking-[0.22em] text-[#C7A98B] underline underline-offset-3 decoration-[#C7A98B]/40 transition-all hover:decoration-[#C7A98B] lg:hidden"
           >
             {added ? '✓ Added' : '+ Add to Bag'}
           </button>

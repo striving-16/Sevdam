@@ -17,7 +17,7 @@ export function FounderStory() {
   const imageY = useTransform(scrollYProgress, [0, 1], ['-5%', '5%'])
 
   return (
-    <section ref={ref} className="overflow-hidden bg-white">
+    <section ref={ref} className="overflow-hidden" style={{ backgroundColor: '#E7E1DA' }}>
 
       {/* ── Full-width grid: text left, image right ── */}
       <div className="grid lg:grid-cols-[1fr_1fr] lg:min-h-[80vh]">
@@ -31,12 +31,12 @@ export function FounderStory() {
           className="flex flex-col justify-center px-8 py-20 sm:px-12 sm:py-24 lg:px-16 lg:py-0 xl:px-24"
         >
           {/* Small label */}
-          <p className="mb-6 text-[8.5px] font-light uppercase tracking-[0.5em] text-[#C9A96E]">
+          <p className="mb-6 text-[8.5px] font-light uppercase tracking-[0.5em] text-[#C7A98B]">
             Our Story
           </p>
 
           {/* Large editorial headline */}
-          <h2 className="font-display text-[clamp(36px,5.5vw,72px)] font-light italic leading-[1.0] text-[#1A1714]">
+          <h2 className="font-display text-[clamp(36px,5.5vw,72px)] font-light italic leading-[1.0] text-[#111111]">
             Beauty That<br />Speaks For Itself
           </h2>
 
@@ -46,11 +46,11 @@ export function FounderStory() {
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.9, delay: 0.3, ease: [0.76, 0, 0.24, 1] }}
-            className="mb-8 mt-8 h-px w-16 origin-left bg-[#C9A96E]"
+            className="mb-8 mt-8 h-px w-16 origin-left bg-[#C7A98B]"
           />
 
           {/* Story body */}
-          <div className="space-y-5 text-[14px] font-light leading-[2] text-[#6B5745]">
+          <div className="space-y-5 text-[14px] font-light leading-[2] text-[#5A5A5A]">
             <p>
               Born from a simple belief — that every woman deserves to feel extraordinary.
               Besma Sevdam was created to bring luxury beauty within reach, without
@@ -64,12 +64,12 @@ export function FounderStory() {
           </div>
 
           {/* Large italic quote — the brand voice */}
-          <blockquote className="mt-10 border-l-2 border-[#C9A96E] pl-6">
-            <p className="font-display text-[clamp(18px,2.2vw,26px)] font-light italic leading-[1.6] text-[#1A1714]">
+          <blockquote className="mt-10 border-l-2 border-[#C7A98B] pl-6">
+            <p className="font-display text-[clamp(18px,2.2vw,26px)] font-light italic leading-[1.6] text-[#111111]">
               "Luxury is not a price. It is a feeling."
             </p>
             <footer className="mt-3">
-              <p className="font-display text-[14px] italic text-[#C9A96E]">
+              <p className="font-display text-[14px] italic text-[#C7A98B]">
                 — Besma Sevdam
               </p>
             </footer>
@@ -116,10 +116,10 @@ export function FounderStory() {
             transition={{ delay: 0.55, duration: 0.7 }}
             className="absolute bottom-8 left-8 z-20 max-w-[190px] bg-white/90 px-5 py-4 shadow-[0_8px_32px_rgba(26,23,20,0.10)] backdrop-blur-sm"
           >
-            <p className="font-display text-[12px] italic leading-[1.6] text-[#1A1714]">
+            <p className="font-display text-[12px] italic leading-[1.6] text-[#111111]">
               "Every woman deserves to feel extraordinary."
             </p>
-            <p className="mt-2 text-[7.5px] font-light uppercase tracking-[0.3em] text-[#C9A96E]">
+            <p className="mt-2 text-[7.5px] font-light uppercase tracking-[0.3em] text-[#C7A98B]">
               Besma Sevdam
             </p>
           </motion.div>

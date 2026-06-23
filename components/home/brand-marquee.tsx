@@ -20,7 +20,7 @@ export function BrandMarquee() {
   const doubled = [...WORDS, ...WORDS]
 
   return (
-    <div className="overflow-hidden border-y border-[#EDE5DA] bg-[#FDF9F4] py-4">
+    <div className="overflow-hidden border-y border-[#E2DDD7] bg-[#FDF9F4] py-4">
       <div
         className={`marquee-track ${isRtl ? '[animation-direction:reverse]' : ''}`}
       >
@@ -33,7 +33,7 @@ export function BrandMarquee() {
               {word}
             </span>
             {/* Separator dot */}
-            <span className="text-[8px] text-[#C9A96E]">◆</span>
+            <span className="text-[8px] text-[#C7A98B]">◆</span>
           </span>
         ))}
       </div>

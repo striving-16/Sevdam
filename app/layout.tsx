@@ -1,14 +1,15 @@
 import type { Metadata } from 'next'
-import { Geist, Cormorant_Garamond, Tajawal } from 'next/font/google'
+import { Inter, Cormorant_Garamond, Tajawal } from 'next/font/google'
 import { cookies } from 'next/headers'
 import { Toaster } from '@/components/ui/sonner'
 import { I18nProvider } from '@/lib/i18n/context'
 import type { Locale } from '@/lib/i18n/translations'
 import './globals.css'
 
-const geist = Geist({
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-geist',
+  variable: '--font-inter',
+  weight: ['300', '400', '500'],
   display: 'swap',
 })
 
@@ -57,9 +58,9 @@ export default async function RootLayout({
     <html
       lang={initialLocale}
       dir={dir}
-      className={`${geist.variable} ${cormorant.variable} ${tajawal.variable} h-full antialiased`}
+      className={`${inter.variable} ${cormorant.variable} ${tajawal.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-white text-[#1A1A18]">
+      <body className="min-h-full bg-[#F7F5F2] text-[#111111]">
         <I18nProvider initialLocale={initialLocale}>
           {children}
         </I18nProvider>

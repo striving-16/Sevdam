@@ -3,76 +3,68 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    BESMA SEVDAM — Luxury Beauty Design System
    Philosophy: editorial, feminine, minimal, expensive
-   Inspired by: Skin by Shirin, Rhode Skin, Charlotte Tilbury
+   References: Rhode Skin, Rare Beauty, Merit Beauty, Dior Beauty, Chanel
 ───────────────────────────────────────────────────────────────────────────── */
 
 @layer base {
   :root {
     --background: oklch(1 0 0);
-    --foreground: oklch(0.12 0.005 45);
+    --foreground: oklch(0.09 0.002 0);
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.12 0.005 45);
+    --card-foreground: oklch(0.09 0.002 0);
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.12 0.005 45);
-    --primary: oklch(0.12 0.005 45);
+    --popover-foreground: oklch(0.09 0.002 0);
+    --primary: oklch(0.09 0.002 0);
     --primary-foreground: oklch(1 0 0);
-    --secondary: oklch(0.97 0.006 60);
-    --secondary-foreground: oklch(0.12 0.005 45);
-    --muted: oklch(0.97 0.006 60);
-    --muted-foreground: oklch(0.50 0.02 55);
-    --accent: oklch(0.74 0.10 78);
-    --accent-foreground: oklch(0.12 0.005 45);
+    --secondary: oklch(0.97 0.005 60);
+    --secondary-foreground: oklch(0.09 0.002 0);
+    --muted: oklch(0.96 0.006 55);
+    --muted-foreground: oklch(0.42 0.010 45);
+    --accent: oklch(0.72 0.07 58);
+    --accent-foreground: oklch(0.09 0.002 0);
     --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.93 0.010 65);
-    --input: oklch(0.93 0.010 65);
-    --ring: oklch(0.74 0.10 78);
-    --radius: 999px; /* pill-first design */
+    --border: oklch(0.90 0.008 60);
+    --input: oklch(0.90 0.008 60);
+    --ring: oklch(0.72 0.07 58);
+    --radius: 999px;
   }
 }
 
 @theme inline {
-  --font-sans:    var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-sans:    var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-cormorant), Georgia, "Times New Roman", serif;
 
   /* shadcn tokens */
-  --color-background:         var(--background);
-  --color-foreground:         var(--foreground);
-  --color-border:             var(--border);
-  --color-input:              var(--input);
-  --color-ring:               var(--ring);
-  --color-primary:            var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary:          var(--secondary);
+  --color-background:           var(--background);
+  --color-foreground:           var(--foreground);
+  --color-border:               var(--border);
+  --color-input:                var(--input);
+  --color-ring:                 var(--ring);
+  --color-primary:              var(--primary);
+  --color-primary-foreground:   var(--primary-foreground);
+  --color-secondary:            var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted:              var(--muted);
-  --color-muted-foreground:   var(--muted-foreground);
-  --color-accent:             var(--accent);
-  --color-accent-foreground:  var(--accent-foreground);
-  --color-destructive:        var(--destructive);
-  --color-card:               var(--card);
-  --color-card-foreground:    var(--card-foreground);
-  --color-popover:            var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
+  --color-muted:                var(--muted);
+  --color-muted-foreground:     var(--muted-foreground);
+  --color-accent:               var(--accent);
+  --color-accent-foreground:    var(--accent-foreground);
+  --color-destructive:          var(--destructive);
+  --color-card:                 var(--card);
+  --color-card-foreground:      var(--card-foreground);
+  --color-popover:              var(--popover);
+  --color-popover-foreground:   var(--popover-foreground);
 
   /* ── BESMA SEVDAM palette ── */
-  --color-white:            #FFFFFF;
-  --color-ivory:            #FDF9F4;   /* warm ivory page bg */
-  --color-cream:            #FAF5EE;   /* section alt bg */
-  --color-champagne:        #F5EAD8;   /* warm champagne */
-  --color-gold:             #C9A96E;   /* warm luxury gold */
-  --color-gold-bright:      #D4AF37;   /* vivid gold accent */
-  --color-gold-pale:        #F0E4CE;   /* pale gold for borders */
-  --color-onyx:             #1A1714;   /* rich near-black */
-  --color-warm-brown:       #6B5745;   /* body text */
-  --color-stone:            #9E8E80;   /* secondary text */
-  --color-divider:          #EDE5DA;   /* warm dividers */
-
-  /* no border-radius — pill buttons handled inline, sections are sharp */
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-xl: 0;
-  --radius-2xl: 0;
+  --color-bg-primary:     #E7E1DA;   /* warm beige — hero, large sections */
+  --color-bg-secondary:   #F7F5F2;   /* lighter cream — product sections   */
+  --color-bg-white:       #FFFFFF;   /* cards, overlays                    */
+  --color-onyx:           #111111;   /* primary text                       */
+  --color-secondary-text: #5A5A5A;   /* secondary text                     */
+  --color-stone:          #8A8A8A;   /* tertiary / placeholder text        */
+  --color-accent:         #C7A98B;   /* luxury champagne accent            */
+  --color-champagne:      #D8C3A5;   /* champagne — decorative             */
+  --color-divider:        rgba(17,17,17,0.08);
+  --color-divider-solid:  #E2DDD7;   /* fallback for non-rgba contexts     */
 }
 
 /* ── Base ──────────────────────────────────────────────────────────────────── */
@@ -87,21 +79,21 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: #FFFFFF;
-  color: #1A1714;
+  background: #F7F5F2;
+  color: #111111;
   font-weight: 300;
 }
 
 ::selection {
-  background: rgba(201, 169, 110, 0.18);
-  color: #1A1714;
+  background: rgba(199, 169, 139, 0.20);
+  color: #111111;
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #EDE5DA; }
-::-webkit-scrollbar-thumb:hover { background: #C9A96E; }
+::-webkit-scrollbar-thumb { background: #D8C3A5; }
+::-webkit-scrollbar-thumb:hover { background: #C7A98B; }
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ANIMATIONS
@@ -146,51 +138,52 @@ body {
   height: 300%;
   pointer-events: none;
   z-index: 3;
-  opacity: 0.045;
+  opacity: 0.04;
   mix-blend-mode: overlay;
   animation: grain-shift 7s steps(8) infinite;
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");
 }
 
-/* Pill button — luxury rounded */
+/* Pill button — luxury rounded, dark fill */
 .btn-pill-dark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 1px solid #1A1714;
-  background: #1A1714;
+  border: 1px solid #111111;
+  background: #111111;
   color: #FFFFFF;
   font-size: 10px;
-  font-weight: 300;
-  letter-spacing: 0.22em;
+  font-weight: 400;
+  letter-spacing: 0.20em;
   text-transform: uppercase;
   padding: 14px 36px;
-  transition: background 0.4s ease, color 0.4s ease;
+  transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
 }
 .btn-pill-dark:hover {
   background: transparent;
-  color: #1A1714;
+  color: #111111;
 }
 
+/* Pill button — outline accent */
 .btn-pill-outline {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 1px solid #C9A96E;
+  border: 1px solid #C7A98B;
   background: transparent;
-  color: #1A1714;
+  color: #111111;
   font-size: 10px;
-  font-weight: 300;
-  letter-spacing: 0.22em;
+  font-weight: 400;
+  letter-spacing: 0.20em;
   text-transform: uppercase;
   padding: 14px 36px;
   transition: background 0.4s ease, color 0.4s ease;
 }
 .btn-pill-outline:hover {
-  background: #C9A96E;
+  background: #C7A98B;
   color: #FFFFFF;
 }
 
@@ -198,7 +191,7 @@ body {
 .gold-line {
   display: block;
   height: 1px;
-  background: linear-gradient(to right, transparent, #C9A96E 40%, #C9A96E 60%, transparent);
+  background: linear-gradient(to right, transparent, #C7A98B 40%, #C7A98B 60%, transparent);
 }
 
 /* ── Arabic / RTL ──────────────────────────────────────────────────────────── */

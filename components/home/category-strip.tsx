@@ -54,7 +54,7 @@ const TILES = [
 
 export function CategoryStrip() {
   return (
-    <section className="bg-white px-6 py-24 sm:px-10 sm:py-32 lg:px-14">
+    <section className="bg-[#F7F5F2] px-6 py-24 sm:px-10 sm:py-32 lg:px-14">
 
       {/* Section header — editorial style */}
       <div className="mb-14 flex items-end justify-between">
@@ -63,7 +63,7 @@ export function CategoryStrip() {
             initial={{ opacity: 0, y: 6 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-3 text-[8.5px] font-light uppercase tracking-[0.5em] text-[#C9A96E]"
+            className="mb-3 text-[8.5px] font-light uppercase tracking-[0.5em] text-[#C7A98B]"
           >
             The Collection
           </motion.p>
@@ -72,7 +72,7 @@ export function CategoryStrip() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.08, duration: 0.7 }}
-            className="font-display text-[clamp(34px,5vw,64px)] font-light italic leading-[0.95] text-[#1A1714]"
+            className="font-display text-[clamp(34px,5vw,64px)] font-light italic leading-[0.95] text-[#111111]"
           >
             Shop The Edit
           </motion.h2>
@@ -86,7 +86,7 @@ export function CategoryStrip() {
         >
           <Link
             href="/products"
-            className="font-display text-[13px] italic text-[#C9A96E] underline underline-offset-4 decoration-[#C9A96E]/40 transition-all hover:decoration-[#C9A96E]"
+            className="font-display text-[13px] italic text-[#C7A98B] underline underline-offset-4 decoration-[#C7A98B]/40 transition-all hover:decoration-[#C7A98B]"
           >
             View all →
           </Link>
@@ -139,7 +139,7 @@ export function CategoryStrip() {
 
                 {/* Gold bottom line on hover */}
                 <div
-                  className="absolute bottom-0 left-0 right-0 h-px bg-[#C9A96E] scale-x-0 transition-transform duration-500 group-hover:scale-x-100"
+                  className="absolute bottom-0 left-0 right-0 h-px bg-[#C7A98B] scale-x-0 transition-transform duration-500 group-hover:scale-x-100"
                 />
 
                 {/* Arrow reveal */}

@@ -32,7 +32,7 @@ const QUOTES = [
 
 export function Testimonials() {
   return (
-    <section className="bg-[#FAF5EE] px-6 py-24 sm:px-10 sm:py-32 lg:px-14">
+    <section className="bg-[#F7F5F2] px-6 py-24 sm:px-10 sm:py-32 lg:px-14">
 
       {/* Section header */}
       <div className="mb-16 text-center">
@@ -40,7 +40,7 @@ export function Testimonials() {
           initial={{ opacity: 0, y: 6 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mb-3 text-[8.5px] font-light uppercase tracking-[0.5em] text-[#C9A96E]"
+          className="mb-3 text-[8.5px] font-light uppercase tracking-[0.5em] text-[#C7A98B]"
         >
           What They Say
         </motion.p>
@@ -49,7 +49,7 @@ export function Testimonials() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.08, duration: 0.7 }}
-          className="font-display text-[clamp(32px,4.5vw,60px)] font-light italic leading-[0.95] text-[#1A1714]"
+          className="font-display text-[clamp(32px,4.5vw,60px)] font-light italic leading-[0.95] text-[#111111]"
         >
           Loved By Thousands
         </motion.h2>
@@ -63,9 +63,9 @@ export function Testimonials() {
           className="mt-4 flex items-center justify-center gap-1.5"
         >
           {[...Array(5)].map((_, i) => (
-            <span key={i} className="text-[14px] text-[#C9A96E]">★</span>
+            <span key={i} className="text-[14px] text-[#C7A98B]">★</span>
           ))}
-          <span className="ml-2 text-[11px] font-light text-[#9E8E80]">4.9 · 2,400+ reviews</span>
+          <span className="ml-2 text-[11px] font-light text-[#8A8A8A]">4.9 · 2,400+ reviews</span>
         </motion.div>
       </div>
 
@@ -78,19 +78,19 @@ export function Testimonials() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.65, delay: i * 0.12 }}
-            className="border-b border-[#EDE5DA] py-10 last:border-none"
+            className="border-b border-[rgba(17,17,17,0.08)] py-10 last:border-none"
           >
             {/* Stars */}
             <div className={`mb-5 flex gap-0.5 ${i % 2 === 1 ? 'justify-end' : 'justify-start'}`}>
               {[...Array(q.stars)].map((_, j) => (
-                <span key={j} className="text-[11px] text-[#C9A96E]">★</span>
+                <span key={j} className="text-[11px] text-[#C7A98B]">★</span>
               ))}
             </div>
 
             {/* Large quote text */}
             <p
               className={[
-                'font-display text-[clamp(17px,2.2vw,26px)] font-light italic leading-[1.7] text-[#1A1714]',
+                'font-display text-[clamp(17px,2.2vw,26px)] font-light italic leading-[1.7] text-[#111111]',
                 i % 2 === 1 ? 'text-right' : 'text-left',
               ].join(' ')}
             >
@@ -100,11 +100,11 @@ export function Testimonials() {
             {/* Attribution */}
             <div className={`mt-5 flex items-center gap-3 ${i % 2 === 1 ? 'flex-row-reverse' : ''}`}>
               <div
-                className="h-px flex-1 bg-[#EDE5DA]"
+                className="h-px flex-1 bg-[rgba(17,17,17,0.08)]"
               />
               <div className={i % 2 === 1 ? 'text-right' : ''}>
-                <p className="text-[11px] font-light text-[#1A1714]">{q.name}</p>
-                <p className="text-[9.5px] font-light uppercase tracking-[0.18em] text-[#9E8E80]">
+                <p className="text-[11px] font-light text-[#111111]">{q.name}</p>
+                <p className="text-[9.5px] font-light uppercase tracking-[0.18em] text-[#8A8A8A]">
                   {q.detail}
                 </p>
               </div>

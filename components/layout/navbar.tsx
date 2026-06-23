@@ -57,7 +57,7 @@ export function Navbar() {
         className={cn(
           'fixed inset-x-0 top-0 z-50 transition-all duration-500',
           scrolled
-            ? 'bg-white/95 backdrop-blur-xl shadow-[0_1px_0_#EDE5DA]'
+            ? 'bg-white/95 backdrop-blur-xl shadow-[0_1px_0_#E2DDD7]'
             : 'bg-transparent'
         )}
       >
@@ -71,7 +71,7 @@ export function Navbar() {
                 href={l.href}
                 className={cn(
                   'text-[10.5px] font-light uppercase tracking-[0.18em] transition-colors duration-200',
-                  pathname === l.href ? 'text-[#C9A96E]' : 'text-[#6B5745] hover:text-[#1A1714]'
+                  pathname === l.href ? 'text-[#C7A98B]' : 'text-[#6B5745] hover:text-[#111111]'
                 )}
               >
                 {l.label}
@@ -84,11 +84,11 @@ export function Navbar() {
             href="/"
             className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center leading-none"
           >
-            <span className="font-display text-[22px] font-light italic tracking-[0.06em] text-[#1A1714] transition-opacity hover:opacity-60">
+            <span className="font-display text-[22px] font-light italic tracking-[0.06em] text-[#111111] transition-opacity hover:opacity-60">
               Besma Sevdam
             </span>
             <span
-              className="mt-0.5 text-[6px] font-light uppercase text-[#C9A96E]"
+              className="mt-0.5 text-[6px] font-light uppercase text-[#C7A98B]"
               style={{ letterSpacing: '0.55em' }}
             >
               Beauty
@@ -104,7 +104,7 @@ export function Navbar() {
                   href={l.href}
                   className={cn(
                     'text-[10.5px] font-light uppercase tracking-[0.18em] transition-colors duration-200',
-                    pathname === l.href ? 'text-[#C9A96E]' : 'text-[#6B5745] hover:text-[#1A1714]'
+                    pathname === l.href ? 'text-[#C7A98B]' : 'text-[#6B5745] hover:text-[#111111]'
                   )}
                 >
                   {l.label}
@@ -112,14 +112,14 @@ export function Navbar() {
               ))}
 
               {/* Language */}
-              <div className="flex items-center divide-x divide-[#EDE5DA]">
+              <div className="flex items-center divide-x divide-[#E2DDD7]">
                 {LOCALE_OPTIONS.map((l) => (
                   <button
                     key={l.code}
                     onClick={() => setLocale(l.code)}
                     className={cn(
                       'px-2.5 text-[9.5px] font-light uppercase tracking-[0.1em] transition-colors',
-                      locale === l.code ? 'text-[#C9A96E]' : 'text-[#9E8E80] hover:text-[#1A1714]'
+                      locale === l.code ? 'text-[#C7A98B]' : 'text-[#8A8A8A] hover:text-[#111111]'
                     )}
                   >
                     {l.native}
@@ -129,13 +129,13 @@ export function Navbar() {
             </nav>
 
             {/* Cart */}
-            <Link href="/cart" aria-label="Bag" className="relative text-[#6B5745] transition-colors hover:text-[#1A1714]">
+            <Link href="/cart" aria-label="Bag" className="relative text-[#6B5745] transition-colors hover:text-[#111111]">
               <ShoppingBag size={18} strokeWidth={1.25} />
               <AnimatePresence>
                 {cartCount > 0 && (
                   <motion.span
                     initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                    className="absolute -right-1.5 -top-1.5 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-[#C9A96E] text-[7px] font-light text-white"
+                    className="absolute -right-1.5 -top-1.5 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-[#C7A98B] text-[7px] font-light text-white"
                   >
                     {cartCount > 9 ? '9+' : cartCount}
                   </motion.span>
@@ -146,7 +146,7 @@ export function Navbar() {
             {/* Mobile hamburger */}
             <button
               onClick={() => setOpen((v) => !v)}
-              className="lg:hidden text-[#6B5745] transition-colors hover:text-[#1A1714]"
+              className="lg:hidden text-[#6B5745] transition-colors hover:text-[#111111]"
               aria-label="Menu"
             >
               <AnimatePresence mode="wait" initial={false}>
@@ -178,12 +178,12 @@ export function Navbar() {
             className="fixed inset-0 z-40 flex flex-col bg-[#FDF9F4] lg:hidden"
           >
             {/* Gold thin top line */}
-            <div className="h-px bg-[#C9A96E]" />
+            <div className="h-px bg-[#C7A98B]" />
 
             <div className="flex flex-1 flex-col justify-between px-8 pb-14 pt-[100px]">
               {/* Brand centered */}
               <div className="mb-10 text-center">
-                <p className="font-display text-[15px] italic text-[#C9A96E]">Besma Sevdam</p>
+                <p className="font-display text-[15px] italic text-[#C7A98B]">Besma Sevdam</p>
               </div>
 
               <nav className="flex flex-col items-center gap-1">
@@ -198,7 +198,7 @@ export function Navbar() {
                     <Link
                       href={l.href}
                       onClick={closeMenu}
-                      className="block w-full border-b border-[#EDE5DA] py-5 text-center font-display text-[32px] font-light italic text-[#1A1714] transition-colors hover:text-[#C9A96E]"
+                      className="block w-full border-b border-[#E2DDD7] py-5 text-center font-display text-[32px] font-light italic text-[#111111] transition-colors hover:text-[#C7A98B]"
                     >
                       {l.label}
                     </Link>
@@ -215,7 +215,7 @@ export function Navbar() {
                       onClick={() => { setLocale(l.code); closeMenu() }}
                       className={cn(
                         'text-[10px] font-light uppercase tracking-[0.2em]',
-                        locale === l.code ? 'text-[#C9A96E]' : 'text-[#9E8E80]'
+                        locale === l.code ? 'text-[#C7A98B]' : 'text-[#8A8A8A]'
                       )}
                     >
                       {l.native}
