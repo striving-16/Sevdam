@@ -2,8 +2,6 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getProductBySlug, getProducts } from '@/actions/product-actions'
 import { getServerT } from '@/lib/i18n/server'
-import { formatPrice } from '@/lib/utils'
-import { DEMO_PRODUCTS } from '@/lib/demo-products'
 import { ProductPageClient } from '@/components/products/product-page-client'
 import { CATEGORY_LABELS } from '@/lib/validations'
 import type { Metadata } from 'next'
@@ -15,8 +13,6 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const product = await getProductBySlug(slug).catch(() => null)
-    ?? DEMO_PRODUCTS.find((p) => p.slug === slug)
-    ?? null
   if (!product) return { title: 'Product not found' }
   return {
     title: `${product.name_en} — Besma Sevdam`,
@@ -26,9 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export async function generateStaticParams() {
   const dbProducts = await getProducts().catch(() => [])
-  const demoSlugs  = DEMO_PRODUCTS.map((p) => ({ slug: p.slug }))
-  const dbSlugs    = dbProducts.map((p) => ({ slug: p.slug }))
-  return [...demoSlugs, ...dbSlugs]
+  return dbProducts.map((p) => ({ slug: p.slug }))
 }
 
 export default async function ProductPage({ params }: Props) {
@@ -36,8 +30,6 @@ export default async function ProductPage({ params }: Props) {
   const { dir, locale } = await getServerT()
 
   const product = await getProductBySlug(slug).catch(() => null)
-    ?? DEMO_PRODUCTS.find((p) => p.slug === slug)
-    ?? null
 
   if (!product) notFound()
 

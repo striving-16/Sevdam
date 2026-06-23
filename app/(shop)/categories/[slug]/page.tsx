@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { getProducts } from '@/actions/product-actions'
 import { ProductGrid, ProductGridSkeleton } from '@/components/products/product-grid'
 import { CategoryPageFilters } from '@/components/products/category-page-filters'
-import { DEMO_PRODUCTS } from '@/lib/demo-products'
 import type { Product } from '@/types'
 
 type CategoryDef = {
@@ -161,9 +160,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const cat = CATEGORY_MAP[slug]
   if (!cat) notFound()
 
-  let products: Product[] = await getProducts(sub || undefined, cat.enum).catch(() =>
-    DEMO_PRODUCTS.filter((p) => p.category === cat.enum)
-  )
+  let products: Product[] = await getProducts(sub || undefined, cat.enum).catch(() => [])
 
   if (brand) products = products.filter((p) => (p.brand ?? '').toLowerCase() === brand.toLowerCase())
   if (instock === '1') products = products.filter((p) => p.stock > 0)

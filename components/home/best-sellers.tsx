@@ -4,13 +4,13 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useTranslation } from '@/lib/i18n/context'
 import { ProductCard } from '@/components/products/product-card'
-import { DEMO_FEATURED } from '@/lib/demo-products'
 import type { Product } from '@/types'
 
 export function BestSellers({ products }: { products: Product[] }) {
   const { dir } = useTranslation()
   const isRtl = dir === 'rtl'
-  const display = (products.length > 0 ? products : DEMO_FEATURED).slice(0, 4)
+  const display = products.slice(0, 4)
+  if (display.length === 0) return null
 
   return (
     <section

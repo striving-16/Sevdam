@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useTranslation } from '@/lib/i18n/context'
 import { ProductCard } from '@/components/products/product-card'
-import { DEMO_NEW_ARRIVALS } from '@/lib/demo-products'
 import type { Product } from '@/types'
 
 interface Props {
@@ -14,7 +13,8 @@ interface Props {
 export function NewArrivals({ products }: Props) {
   const { dir } = useTranslation()
   const isRtl = dir === 'rtl'
-  const display = (products && products.length > 0 ? products : DEMO_NEW_ARRIVALS).slice(0, 4)
+  const display = (products ?? []).slice(0, 4)
+  if (display.length === 0) return null
 
   return (
     <section

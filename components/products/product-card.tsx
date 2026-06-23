@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Plus, Check } from 'lucide-react'
+import { ShoppingBag, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCart } from '@/hooks/use-cart'
 import { useTranslation } from '@/lib/i18n/context'
@@ -12,11 +12,6 @@ import { formatPrice, cn } from '@/lib/utils'
 import { CATEGORY_LABELS } from '@/lib/validations'
 import type { Product, Variant } from '@/types'
 
-/*
-  mode="editorial"  → homepage campaign cards — "Discover →" CTA, no add-to-bag
-  mode="shop"       → /products grid — "Add to Bag" CTA with cart logic
-  featured          → first card in Best Sellers; wider slot, taller image, bigger type
-*/
 export function ProductCard({
   product,
   index = 0,
@@ -44,9 +39,7 @@ export function ProductCard({
   const displayImage = (selected?.image ?? null) || product.imageUrl
   const stock   = selected ? selected.stock : product.stock
   const soldOut = stock === 0
-
-  // Max swatches shown on the card
-  const maxSwatches = featured ? 8 : 6
+  const maxSwatches = featured ? 8 : 5
 
   function handleShadeClick(e: React.MouseEvent, variant: Variant) {
     e.preventDefault()
@@ -62,125 +55,93 @@ export function ProductCard({
     const shade = selected ? ` — ${selected.shadeName}` : ''
     toast.success(`${name}${shade}`, { description: 'Added to your bag' })
     setAdded(true)
-    setTimeout(() => setAdded(false), 2000)
+    setTimeout(() => setAdded(false), 2200)
   }
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 28 }}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-30px' }}
-      transition={{ duration: 0.6, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.55, delay: index * 0.055, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        'group flex h-full flex-col overflow-hidden rounded-[32px]',
+        'group flex h-full flex-col overflow-hidden rounded-[28px]',
         'bg-[#F3EFE9]',
-        'shadow-[0_1px_4px_rgba(0,0,0,0.03),0_6px_28px_rgba(0,0,0,0.045)]',
+        'shadow-[0_1px_3px_rgba(0,0,0,0.03),0_4px_24px_rgba(0,0,0,0.04)]',
         'transition-[transform,box-shadow] duration-500',
-        'hover:-translate-y-1.5 hover:shadow-[0_20px_70px_rgba(0,0,0,0.09)]',
+        'hover:-translate-y-1 hover:shadow-[0_16px_56px_rgba(0,0,0,0.08)]',
         className,
       )}
     >
-      {/* ─────────────────── IMAGE — the hero ─────────────────── */}
-      <div className={cn(
-        'relative flex-shrink-0 overflow-hidden',
-        featured ? 'aspect-[5/6] lg:aspect-[3/4]' : 'aspect-[5/6]',
-      )}>
-        <Link
-          href={`/products/${product.slug}`}
-          tabIndex={-1}
-          aria-label={name}
-          className="absolute inset-0"
-        >
-          <Image
-            src={displayImage}
-            alt={name}
-            fill
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-            sizes={
-              featured
-                ? '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 40vw'
-                : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw'
-            }
-            loading="lazy"
-          />
-        </Link>
-
-        {/* Floating + button */}
-        {!soldOut && (
-          <button
-            type="button"
-            onClick={handleAdd}
-            aria-label="Add to bag"
-            className={cn(
-              'absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full shadow-md',
-              'transition-all duration-200',
-              added
-                ? 'bg-[#111111] text-white'
-                : 'bg-white/90 text-[#111111] backdrop-blur-sm hover:bg-[#111111] hover:text-white',
-            )}
-          >
-            {added ? <Check size={14} strokeWidth={2} /> : <Plus size={14} strokeWidth={2} />}
-          </button>
+      {/* ── Image ─────────────────────────────────────────────── */}
+      <Link
+        href={`/products/${product.slug}`}
+        tabIndex={-1}
+        aria-label={name}
+        className={cn(
+          'relative block flex-shrink-0 overflow-hidden',
+          featured ? 'aspect-[5/6] lg:aspect-[3/4]' : 'aspect-[4/5]',
         )}
+      >
+        <Image
+          src={displayImage}
+          alt={name}
+          fill
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          sizes={
+            featured
+              ? '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 40vw'
+              : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw'
+          }
+          loading="lazy"
+        />
 
-        {/* Sold out */}
         {soldOut && (
-          <div className="absolute inset-0 flex items-end justify-center pb-5">
-            <span className="rounded-full bg-white/60 px-3.5 py-1.5 text-[7.5px] font-light uppercase tracking-[0.38em] text-[#7A7A7A] backdrop-blur-sm">
+          <div className="absolute inset-0 flex items-end justify-center pb-4">
+            <span className="rounded-full bg-white/65 px-3 py-1 text-[7px] font-light uppercase tracking-[0.36em] text-[#7A7A7A] backdrop-blur-sm">
               Sold Out
             </span>
           </div>
         )}
-      </div>
+      </Link>
 
-      {/* ─────────────────── BODY ─────────────────────────────── */}
+      {/* ── Body ──────────────────────────────────────────────── */}
       <div
         className={cn(
           'flex flex-1 flex-col',
-          featured ? 'px-6 pb-7 pt-5' : 'px-4 pb-5 pt-4',
+          featured ? 'px-5 pb-6 pt-4' : 'px-3.5 pb-4 pt-3.5',
         )}
         dir={isAr ? 'rtl' : 'ltr'}
       >
         {/* Category */}
-        <p
-          className={cn(
-            'font-light uppercase text-[#C7A98B]',
-            featured ? 'text-[8.5px] tracking-[0.48em]' : 'text-[7.5px] tracking-[0.42em]',
-          )}
-        >
+        <p className="text-[7px] font-light uppercase tracking-[0.44em] text-[#C7A98B]">
           {categoryLabel}
         </p>
 
-        {/* Product name */}
+        {/* Name */}
         <Link href={`/products/${product.slug}`}>
           <h3
             className={cn(
-              'mt-2 line-clamp-2 font-display font-light italic leading-[1.2] text-[#111111]',
+              'mt-1.5 line-clamp-2 font-display font-light italic leading-[1.25] text-[#111111]',
               'transition-colors duration-200 hover:text-[#C7A98B]',
-              featured
-                ? 'text-[clamp(20px,2vw,30px)]'
-                : 'text-[clamp(15px,1.4vw,20px)]',
+              featured ? 'text-[clamp(17px,1.7vw,22px)]' : 'text-[clamp(13px,1.2vw,17px)]',
             )}
           >
             {name}
           </h3>
         </Link>
 
-        {/* Price — must feel strong */}
-        <p
-          className={cn(
-            'mt-2 font-bold leading-none tracking-[0.01em] text-[#111111]',
-            featured
-              ? 'text-[clamp(22px,2.2vw,28px)]'
-              : 'text-[clamp(18px,1.8vw,22px)]',
-          )}
-        >
+        {/* Price — present but secondary */}
+        <p className={cn(
+          'mt-1.5 font-light leading-none text-[#9E8E80]',
+          featured ? 'text-[14px]' : 'text-[13px]',
+        )}>
           {formatPrice(product.price)}
         </p>
 
-        {/* Shade swatches */}
+        {/* Swatches */}
         {hasVariants && (
-          <div className={cn('mt-3.5 flex flex-wrap items-center', featured ? 'gap-2.5' : 'gap-2')}>
+          <div className={cn('mt-3 flex flex-wrap items-center', featured ? 'gap-2' : 'gap-1.5')}>
             {product.variants.slice(0, maxSwatches).map((v) => (
               <button
                 key={v.id}
@@ -191,49 +152,62 @@ export function ProductCard({
                 aria-pressed={selected?.id === v.id}
                 className="flex-shrink-0 rounded-full focus:outline-none"
                 style={{
-                  width:           featured ? 24 : 20,
-                  height:          featured ? 24 : 20,
+                  width:           featured ? 20 : 16,
+                  height:          featured ? 20 : 16,
                   backgroundColor: v.hexColor,
                   boxShadow:       selected?.id === v.id
-                    ? `0 0 0 2.5px #F3EFE9, 0 0 0 4px ${v.hexColor}`
-                    : '0 0 0 0.5px rgba(0,0,0,0.16)',
-                  transform:       selected?.id === v.id ? 'scale(1.2)' : 'scale(1)',
-                  transition:      'transform 0.25s ease, box-shadow 0.25s ease',
+                    ? `0 0 0 2px #F3EFE9, 0 0 0 3.5px ${v.hexColor}`
+                    : '0 0 0 0.5px rgba(0,0,0,0.14)',
+                  transform:       selected?.id === v.id ? 'scale(1.18)' : 'scale(1)',
+                  transition:      'transform 0.2s ease, box-shadow 0.2s ease',
                 }}
               />
             ))}
             {product.variants.length > maxSwatches && (
-              <span className="text-[9.5px] font-light text-[#9E8E80]">
+              <span className="text-[9px] font-light text-[#9E8E80]">
                 +{product.variants.length - maxSwatches}
               </span>
             )}
           </div>
         )}
 
-        {/* Selected shade label */}
         {hasVariants && selected && (
-          <p className="mt-2 text-[9.5px] font-light text-[#9A9A9A]">{selected.shadeName}</p>
+          <p className="mt-1.5 text-[9px] font-light text-[#B0A49A]">{selected.shadeName}</p>
         )}
 
-        {/* Push CTA to bottom */}
+        {/* Spacer */}
         <div className="flex-1" />
 
-        {/* CTA */}
+        {/* Add to Bag — slim elegant pill */}
         <button
           type="button"
           onClick={handleAdd}
           disabled={soldOut}
           className={cn(
-            'mt-4 w-full rounded-[14px] py-3 text-[9px] font-light uppercase tracking-[0.3em]',
-            'transition-all duration-300 active:scale-[0.98]',
+            'mt-3 flex w-full items-center justify-center gap-1.5 rounded-full',
+            featured ? 'py-2.5' : 'py-2',
+            'text-[8px] font-light uppercase tracking-[0.3em]',
+            'ring-1 transition-all duration-300 active:scale-[0.97]',
             soldOut
-              ? 'cursor-not-allowed bg-neutral-100 text-neutral-400'
+              ? 'cursor-not-allowed ring-[#E0D8D0] text-[#C4B8B0]'
               : added
-              ? 'bg-[#111111] text-white'
-              : 'bg-[#C7A98B] text-white hover:bg-[#B8967A]',
+              ? 'bg-[#C7A98B] ring-[#C7A98B] text-white'
+              : 'bg-[#C7A98B]/[0.07] ring-[#C7A98B]/50 text-[#A8896F] hover:bg-[#C7A98B] hover:ring-[#C7A98B] hover:text-white',
           )}
         >
-          {soldOut ? 'Sold Out' : added ? '✓ Added' : 'Add to Bag'}
+          {soldOut ? (
+            'Sold Out'
+          ) : added ? (
+            <>
+              <Check size={9} strokeWidth={2.5} />
+              Added
+            </>
+          ) : (
+            <>
+              <ShoppingBag size={9} strokeWidth={1.5} />
+              Add to Bag
+            </>
+          )}
         </button>
       </div>
     </motion.article>

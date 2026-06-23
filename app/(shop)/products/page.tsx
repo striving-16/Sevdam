@@ -4,7 +4,6 @@ import { ProductGrid, ProductGridSkeleton } from '@/components/products/product-
 import { ProductSearch } from '@/components/products/product-search'
 import { CategoryFilter } from '@/components/products/category-filter'
 import { getServerT } from '@/lib/i18n/server'
-import { DEMO_PRODUCTS } from '@/lib/demo-products'
 import type { Product } from '@/types'
 
 interface Props {
@@ -22,15 +21,7 @@ export default async function ProductsPage({ searchParams }: Props) {
   try {
     products = await getProducts(q, category)
   } catch {
-    /* DB not connected — show demo products */
-    products = DEMO_PRODUCTS.filter((p) => {
-      if (q) {
-        const query = q.toLowerCase()
-        return p.name_en.toLowerCase().includes(query) || p.tags.some((tag) => tag.includes(query))
-      }
-      if (category) return p.category === category.toUpperCase()
-      return true
-    })
+    // DB unavailable — show empty grid
   }
 
   return (

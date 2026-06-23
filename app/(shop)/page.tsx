@@ -6,7 +6,6 @@ import { Offers }            from '@/components/home/offers'
 import { NewArrivals }       from '@/components/home/new-arrivals'
 import { Testimonials }      from '@/components/home/testimonials'
 import { getFeaturedProducts, getOfferProducts } from '@/actions/product-actions'
-import { DEMO_FEATURED, DEMO_NEW_ARRIVALS } from '@/lib/demo-products'
 import type { Product } from '@/types'
 
 export default async function HomePage() {
@@ -19,8 +18,7 @@ export default async function HomePage() {
       getOfferProducts(4),
     ])
   } catch {
-    featured = DEMO_FEATURED
-    offers   = []
+    // DB unavailable — sections hide themselves when empty
   }
 
   return (
