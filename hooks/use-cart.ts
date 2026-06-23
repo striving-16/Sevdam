@@ -10,10 +10,13 @@ function cartKey(productId: string, variantId: string | null | undefined): strin
 
 type CartStore = {
   items: CartItem[]
+  isOpen: boolean
   addItem: (product: Product, variant?: Variant | null, quantity?: number) => void
   removeItem: (productId: string, variantId?: string | null) => void
   updateQuantity: (productId: string, variantId: string | null | undefined, quantity: number) => void
   clearCart: () => void
+  openCart: () => void
+  closeCart: () => void
   totalItems: () => number
   totalPrice: () => number
 }
@@ -22,6 +25,10 @@ export const useCart = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      isOpen: false,
+
+      openCart:  () => set({ isOpen: true }),
+      closeCart: () => set({ isOpen: false }),
 
       addItem: (product, variant = null, quantity = 1) => {
         set((state) => {

@@ -37,6 +37,7 @@ export function Navbar() {
   const pathname = usePathname()
   const { scrollY } = useScroll()
   const cartCount = useCart((s) => s.totalItems())
+  const openCart  = useCart((s) => s.openCart)
   const { locale, setLocale, dir } = useTranslation()
   const isRtl = dir === 'rtl'
 
@@ -123,7 +124,12 @@ export function Navbar() {
             </nav>
 
             {/* Cart */}
-            <Link href="/cart" aria-label="Bag" className="relative text-[#6B5745] transition-colors hover:text-[#111111]">
+            <button
+              type="button"
+              onClick={openCart}
+              aria-label="Bag"
+              className="relative text-[#6B5745] transition-colors hover:text-[#111111]"
+            >
               <ShoppingBag size={18} strokeWidth={1.25} />
               <AnimatePresence>
                 {cartCount > 0 && (
@@ -135,7 +141,7 @@ export function Navbar() {
                   </motion.span>
                 )}
               </AnimatePresence>
-            </Link>
+            </button>
 
             {/* Mobile hamburger */}
             <button
@@ -216,13 +222,13 @@ export function Navbar() {
                     </button>
                   ))}
                 </div>
-                <Link
-                  href="/cart"
-                  onClick={closeMenu}
+                <button
+                  type="button"
+                  onClick={() => { openCart(); closeMenu() }}
                   className="btn-pill-dark w-full max-w-[280px] text-center"
                 >
                   View Bag {cartCount > 0 && `(${cartCount})`}
-                </Link>
+                </button>
               </div>
             </div>
           </motion.div>

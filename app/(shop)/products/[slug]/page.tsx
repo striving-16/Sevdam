@@ -5,6 +5,7 @@ import { getServerT } from '@/lib/i18n/server'
 import { formatPrice } from '@/lib/utils'
 import { DEMO_PRODUCTS } from '@/lib/demo-products'
 import { ProductPageClient } from '@/components/products/product-page-client'
+import { CATEGORY_LABELS } from '@/lib/validations'
 import type { Metadata } from 'next'
 
 interface Props {
@@ -30,17 +31,6 @@ export async function generateStaticParams() {
   return [...demoSlugs, ...dbSlugs]
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  SKINCARE: 'Skincare',
-  HAIRCARE: 'Hair Care',
-  PERFUMES: 'Perfumes',
-  MAKEUP:   'Makeup',
-  BODYCARE: 'Body Care',
-  MENCARE:  "Men's Care",
-  BABYCARE: 'Baby Care',
-  TOOLS:    'Beauty Tools',
-}
-
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params
   const { dir, locale } = await getServerT()
@@ -62,16 +52,6 @@ export default async function ProductPage({ params }: Props) {
     product.imageUrl,
     ...product.gallery.filter((g) => g !== product.imageUrl),
   ]
-
-  /* Fallback copy for product detail sections */
-  const benefits = product.benefits
-    ?? `Luxuriously formulated to deliver visible results from the very first use. Our advanced complex nourishes and perfects for a flawless, long-lasting finish that moves with you throughout the day.`
-
-  const ingredients = product.ingredients
-    ?? `Crafted from the finest cosmetic-grade ingredients, rigorously tested for safety and efficacy. Free from parabens, sulfates, and artificial fragrances.`
-
-  const usage = product.usage
-    ?? `Apply to clean, prepared skin using the included applicator or a soft brush. Build intensity as desired. For best results, use as part of your complete Besma Sevdam ritual.`
 
   return (
     <div className="min-h-screen bg-white" dir={dir}>
@@ -97,9 +77,6 @@ export default async function ProductPage({ params }: Props) {
         description={description}
         categoryLabel={categoryLabel}
         isRtl={isRtl}
-        benefits={benefits}
-        ingredients={ingredients}
-        usage={usage}
       />
 
       {/* ── Brand promise strip ─────────────────────────────────────────────── */}

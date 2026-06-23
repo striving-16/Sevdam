@@ -4,10 +4,12 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Plus, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from '@/lib/i18n/context'
 import { useCart } from '@/hooks/use-cart'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, cn } from '@/lib/utils'
+import { CATEGORY_LABELS } from '@/lib/validations'
 import type { Product, Variant } from '@/types'
 
 interface Props {
@@ -25,7 +27,7 @@ export function Offers({ products }: Props) {
       className="bg-[#111111] px-6 py-24 sm:px-10 sm:py-32 lg:px-14"
       dir={isRtl ? 'rtl' : 'ltr'}
     >
-      {/* Thin gold top border */}
+      {/* Gold top hairline */}
       <div
         className="mx-auto mb-16 max-w-screen-xl"
         style={{ height: 1, background: 'linear-gradient(to right, transparent, #C7A98B 35%, #C7A98B 65%, transparent)' }}
@@ -69,15 +71,15 @@ export function Offers({ products }: Props) {
           </motion.div>
         </div>
 
-        {/* Product grid */}
-        <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:gap-x-6 lg:grid-cols-4">
+        {/* Cards grid */}
+        <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-4 lg:gap-5">
           {products.slice(0, 4).map((product, i) => (
             <OfferCard key={product.id} product={product} index={i} />
           ))}
         </div>
       </div>
 
-      {/* Bottom gold hairline */}
+      {/* Gold bottom hairline */}
       <div
         className="mx-auto mt-16 max-w-screen-xl"
         style={{ height: 1, background: 'linear-gradient(to right, transparent, #C7A98B 35%, #C7A98B 65%, transparent)' }}
@@ -91,6 +93,7 @@ function OfferCard({ product, index }: { product: Product; index: number }) {
   const { locale } = useTranslation()
   const isAr       = locale === 'ar'
   const name       = (isAr && product.name_ar) ? product.name_ar : product.name_en
+  const categoryLabel = CATEGORY_LABELS[product.category] ?? product.category
 
   const hasVariants  = product.hasVariants && product.variants.length > 0
   const firstVariant = hasVariants ? product.variants[0] : null
@@ -101,11 +104,6 @@ function OfferCard({ product, index }: { product: Product; index: number }) {
   const displayImage = (selected?.image ?? null) || product.imageUrl
   const stock        = selected ? selected.stock : product.stock
   const soldOut      = stock === 0
-
-  const discount =
-    product.salePrice && product.price > product.salePrice
-      ? Math.round(((product.price - product.salePrice) / product.price) * 100)
-      : null
 
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault()
@@ -124,111 +122,124 @@ function OfferCard({ product, index }: { product: Product; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group"
+      className="group flex h-full flex-col overflow-hidden rounded-[28px] bg-[#1A1A1A] shadow-[0_2px_20px_rgba(0,0,0,0.3)]"
     >
-      <Link href={`/products/${product.slug}`} className="block">
-        <div
-          className="relative overflow-hidden"
-          style={{
-            aspectRatio: '3/4',
-            background: 'radial-gradient(ellipse 80% 70% at 50% 40%, #F0EAE0 0%, #E8E0D4 55%, #DDD5C8 100%)',
-          }}
-        >
+      {/* Image */}
+      <div className="relative aspect-[4/5] flex-shrink-0 overflow-hidden">
+        <Link href={`/products/${product.slug}`} className="absolute inset-0" tabIndex={-1} aria-label={name}>
           <Image
             src={displayImage}
             alt={name}
             fill
-            className="object-contain object-center p-4 transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
             sizes="(max-width: 640px) 50vw, 25vw"
             loading="lazy"
           />
+        </Link>
 
-          {/* Discount badge */}
-          {discount && (
-            <div className="absolute left-3 top-3 z-10">
-              <span className="block rounded-full bg-[#C7A98B] px-2.5 py-1 text-[8px] font-medium uppercase tracking-[0.15em] text-white">
-                -{discount}%
-              </span>
-            </div>
-          )}
+        {/* Floating + */}
+        {!soldOut && (
+          <button
+            type="button"
+            onClick={handleAdd}
+            aria-label="Add to bag"
+            className={cn(
+              'absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full shadow-md',
+              'transition-all duration-200',
+              added
+                ? 'bg-[#C7A98B] text-white'
+                : 'bg-white/90 text-[#111111] backdrop-blur-sm hover:bg-[#C7A98B] hover:text-white',
+            )}
+          >
+            {added ? <Check size={14} strokeWidth={2} /> : <Plus size={14} strokeWidth={2} />}
+          </button>
+        )}
 
-          {soldOut && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[2px]">
-              <span className="text-[9px] font-light uppercase tracking-[0.3em] text-[#8A8A8A]">Sold Out</span>
-            </div>
-          )}
+        {soldOut && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px]">
+            <span className="text-[9px] font-light uppercase tracking-[0.3em] text-white/70">Sold Out</span>
+          </div>
+        )}
+      </div>
 
-          {!soldOut && (
-            <div className="absolute inset-x-0 bottom-0 z-10 translate-y-full pb-4 text-center opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-              <div className="mx-3 bg-white/95 py-3 backdrop-blur-sm">
-                <button
-                  onClick={handleAdd}
-                  className="text-[9.5px] font-light uppercase tracking-[0.22em] text-[#111111] transition-colors hover:text-[#C7A98B]"
-                >
-                  {added ? '✓ Added' : 'Add to Bag'}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </Link>
+      {/* Card body */}
+      <div className="flex flex-1 flex-col px-4 pb-5 pt-4">
+        {/* Category */}
+        <p className="text-[7.5px] font-light uppercase tracking-[0.42em] text-[#C7A98B]">
+          {categoryLabel}
+        </p>
 
-      {/* Shade circles */}
-      {hasVariants && (
-        <div className="mt-3 flex items-center gap-1.5">
-          {product.variants.slice(0, 6).map((v) => (
-            <button
-              key={v.id}
-              title={v.shadeName}
-              onClick={(e) => { e.preventDefault(); setSelected(v) }}
-              className="flex-shrink-0 rounded-full transition-transform duration-200 hover:scale-110"
-              style={{
-                width: 13, height: 13,
-                backgroundColor: v.hexColor,
-                boxShadow: selected?.id === v.id
-                  ? `0 0 0 1.5px #111, 0 0 0 3px ${v.hexColor}`
-                  : '0 0 0 0.5px rgba(255,255,255,0.2)',
-              }}
-              aria-label={v.shadeName}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Info */}
-      <div className="mt-3 space-y-1">
+        {/* Name */}
         <Link href={`/products/${product.slug}`}>
-          <h3 className="font-display text-[clamp(14px,1.5vw,18px)] font-light italic leading-[1.25] text-white transition-colors hover:text-[#C7A98B]">
+          <h3 className="mt-2 line-clamp-2 font-display text-[clamp(14px,1.4vw,18px)] font-light italic leading-[1.25] text-white transition-colors hover:text-[#C7A98B]">
             {name}
           </h3>
         </Link>
 
-        {/* Price — original crossed out + sale price */}
-        <div className="flex items-baseline gap-2 pt-0.5">
+        {/* Price */}
+        <div className="mt-2 flex items-baseline gap-2">
           {product.salePrice ? (
             <>
-              <span className="text-[17px] font-light tracking-[0.02em] text-[#C7A98B]">
+              <span className="text-[16px] font-bold tracking-[0.01em] text-[#C7A98B]">
                 {formatPrice(product.salePrice)}
               </span>
-              <span className="text-[12px] font-light text-white/30 line-through">
+              <span className="text-[11px] font-light text-white/30 line-through">
                 {formatPrice(product.price)}
               </span>
             </>
           ) : (
-            <span className="text-[17px] font-light tracking-[0.02em] text-white">
+            <span className="text-[16px] font-bold tracking-[0.01em] text-white">
               {formatPrice(product.price)}
             </span>
           )}
         </div>
 
-        {!soldOut && (
-          <button
-            onClick={handleAdd}
-            className="mt-1.5 block text-[8.5px] font-light uppercase tracking-[0.22em] text-[#C7A98B] underline underline-offset-3 decoration-[#C7A98B]/40 transition-all hover:decoration-[#C7A98B] lg:hidden"
-          >
-            {added ? '✓ Added' : '+ Add to Bag'}
-          </button>
+        {/* Shade swatches */}
+        {hasVariants && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            {product.variants.slice(0, 6).map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                title={v.shadeName}
+                onClick={(e) => { e.preventDefault(); setSelected(v) }}
+                aria-label={v.shadeName}
+                aria-pressed={selected?.id === v.id}
+                className="flex-shrink-0 rounded-full transition-transform duration-200 hover:scale-110 focus:outline-none"
+                style={{
+                  width: 14,
+                  height: 14,
+                  backgroundColor: v.hexColor,
+                  boxShadow: selected?.id === v.id
+                    ? `0 0 0 1.5px #1A1A1A, 0 0 0 3px ${v.hexColor}`
+                    : '0 0 0 0.5px rgba(255,255,255,0.2)',
+                  transform: selected?.id === v.id ? 'scale(1.15)' : 'scale(1)',
+                }}
+              />
+            ))}
+          </div>
         )}
+
+        {/* Push CTA to bottom */}
+        <div className="flex-1" />
+
+        {/* Add to Bag */}
+        <button
+          type="button"
+          onClick={handleAdd}
+          disabled={soldOut}
+          className={cn(
+            'mt-4 w-full rounded-[12px] py-2.5 text-[8.5px] font-light uppercase tracking-[0.28em]',
+            'transition-all duration-300 active:scale-[0.98]',
+            soldOut
+              ? 'cursor-not-allowed bg-white/5 text-white/20'
+              : added
+              ? 'bg-[#C7A98B] text-white'
+              : 'bg-white/10 text-white hover:bg-[#C7A98B]',
+          )}
+        >
+          {soldOut ? 'Sold Out' : added ? '✓ Added' : 'Add to Bag'}
+        </button>
       </div>
     </motion.article>
   )

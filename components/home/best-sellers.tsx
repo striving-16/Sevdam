@@ -67,7 +67,7 @@ export function BestSellers({ products }: { products: Product[] }) {
         Magazine grid: first product is the featured hero (col-span-2 on desktop).
         Mobile: 2-column equal grid. Desktop: 5 columns — featured takes 2, rest take 1 each.
       */}
-      <div className="grid grid-cols-2 items-start gap-4 lg:grid-cols-5 lg:gap-5">
+      <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-5 lg:gap-5">
         {display.map((product, i) => (
           <ProductCard
             key={product.id}

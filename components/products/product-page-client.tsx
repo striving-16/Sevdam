@@ -15,21 +15,17 @@ interface Props {
   description:   string
   categoryLabel: string
   isRtl:        boolean
-  benefits:      string
-  ingredients:   string
-  usage:         string
 }
 
 export function ProductPageClient({
   product, allImages, name, description,
-  categoryLabel, isRtl, benefits, ingredients, usage,
+  categoryLabel, isRtl,
 }: Props) {
   const hasVariants   = product.hasVariants && product.variants.length > 0
   const firstVariant  = hasVariants ? product.variants[0] : null
 
   const [activeImage,    setActiveImage]    = useState(allImages[0] ?? product.imageUrl)
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(firstVariant)
-  const [activeTab,      setActiveTab]      = useState<'benefits' | 'usage' | 'ingredients'>('benefits')
 
   function selectVariant(v: Variant) {
     setSelectedVariant(v)
@@ -261,51 +257,6 @@ export function ProductPageClient({
         </div>
       </div>
 
-      {/* ── Product Details Tabs ────────────────────────────────────────────── */}
-      <div className="border-t border-[#EDE5DA] bg-[#FDF9F4]">
-        <div className="mx-auto max-w-screen-xl px-6 py-16 sm:px-10 lg:px-14">
-
-          {/* Tab bar */}
-          <div className="mb-10 flex border-b border-[#EDE5DA]">
-            {([
-              { key: 'benefits',    label: 'Benefits'     },
-              { key: 'usage',       label: 'How to Use'   },
-              { key: 'ingredients', label: 'Ingredients'  },
-            ] as const).map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={[
-                  'mr-8 pb-4 text-[10px] font-light uppercase tracking-[0.35em] transition-all duration-200',
-                  activeTab === tab.key
-                    ? 'border-b-2 border-[#C9A96E] text-[#1A1714]'
-                    : 'text-[#9E8E80] hover:text-[#1A1714]',
-                ].join(' ')}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Tab content */}
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25 }}
-              className="max-w-2xl"
-            >
-              <p className="text-[14px] font-light leading-[2] text-[#6B5745]">
-                {activeTab === 'benefits'    && benefits}
-                {activeTab === 'usage'       && usage}
-                {activeTab === 'ingredients' && ingredients}
-              </p>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
     </>
   )
 }

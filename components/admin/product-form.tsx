@@ -379,9 +379,9 @@ export function ProductForm({ product }: { product?: Product }) {
       isBestseller,
       isOffer,
       salePrice:      null,
-      benefits:       (formData.get('benefits') as string) || null,
-      ingredients:    (formData.get('ingredients') as string) || null,
-      usage:          (formData.get('usage') as string) || null,
+      benefits:       null,
+      ingredients:    null,
+      usage:          null,
     }
 
     try {
@@ -545,51 +545,6 @@ export function ProductForm({ product }: { product?: Product }) {
           placeholder="وصف المنتج بالعربية…"
           rows={3}
           className="resize-none rounded-lg border-neutral-200 text-[14px] text-right focus-visible:ring-neutral-300"
-        />
-      </div>
-
-      {/* Benefits */}
-      <div className="space-y-2">
-        <Label htmlFor="benefits" className="text-[12px] font-light tracking-wide text-neutral-600">
-          Benefits <span className="text-[10px] text-neutral-400">(optional)</span>
-        </Label>
-        <Textarea
-          id="benefits"
-          name="benefits"
-          defaultValue={product?.benefits ?? ''}
-          placeholder="Key product benefits shown on the product page…"
-          rows={3}
-          className="resize-none rounded-lg border-neutral-200 text-[14px] focus-visible:ring-neutral-300"
-        />
-      </div>
-
-      {/* Usage */}
-      <div className="space-y-2">
-        <Label htmlFor="usage" className="text-[12px] font-light tracking-wide text-neutral-600">
-          How to Use <span className="text-[10px] text-neutral-400">(optional)</span>
-        </Label>
-        <Textarea
-          id="usage"
-          name="usage"
-          defaultValue={product?.usage ?? ''}
-          placeholder="Application instructions…"
-          rows={3}
-          className="resize-none rounded-lg border-neutral-200 text-[14px] focus-visible:ring-neutral-300"
-        />
-      </div>
-
-      {/* Ingredients */}
-      <div className="space-y-2">
-        <Label htmlFor="ingredients" className="text-[12px] font-light tracking-wide text-neutral-600">
-          Ingredients <span className="text-[10px] text-neutral-400">(optional)</span>
-        </Label>
-        <Textarea
-          id="ingredients"
-          name="ingredients"
-          defaultValue={product?.ingredients ?? ''}
-          placeholder="Full INCI ingredient list…"
-          rows={3}
-          className="resize-none rounded-lg border-neutral-200 text-[14px] focus-visible:ring-neutral-300"
         />
       </div>
 

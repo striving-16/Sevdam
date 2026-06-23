@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Plus, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCart } from '@/hooks/use-cart'
 import { useTranslation } from '@/lib/i18n/context'
@@ -41,9 +42,8 @@ export function ProductCard({
   const [added,    setAdded]    = useState(false)
 
   const displayImage = (selected?.image ?? null) || product.imageUrl
-  const stock        = selected ? selected.stock : product.stock
-  const soldOut      = stock === 0
-  const isEditorial  = mode === 'editorial'
+  const stock   = selected ? selected.stock : product.stock
+  const soldOut = stock === 0
 
   // Max swatches shown on the card
   const maxSwatches = featured ? 8 : 6
@@ -72,9 +72,8 @@ export function ProductCard({
       viewport={{ once: true, margin: '-30px' }}
       transition={{ duration: 0.6, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        'group flex flex-col overflow-hidden rounded-[32px]',
+        'group flex h-full flex-col overflow-hidden rounded-[32px]',
         'bg-[#F3EFE9]',
-        // Ghost shadow — almost invisible, product is the hero
         'shadow-[0_1px_4px_rgba(0,0,0,0.03),0_6px_28px_rgba(0,0,0,0.045)]',
         'transition-[transform,box-shadow] duration-500',
         'hover:-translate-y-1.5 hover:shadow-[0_20px_70px_rgba(0,0,0,0.09)]',
@@ -82,45 +81,49 @@ export function ProductCard({
       )}
     >
       {/* ─────────────────── IMAGE — the hero ─────────────────── */}
-      <Link
-        href={`/products/${product.slug}`}
-        tabIndex={-1}
-        aria-label={name}
-        className={cn(
-          'relative block flex-shrink-0 overflow-hidden',
-          // Mobile always portrait 5:6. Featured desktop upgrades to 3:4 (wider slot)
-          featured ? 'aspect-[5/6] lg:aspect-[3/4]' : 'aspect-[5/6]',
-        )}
-      >
-        {/*
-          Warm radial spotlight: mimics professional beauty product photography.
-          mix-blend-multiply on the Image erases white product backgrounds so the
-          product appears to float inside this glow.
-        */}
-        <div
-          aria-hidden
+      <div className={cn(
+        'relative flex-shrink-0 overflow-hidden',
+        featured ? 'aspect-[5/6] lg:aspect-[3/4]' : 'aspect-[5/6]',
+      )}>
+        <Link
+          href={`/products/${product.slug}`}
+          tabIndex={-1}
+          aria-label={name}
           className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 74% 82% at 50% 43%, #E2D5C6 0%, #EDE5D8 38%, #F3EFE9 70%)',
-          }}
-        />
+        >
+          <Image
+            src={displayImage}
+            alt={name}
+            fill
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+            sizes={
+              featured
+                ? '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 40vw'
+                : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw'
+            }
+            loading="lazy"
+          />
+        </Link>
 
-        {/* scale-[1.06] at rest trims excessive white padding in the source photo */}
-        <Image
-          src={displayImage}
-          alt={name}
-          fill
-          className="relative scale-[1.06] object-contain mix-blend-multiply transition-transform duration-700 ease-out group-hover:scale-[1.12]"
-          sizes={
-            featured
-              ? '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 40vw'
-              : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw'
-          }
-          loading="lazy"
-        />
+        {/* Floating + button */}
+        {!soldOut && (
+          <button
+            type="button"
+            onClick={handleAdd}
+            aria-label="Add to bag"
+            className={cn(
+              'absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full shadow-md',
+              'transition-all duration-200',
+              added
+                ? 'bg-[#111111] text-white'
+                : 'bg-white/90 text-[#111111] backdrop-blur-sm hover:bg-[#111111] hover:text-white',
+            )}
+          >
+            {added ? <Check size={14} strokeWidth={2} /> : <Plus size={14} strokeWidth={2} />}
+          </button>
+        )}
 
-        {/* Sold out — minimal, elegant */}
+        {/* Sold out */}
         {soldOut && (
           <div className="absolute inset-0 flex items-end justify-center pb-5">
             <span className="rounded-full bg-white/60 px-3.5 py-1.5 text-[7.5px] font-light uppercase tracking-[0.38em] text-[#7A7A7A] backdrop-blur-sm">
@@ -128,7 +131,7 @@ export function ProductCard({
             </span>
           </div>
         )}
-      </Link>
+      </div>
 
       {/* ─────────────────── BODY ─────────────────────────────── */}
       <div
@@ -216,36 +219,22 @@ export function ProductCard({
         <div className="flex-1" />
 
         {/* CTA */}
-        {isEditorial ? (
-          <Link
-            href={`/products/${product.slug}`}
-            className={cn(
-              'mt-5 block rounded-full border border-[#C4B9AC] py-3 text-center',
-              'text-[9px] font-light uppercase tracking-[0.34em] text-[#111111]',
-              'transition-all duration-300',
-              'hover:border-[#111111] hover:bg-[#111111] hover:text-white',
-            )}
-          >
-            Discover →
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={handleAdd}
-            disabled={soldOut}
-            className={cn(
-              'mt-4 w-full rounded-[14px] py-3 text-[9px] font-light uppercase tracking-[0.3em]',
-              'transition-all duration-300 active:scale-[0.98]',
-              soldOut
-                ? 'cursor-not-allowed bg-neutral-100 text-neutral-400'
-                : added
-                ? 'bg-[#111111] text-white'
-                : 'bg-[#C7A98B] text-white hover:bg-[#B8967A]',
-            )}
-          >
-            {soldOut ? 'Sold Out' : added ? '✓ Added to Bag' : 'Add to Bag'}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handleAdd}
+          disabled={soldOut}
+          className={cn(
+            'mt-4 w-full rounded-[14px] py-3 text-[9px] font-light uppercase tracking-[0.3em]',
+            'transition-all duration-300 active:scale-[0.98]',
+            soldOut
+              ? 'cursor-not-allowed bg-neutral-100 text-neutral-400'
+              : added
+              ? 'bg-[#111111] text-white'
+              : 'bg-[#C7A98B] text-white hover:bg-[#B8967A]',
+          )}
+        >
+          {soldOut ? 'Sold Out' : added ? '✓ Added' : 'Add to Bag'}
+        </button>
       </div>
     </motion.article>
   )
