@@ -9,7 +9,7 @@ import { useTranslation } from '@/lib/i18n/context'
 import { useCart } from '@/hooks/use-cart'
 import { formatPrice } from '@/lib/utils'
 import { DEMO_NEW_ARRIVALS } from '@/lib/demo-products'
-import type { Product } from '@/types'
+import type { Product, Variant } from '@/types'
 
 interface Props {
   products?: Product[]
@@ -55,7 +55,7 @@ export function NewArrivals({ products }: Props) {
         </motion.p>
       </div>
 
-      {/* Product grid — alternating large/small portrait format */}
+      {/* Product grid */}
       <div className="mx-auto max-w-screen-xl">
         <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:gap-x-6 lg:grid-cols-4">
           {display.map((product, i) => (
@@ -83,24 +83,44 @@ export function NewArrivals({ products }: Props) {
   )
 }
 
-/* ── New Arrival card — slightly different layout, taller aspect ─────────── */
+/* ── New Arrival card ────────────────────────────────────────────────────── */
 function ArrivalCard({ product, index }: { product: Product; index: number }) {
-  const [added, setAdded] = useState(false)
-  const addItem = useCart((s) => s.addItem)
+  const addItem    = useCart((s) => s.addItem)
   const { locale } = useTranslation()
-  const isAr = locale === 'ar'
-  const soldOut = product.stock === 0
-  const name = (isAr && product.name_ar) ? product.name_ar : product.name_en
+  const isAr       = locale === 'ar'
+  const name       = (isAr && product.name_ar) ? product.name_ar : product.name_en
+
+  const hasVariants  = product.hasVariants && product.variants.length > 0
+  const firstVariant = hasVariants ? product.variants[0] : null
+
+  const [selected, setSelected] = useState<Variant | null>(firstVariant)
+  const [added,    setAdded]    = useState(false)
+
+  const displayImage = (selected?.image ?? null) || product.imageUrl
+  const stock        = selected ? selected.stock : product.stock
+  const soldOut      = stock === 0
+
+  function handleShadeClick(e: React.MouseEvent, v: Variant) {
+    e.preventDefault()
+    e.stopPropagation()
+    setSelected(v)
+  }
 
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
     if (soldOut) return
-    addItem(product)
-    toast.success(name, { description: 'Added to your bag' })
+    addItem(product, selected, 1)
+    const shade = selected ? ` — ${selected.shadeName}` : ''
+    toast.success(`${name}${shade}`, { description: 'Added to your bag' })
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
+
+  const categoryLabel =
+    product.category === 'SKINCARE' ? 'Skincare'
+    : product.category === 'TOOLS' ? 'Beauty Tools'
+    : 'Makeup'
 
   return (
     <motion.article
@@ -116,7 +136,7 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
           style={{ aspectRatio: '2/3' }}
         >
           <Image
-            src={product.imageUrl}
+            src={displayImage}
             alt={name}
             fill
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
@@ -134,6 +154,14 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
             </span>
           </div>
 
+          {soldOut && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[2px]">
+              <span className="text-[9px] font-light uppercase tracking-[0.3em] text-[#9E8E80]">
+                Sold Out
+              </span>
+            </div>
+          )}
+
           {!soldOut && (
             <div className="absolute inset-x-0 bottom-0 z-10 translate-y-full pb-5 text-center opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
               <div className="mx-4 bg-white/90 py-3 backdrop-blur-sm">
@@ -149,21 +177,56 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
         </div>
       </Link>
 
+      {/* Shade circles */}
+      {hasVariants && (
+        <div className="mt-3 flex items-center gap-1.5">
+          {product.variants.slice(0, 8).map((v) => (
+            <button
+              key={v.id}
+              title={v.shadeName}
+              onClick={(e) => handleShadeClick(e, v)}
+              className="relative flex-shrink-0 rounded-full transition-transform duration-200 hover:scale-110 focus:outline-none"
+              style={{
+                width: 14,
+                height: 14,
+                backgroundColor: v.hexColor,
+                boxShadow:
+                  selected?.id === v.id
+                    ? `0 0 0 1.5px white, 0 0 0 3px ${v.hexColor}`
+                    : '0 0 0 0.5px rgba(0,0,0,0.12)',
+              }}
+              aria-label={v.shadeName}
+              aria-pressed={selected?.id === v.id}
+            />
+          ))}
+          {product.variants.length > 8 && (
+            <Link
+              href={`/products/${product.slug}`}
+              className="text-[9px] font-light text-[#9E8E80] hover:text-[#C9A96E]"
+            >
+              +{product.variants.length - 8}
+            </Link>
+          )}
+        </div>
+      )}
+
       {/* Info */}
       <div className="mt-4 space-y-1" dir={isAr ? 'rtl' : 'ltr'}>
         <p className="text-[8.5px] font-light uppercase tracking-[0.28em] text-[#C9A96E]">
-          {product.category === 'SKINCARE' ? 'Skincare' : product.category === 'TOOLS' ? 'Beauty Tools' : 'Makeup'}
+          {categoryLabel}
         </p>
         <Link href={`/products/${product.slug}`}>
           <h3 className="font-display text-[clamp(14px,1.5vw,18px)] font-light italic leading-[1.3] text-[#1A1714] transition-colors hover:text-[#C9A96E]">
             {name}
           </h3>
         </Link>
+        {hasVariants && selected && (
+          <p className="text-[10px] font-light text-[#9E8E80]">{selected.shadeName}</p>
+        )}
         <p className="font-display text-[clamp(13px,1.4vw,16px)] font-light italic text-[#9E8E80]">
           {formatPrice(product.price)}
         </p>
 
-        {/* Mobile add button */}
         {!soldOut && (
           <button
             onClick={handleAdd}

@@ -14,6 +14,10 @@ async function requireAdmin() {
   if (!session?.user) redirect('/login')
 }
 
+const WITH_VARIANTS = {
+  variants: { orderBy: { sortOrder: 'asc' as const } },
+}
+
 export async function getProducts(search?: string, category?: string): Promise<Product[]> {
   return db.product.findMany({
     where: {
@@ -30,21 +34,34 @@ export async function getProducts(search?: string, category?: string): Promise<P
         category ? { category: category as Product['category'] } : {},
       ],
     },
+    include: WITH_VARIANTS,
     orderBy: { createdAt: 'desc' },
   }) as unknown as Promise<Product[]>
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  return db.product.findUnique({ where: { id } }) as unknown as Promise<Product | null>
+  return db.product.findUnique({
+    where: { id },
+    include: WITH_VARIANTS,
+  }) as unknown as Promise<Product | null>
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  return db.product.findUnique({ where: { slug } }) as unknown as Promise<Product | null>
+  return db.product.findUnique({
+    where: { slug },
+    include: WITH_VARIANTS,
+  }) as unknown as Promise<Product | null>
 }
 
 export async function getFeaturedProducts(limit = 4): Promise<Product[]> {
   return db.product.findMany({
-    where: { stock: { gt: 0 } },
+    where: {
+      OR: [
+        { hasVariants: false, stock: { gt: 0 } },
+        { hasVariants: true, variants: { some: { stock: { gt: 0 } } } },
+      ],
+    },
+    include: WITH_VARIANTS,
     orderBy: [{ isBestseller: 'desc' }, { createdAt: 'desc' }],
     take: limit,
   }) as unknown as Promise<Product[]>
@@ -71,6 +88,12 @@ export async function updateProduct(id: string, input: Partial<ProductInput>) {
   revalidatePath('/')
   revalidatePath('/admin/products')
   return product
+}
+
+export async function updateProductGallery(id: string, gallery: string[]): Promise<void> {
+  await requireAdmin()
+  await db.product.update({ where: { id }, data: { gallery } })
+  revalidatePath('/products')
 }
 
 export async function deleteProduct(id: string) {

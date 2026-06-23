@@ -7,94 +7,106 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/hooks/use-cart'
 import { formatPrice } from '@/lib/utils'
-import type { Product } from '@/types'
+import type { Product, Variant } from '@/types'
 
-interface AddToCartButtonProps {
+interface Props {
   product: Product
+  selectedVariant?: Variant | null
 }
 
-export function AddToCartButton({ product }: AddToCartButtonProps) {
+export function AddToCartButton({ product, selectedVariant = null }: Props) {
   const [quantity, setQuantity] = useState(1)
-  const [added, setAdded] = useState(false)
+  const [added, setAdded]       = useState(false)
   const addItem = useCart((s) => s.addItem)
 
-  const soldOut = product.stock === 0
-  const maxQty = Math.min(product.stock, 10)
+  const variant    = selectedVariant
+  const stock      = variant ? variant.stock : product.stock
+  const soldOut    = stock === 0
+  const needsShade = product.hasVariants && !variant
+  const maxQty     = Math.min(stock, 10)
 
   function handleAdd() {
-    if (soldOut) return
-    addItem(product, quantity)
+    if (soldOut || needsShade) return
+    addItem(product, variant, quantity)
     setAdded(true)
-    toast.success(`${product.name_en} added to cart`, {
+    const shadePart = variant ? ` — ${variant.shadeName}` : ''
+    toast.success(`${product.name_en}${shadePart}`, {
       description: `${quantity} × ${formatPrice(product.price)}`,
     })
-    setTimeout(() => setAdded(false), 2000)
+    setTimeout(() => setAdded(false), 2200)
   }
 
   return (
     <div className="space-y-4">
       {/* Quantity selector */}
-      {!soldOut && (
-        <div className="flex items-center gap-3">
-          <span className="text-[12px] tracking-wide text-neutral-500">Qty</span>
-          <div className="flex items-center rounded-lg border border-neutral-200">
+      {!soldOut && !needsShade && (
+        <div className="flex items-center gap-4">
+          <span className="text-[11px] font-light uppercase tracking-[0.18em] text-[#9E8E80]">Qty</span>
+          <div className="flex items-center rounded-full border border-[#EDE5DA]">
             <button
+              type="button"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               disabled={quantity <= 1}
-              className="flex h-9 w-9 items-center justify-center text-neutral-500 transition-colors hover:text-neutral-900 disabled:opacity-30"
+              className="flex h-10 w-10 items-center justify-center text-[#9E8E80] transition-colors hover:text-[#1A1714] disabled:opacity-30"
             >
-              <Minus size={13} />
+              <Minus size={12} />
             </button>
-            <span className="w-8 text-center text-[14px] font-light text-neutral-900">
+            <span className="w-8 text-center text-[15px] font-light text-[#1A1714]">
               {quantity}
             </span>
             <button
+              type="button"
               onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
               disabled={quantity >= maxQty}
-              className="flex h-9 w-9 items-center justify-center text-neutral-500 transition-colors hover:text-neutral-900 disabled:opacity-30"
+              className="flex h-10 w-10 items-center justify-center text-[#9E8E80] transition-colors hover:text-[#1A1714] disabled:opacity-30"
             >
-              <Plus size={13} />
+              <Plus size={12} />
             </button>
           </div>
+          {stock <= 5 && stock > 0 && (
+            <span className="text-[11px] font-light italic text-[#C9A96E]">
+              Only {stock} left
+            </span>
+          )}
         </div>
       )}
 
-      {/* Add to cart */}
-      <Button
+      {/* Add to Bag */}
+      <button
+        type="button"
         onClick={handleAdd}
-        disabled={soldOut}
-        className={`h-12 w-full rounded-full text-[13px] tracking-wide transition-all duration-300 ${
-          soldOut
-            ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-            : 'bg-neutral-900 text-white hover:bg-neutral-700'
-        }`}
+        disabled={soldOut || needsShade}
+        className={[
+          'btn-pill-dark w-full flex items-center justify-center gap-2.5',
+          (soldOut || needsShade) && 'opacity-40 cursor-not-allowed',
+        ].join(' ')}
       >
         <AnimatePresence mode="wait" initial={false}>
           {added ? (
             <motion.span
               key="added"
-              initial={{ opacity: 0, y: 6 }}
+              initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
+              exit={{ opacity: 0, y: -5 }}
               className="flex items-center gap-2"
             >
-              <Check size={14} />
-              Added to Cart
+              <Check size={14} strokeWidth={2} />
+              Added to Bag
             </motion.span>
           ) : (
             <motion.span
               key="add"
-              initial={{ opacity: 0, y: 6 }}
+              initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
+              exit={{ opacity: 0, y: -5 }}
               className="flex items-center gap-2"
             >
               <ShoppingBag size={14} strokeWidth={1.5} />
-              {soldOut ? 'Sold Out' : 'Add to Cart'}
+              {soldOut ? 'Sold Out' : needsShade ? 'Select a Shade' : 'Add to Bag'}
             </motion.span>
           )}
         </AnimatePresence>
-      </Button>
+      </button>
     </div>
   )
 }

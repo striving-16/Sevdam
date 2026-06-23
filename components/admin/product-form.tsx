@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Loader2, Upload, X, Link as LinkIcon, Star } from 'lucide-react'
+import { Loader2, Upload, X, Link as LinkIcon, Star, Palette, Plus } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -137,6 +137,91 @@ function ImageUpload({
   )
 }
 
+// ── Gallery URL list ─────────────────────────────────────────────────────────
+
+function GalleryEditor({
+  urls,
+  onChange,
+}: {
+  urls: string[]
+  onChange: (urls: string[]) => void
+}) {
+  const [input, setInput] = useState('')
+
+  function addUrl() {
+    const trimmed = input.trim()
+    if (!trimmed || urls.includes(trimmed)) return
+    onChange([...urls, trimmed])
+    setInput('')
+  }
+
+  function removeUrl(idx: number) {
+    onChange(urls.filter((_, i) => i !== idx))
+  }
+
+  return (
+    <div className="space-y-2">
+      {urls.map((url, i) => (
+        <div key={i} className="flex items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50 px-3 py-2">
+          <img src={url} alt="" className="h-10 w-10 flex-shrink-0 rounded object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+          <span className="min-w-0 flex-1 truncate text-[11px] font-light text-neutral-500">{url}</span>
+          <button type="button" onClick={() => removeUrl(i)} className="flex-shrink-0 text-neutral-300 hover:text-red-500">
+            <X size={12} />
+          </button>
+        </div>
+      ))}
+      <div className="flex gap-2">
+        <Input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addUrl())}
+          placeholder="https://... (paste gallery image URL)"
+          className="h-9 rounded-lg border-neutral-200 text-[13px]"
+        />
+        <Button type="button" onClick={addUrl} disabled={!input.trim()} className="h-9 flex-shrink-0 rounded-full bg-neutral-900 px-3 text-white hover:bg-neutral-700 disabled:opacity-50">
+          <Plus size={13} />
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// ── Variants toggle ──────────────────────────────────────────────────────────
+
+function VariantsToggle({
+  value,
+  onChange,
+}: {
+  value: boolean
+  onChange: (v: boolean) => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!value)}
+      className={[
+        'flex w-full items-center justify-between rounded-xl border px-4 py-3.5 transition-all duration-200',
+        value
+          ? 'border-[#C9A96E]/40 bg-[#FDF9F4]'
+          : 'border-neutral-200 bg-white hover:border-neutral-300',
+      ].join(' ')}
+    >
+      <div className={`flex items-center gap-3 ${value ? 'text-[#8B6E3E]' : 'text-neutral-700'}`}>
+        <Palette size={15} strokeWidth={1.5} className={value ? 'text-[#C9A96E]' : 'text-neutral-400'} />
+        <div className="text-left">
+          <p className="text-[13px] font-normal">Has Shades / Variants</p>
+          <p className={`text-[11px] font-light ${value ? 'text-[#9E8E80]' : 'text-neutral-400'}`}>
+            {value ? 'Stock managed per shade — use the Shades panel below' : 'Single stock quantity, no shade options'}
+          </p>
+        </div>
+      </div>
+      <div className={['relative h-5 w-9 rounded-full transition-colors duration-200', value ? 'bg-[#C9A96E]' : 'bg-neutral-200'].join(' ')}>
+        <div className={['absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-200', value ? 'left-4' : 'left-0.5'].join(' ')} />
+      </div>
+    </button>
+  )
+}
+
 // ── Best seller toggle ────────────────────────────────────────────────────────
 
 function BestsellerToggle({
@@ -196,8 +281,10 @@ export function ProductForm({ product }: { product?: Product }) {
   const isEdit = !!product
 
   const [imageUrl, setImageUrl]       = useState(product?.imageUrl ?? '')
+  const [gallery, setGallery]         = useState<string[]>(product?.gallery ?? [])
   const [nameValue, setNameValue]     = useState(product?.name_en ?? '')
   const [isBestseller, setBestseller] = useState(product?.isBestseller ?? false)
+  const [hasVariants, setHasVariants] = useState(product?.hasVariants ?? false)
 
   async function formAction(_prev: State, formData: FormData): Promise<State> {
     if (!imageUrl) return { error: 'Please add a product image' }
@@ -209,8 +296,10 @@ export function ProductForm({ product }: { product?: Product }) {
       description_en: formData.get('description_en') as string,
       description_ar: (formData.get('description_ar') as string) || '',
       price:          Number(formData.get('price')),
-      stock:          Number(formData.get('stock')),
+      stock:          hasVariants ? 0 : Number(formData.get('stock')),
       imageUrl,
+      gallery,
+      hasVariants,
       category:       ((formData.get('category') as string) || 'SKINCARE') as ProductCategory,
       brand:          (formData.get('brand') as string) || null,
       tags:           [] as string[],
@@ -392,6 +481,27 @@ export function ProductForm({ product }: { product?: Product }) {
           rows={3}
           className="resize-none rounded-lg border-neutral-200 text-[14px] text-right focus-visible:ring-neutral-300"
         />
+      </div>
+
+      {/* Gallery */}
+      <div className="space-y-2">
+        <Label className="text-[12px] font-light tracking-wide text-neutral-600">
+          Gallery Images <span className="text-[10px] text-neutral-400">(optional — shown as thumbnails on product page)</span>
+        </Label>
+        <GalleryEditor urls={gallery} onChange={setGallery} />
+      </div>
+
+      {/* Has Variants toggle */}
+      <div className="space-y-2">
+        <Label className="text-[12px] font-light tracking-wide text-neutral-600">
+          Product Type
+        </Label>
+        <VariantsToggle value={hasVariants} onChange={setHasVariants} />
+        {hasVariants && (
+          <p className="text-[11px] font-light text-[#C9A96E]">
+            Stock quantity above will be ignored — stock is tracked per shade in the Shades panel.
+          </p>
+        )}
       </div>
 
       {/* Best seller toggle */}

@@ -2,7 +2,7 @@
 
 import { whatsAppUrl } from '@/lib/config'
 import { formatPrice } from '@/lib/utils'
-import type { Product } from '@/types'
+import type { Product, Variant } from '@/types'
 
 function WhatsAppIcon() {
   return (
@@ -12,22 +12,23 @@ function WhatsAppIcon() {
   )
 }
 
-export function ProductWhatsAppButton({
-  product,
-  className = '',
-}: {
+interface Props {
   product: Product
+  selectedVariant?: Variant | null
   className?: string
-}) {
-  const message = `Hi! I'd like to order: ${product.name_en} — ${formatPrice(product.price)}`
+}
+
+export function ProductWhatsAppButton({ product, selectedVariant = null, className = '' }: Props) {
+  const shadePart = selectedVariant ? ` (Shade: ${selectedVariant.shadeName})` : ''
+  const message   = `Hi! I'd like to order: ${product.name_en}${shadePart} — ${formatPrice(product.price)}`
 
   return (
     <a
       href={whatsAppUrl(message)}
       target="_blank"
       rel="noopener noreferrer"
-      className={`flex w-full items-center justify-center gap-2.5 rounded-full py-3.5 text-[12px] font-normal uppercase text-white transition-all duration-300 hover:brightness-110 hover:shadow-[0_4px_20px_rgba(37,211,102,0.3)] ${className}`}
-      style={{ backgroundColor: '#25D366', letterSpacing: '0.08em' }}
+      className={`flex w-full items-center justify-center gap-2.5 rounded-full py-3.5 text-[12px] font-light uppercase tracking-[0.12em] text-white transition-all duration-300 hover:brightness-110 hover:shadow-[0_4px_20px_rgba(37,211,102,0.3)] ${className}`}
+      style={{ backgroundColor: '#25D366' }}
     >
       <WhatsAppIcon />
       Order on WhatsApp

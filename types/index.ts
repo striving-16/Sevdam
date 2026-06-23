@@ -8,6 +8,17 @@ export type ProductCategory =
   | 'BABYCARE'
   | 'TOOLS'
 
+export type Variant = {
+  id: string
+  productId: string
+  shadeName: string
+  hexColor: string
+  image: string | null
+  stock: number
+  sku: string | null
+  sortOrder: number
+}
+
 export type Product = {
   id: string
   name_en: string
@@ -16,8 +27,11 @@ export type Product = {
   description_en: string
   description_ar: string
   price: number
-  stock: number
+  stock: number       // Used when hasVariants = false
   imageUrl: string
+  gallery: string[]
+  hasVariants: boolean
+  variants: Variant[]
   category: ProductCategory
   brand?: string | null
   tags: string[]
@@ -40,9 +54,12 @@ export type OrderItem = {
   id: string
   orderId: string
   productId: string
+  variantId?: string | null
+  variantName?: string | null
   quantity: number
   price: number
   product?: Product
+  variant?: Variant | null
 }
 
 export type Order = {
@@ -82,5 +99,6 @@ export type AdminUser = {
 
 export type CartItem = {
   product: Product
+  variant: Variant | null
   quantity: number
 }

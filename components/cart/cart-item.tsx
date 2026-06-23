@@ -10,9 +10,10 @@ import type { CartItem as CartItemType } from '@/types'
 
 export function CartItem({ item }: { item: CartItemType }) {
   const { removeItem, updateQuantity } = useCart()
-  const { product, quantity } = item
+  const { product, variant, quantity } = item
   const { t, dir } = useTranslation()
   const isRtl = dir === 'rtl'
+  const variantId = variant?.id ?? null
 
   return (
     <motion.div
@@ -39,10 +40,16 @@ export function CartItem({ item }: { item: CartItemType }) {
         <div className={`flex w-full items-start justify-between gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
           <div className={isRtl ? 'text-right' : ''}>
             <p className="text-[13px] font-normal text-[#1C1917] line-clamp-1">{product.name_en}</p>
+            {variant && (
+              <div className="mt-0.5 flex items-center gap-1.5">
+                <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: variant.hexColor }} />
+                <span className="text-[11px] font-light text-[#9E8E80]">{variant.shadeName}</span>
+              </div>
+            )}
             <p className="mt-0.5 text-[13px] font-light text-[#78716C]">{formatPrice(product.price)}</p>
           </div>
           <button
-            onClick={() => removeItem(product.id)}
+            onClick={() => removeItem(product.id, variantId ?? undefined)}
             aria-label={t.cart.remove}
             className="shrink-0 rounded-md p-1 text-[#78716C] transition-colors hover:text-[#1C1917]"
           >
@@ -53,15 +60,15 @@ export function CartItem({ item }: { item: CartItemType }) {
         {/* Quantity control */}
         <div className={`flex items-center gap-0 ${isRtl ? 'flex-row-reverse' : ''}`}>
           <button
-            onClick={() => updateQuantity(product.id, quantity - 1)}
+            onClick={() => updateQuantity(product.id, variantId, quantity - 1)}
             className="flex h-7 w-7 items-center justify-center rounded-md border border-[#E8E0D8] text-[#78716C] transition-colors hover:text-[#1C1917]"
           >
             <Minus size={11} />
           </button>
           <span className="w-8 text-center text-[13px] font-light text-[#1C1917]">{quantity}</span>
           <button
-            onClick={() => updateQuantity(product.id, quantity + 1)}
-            disabled={quantity >= product.stock}
+            onClick={() => updateQuantity(product.id, variantId, quantity + 1)}
+            disabled={quantity >= (variant?.stock ?? product.stock)}
             className="flex h-7 w-7 items-center justify-center rounded-md border border-[#E8E0D8] text-[#78716C] transition-colors hover:text-[#1C1917] disabled:opacity-30"
           >
             <Plus size={11} />
