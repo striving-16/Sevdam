@@ -83,27 +83,31 @@ export function FounderStory() {
           </div>
         </motion.div>
 
-        {/* RIGHT — founder portrait */}
-        <div className="relative order-first h-[60vw] min-h-[340px] lg:order-last lg:h-auto">
-          {/* Grain texture */}
-          <div className="grain absolute inset-0 z-10" />
-
-          {/* Atmospheric warm glow */}
+        {/* RIGHT — editorial brand spread */}
+        <div
+          className="relative order-first h-[80vw] min-h-[380px] lg:order-last lg:h-auto"
+          style={{ backgroundColor: '#FAFAF8' }}
+        >
+          {/* Subtle warm vignette at the edges — frames the white-bg image */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 z-[2]"
+            className="pointer-events-none absolute inset-0 z-10"
             style={{
-              background: 'radial-gradient(ellipse 60% 55% at 45% 35%, rgba(201,169,110,0.10) 0%, transparent 65%)',
+              background: [
+                'linear-gradient(to right, rgba(231,225,218,0.35) 0%, transparent 18%)',
+                'linear-gradient(to bottom, rgba(231,225,218,0.20) 0%, transparent 15%)',
+                'linear-gradient(to bottom, transparent 80%, rgba(231,225,218,0.25) 100%)',
+              ].join(', '),
             }}
           />
 
-          {/* Parallax image */}
-          <motion.div style={{ y: imageY }} className="absolute inset-0">
+          {/* Editorial image — full composition with products */}
+          <motion.div style={{ y: imageY }} className="absolute inset-0 flex items-center justify-center">
             <Image
-              src="/images/founder.jpeg"
-              alt="Besma Sevdam — Founder"
+              src="/images/founder-story.jpeg"
+              alt="Besma Sevdam — Founder with full product collection"
               fill
-              className="object-cover object-top"
+              className="object-contain object-center"
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </motion.div>
@@ -114,9 +118,9 @@ export function FounderStory() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.55, duration: 0.7 }}
-            className="absolute bottom-8 left-8 z-20 max-w-[190px] bg-white/90 px-5 py-4 shadow-[0_8px_32px_rgba(26,23,20,0.10)] backdrop-blur-sm"
+            className="absolute bottom-6 right-6 z-20 max-w-[180px] bg-[#111111]/90 px-5 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-sm lg:bottom-10 lg:right-10"
           >
-            <p className="font-display text-[12px] italic leading-[1.6] text-[#111111]">
+            <p className="font-display text-[12px] italic leading-[1.6] text-white/90">
               "Every woman deserves to feel extraordinary."
             </p>
             <p className="mt-2 text-[7.5px] font-light uppercase tracking-[0.3em] text-[#C7A98B]">
