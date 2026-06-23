@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { useCart } from '@/hooks/use-cart'
 import { useTranslation } from '@/lib/i18n/context'
 import type { Locale } from '@/lib/i18n/translations'
+import { BrandLogo } from '@/components/ui/brand-logo'
 
 const LOCALE_OPTIONS: { code: Locale; native: string }[] = [
   { code: 'en', native: 'EN' },
@@ -82,17 +83,10 @@ export function Navbar() {
           {/* Center logo */}
           <Link
             href="/"
-            className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center leading-none"
+            className="absolute left-1/2 -translate-x-1/2 transition-opacity hover:opacity-70"
+            aria-label="Besma Sevdam — Home"
           >
-            <span className="font-display text-[22px] font-light italic tracking-[0.06em] text-[#111111] transition-opacity hover:opacity-60">
-              Besma Sevdam
-            </span>
-            <span
-              className="mt-0.5 text-[6px] font-light uppercase text-[#C7A98B]"
-              style={{ letterSpacing: '0.55em' }}
-            >
-              Beauty
-            </span>
+            <BrandLogo variant="dark" size="md" />
           </Link>
 
           {/* Right links + icons */}
@@ -182,8 +176,8 @@ export function Navbar() {
 
             <div className="flex flex-1 flex-col justify-between px-8 pb-14 pt-[100px]">
               {/* Brand centered */}
-              <div className="mb-10 text-center">
-                <p className="font-display text-[15px] italic text-[#C7A98B]">Besma Sevdam</p>
+              <div className="mb-10 flex justify-center">
+                <BrandLogo variant="dark" size="sm" />
               </div>
 
               <nav className="flex flex-col items-center gap-1">

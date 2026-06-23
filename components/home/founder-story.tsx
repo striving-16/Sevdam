@@ -100,7 +100,7 @@ export function FounderStory() {
           {/* Parallax image */}
           <motion.div style={{ y: imageY }} className="absolute inset-0">
             <Image
-              src="/founder.jpeg"
+              src="/images/founder.jpeg"
               alt="Besma Sevdam — Founder"
               fill
               className="object-cover object-top"

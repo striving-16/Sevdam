@@ -135,8 +135,11 @@ function EditorialCard({ product, index }: { product: Product; index: number }) 
       <Link href={`/products/${product.slug}`} className="block">
         {/* Image container */}
         <div
-          className="grain relative overflow-hidden bg-[#EDE8E0]"
-          style={{ aspectRatio: '3/4' }}
+          className="grain relative overflow-hidden"
+          style={{
+            aspectRatio: '3/4',
+            background: 'radial-gradient(ellipse 80% 70% at 50% 40%, #F0EAE0 0%, #E8E0D4 55%, #DDD5C8 100%)',
+          }}
         >
           <Image
             src={displayImage}
@@ -215,29 +218,28 @@ function EditorialCard({ product, index }: { product: Product; index: number }) 
       )}
 
       {/* Card info */}
-      <div className="mt-2.5 space-y-0.5" dir={isAr ? 'rtl' : 'ltr'}>
-        <p className="text-[8.5px] font-light uppercase tracking-[0.28em] text-[#C7A98B]">
+      <div className="mt-3 space-y-1" dir={isAr ? 'rtl' : 'ltr'}>
+        <p className="text-[8px] font-light uppercase tracking-[0.32em] text-[#C7A98B]">
           Besma Sevdam
         </p>
         <Link href={`/products/${product.slug}`}>
-          <h3 className="font-display text-[clamp(14px,1.5vw,18px)] font-light italic leading-[1.3] text-[#111111] transition-colors hover:text-[#C7A98B]">
+          <h3 className="font-display text-[clamp(15px,1.5vw,19px)] font-light italic leading-[1.25] text-[#111111] transition-colors hover:text-[#C7A98B]">
             {name}
           </h3>
         </Link>
         {hasVariants && selected && (
-          <p className="text-[10px] font-light text-[#8A8A8A]">{selected.shadeName}</p>
+          <p className="text-[9.5px] font-light tracking-[0.08em] text-[#8A8A8A]">{selected.shadeName}</p>
         )}
-        <p className="text-[11px] font-light text-[#B8AFA8]">
-          {product.description_en.slice(0, 55).trimEnd()}…
-        </p>
-        <p className="font-display text-[clamp(13px,1.4vw,16px)] font-light italic text-[#8A8A8A]">
+
+        {/* Price — prominent, luxury */}
+        <p className="pt-1 text-[16px] font-light tracking-[0.02em] text-[#111111]">
           {formatPrice(product.price)}
         </p>
 
         {!soldOut && (
           <button
             onClick={handleAdd}
-            className="mt-2 block text-[9px] font-light uppercase tracking-[0.22em] text-[#C7A98B] underline underline-offset-3 decoration-[#C7A98B]/40 transition-all hover:decoration-[#C7A98B] lg:hidden"
+            className="mt-1.5 block text-[8.5px] font-light uppercase tracking-[0.22em] text-[#C7A98B] underline underline-offset-3 decoration-[#C7A98B]/40 transition-all hover:decoration-[#C7A98B] lg:hidden"
           >
             {added ? '✓ Added' : '+ Add to Bag'}
           </button>

@@ -60,7 +60,7 @@ export function Hero() {
         {/* Portrait */}
         <motion.div style={{ y: imageY }} className="absolute inset-0">
           <Image
-            src="/founder.jpeg"
+            src="/images/founder.jpeg"
             alt="Besma Sevdam"
             fill
             priority

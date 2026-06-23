@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useTranslation } from '@/lib/i18n/context'
 import { SOCIAL_LINKS } from '@/lib/config'
+import { BrandLogo } from '@/components/ui/brand-logo'
 
 /*
   FOOTER — warm, elegant, brand-centered.
@@ -28,16 +29,11 @@ export function Footer() {
 
         {/* Brand statement — centered hero of the footer */}
         <div className="border-b border-white/[0.06] py-16 text-center">
-          <p className="font-display text-[clamp(36px,5vw,72px)] font-light italic text-white/90">
-            Besma Sevdam
-          </p>
-          <p
-            className="mt-2 text-[7.5px] font-light uppercase text-[#C7A98B]"
-            style={{ letterSpacing: '0.55em' }}
-          >
-            Luxury Beauty
-          </p>
-          <p className="mx-auto mt-6 max-w-[360px] text-[13px] font-light leading-[1.9] text-white/30">
+          {/* Official logo — light variant on dark footer */}
+          <div className="flex justify-center">
+            <BrandLogo variant="light" size="lg" />
+          </div>
+          <p className="mx-auto mt-8 max-w-[360px] text-[13px] font-light leading-[1.9] text-white/30">
             Where confidence meets elegance. Every product crafted to make you
             feel extraordinary.
           </p>
