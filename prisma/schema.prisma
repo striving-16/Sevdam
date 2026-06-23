@@ -127,6 +127,18 @@ model AdminUser {
   role         String @default("ADMIN")
 }
 
+// ─── Testimonials ─────────────────────────────────────────────────────────────
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  text      String   @db.Text
+  name      String
+  role      String                       // e.g. "Verified Buyer · Dubai"
+  stars     Int      @default(5)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum OrderStatus {

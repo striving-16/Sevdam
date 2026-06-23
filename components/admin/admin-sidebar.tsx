@@ -14,6 +14,7 @@ import {
   ExternalLink,
   Menu,
   X,
+  MessageSquareQuote,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
@@ -37,7 +38,8 @@ const NAV: NavSection[] = [
       { label: 'Dashboard', href: '/admin',          icon: LayoutDashboard, exact: true },
       { label: 'Products',  href: '/admin/products', icon: Package                      },
       { label: 'Orders',    href: '/admin/orders',   icon: ShoppingBag                  },
-      { label: 'Offers',    href: '/admin/offers',   icon: Percent                      },
+      { label: 'Offers',        href: '/admin/offers',        icon: Percent                         },
+      { label: 'Testimonials',  href: '/admin/testimonials',  icon: MessageSquareQuote              },
     ],
   },
   {
