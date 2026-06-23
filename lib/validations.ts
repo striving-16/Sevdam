@@ -33,6 +33,8 @@ export const productSchema = z.object({
   ingredients:    z.string().optional().nullable(),
   usage:          z.string().optional().nullable(),
   isBestseller:   z.boolean().default(false),
+  isOffer:        z.boolean().default(false),
+  salePrice:      z.coerce.number().optional().nullable(),
 })
 
 // ─── Order ───────────────────────────────────────────────────────────────────

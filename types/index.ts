@@ -39,6 +39,8 @@ export type Product = {
   ingredients?: string | null
   usage?: string | null
   isBestseller: boolean
+  isOffer: boolean
+  salePrice?: number | null
   createdAt: Date
   updatedAt: Date
 }

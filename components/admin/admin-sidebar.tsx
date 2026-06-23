@@ -7,14 +7,9 @@ import { motion } from 'framer-motion'
 import {
   LayoutDashboard,
   Package,
-  Tag,
   ShoppingBag,
-  Boxes,
-  Users,
   Percent,
-  Image,
   Settings,
-  Shield,
   LogOut,
   ExternalLink,
   Menu,
@@ -37,28 +32,18 @@ type NavSection = {
 
 const NAV: NavSection[] = [
   {
-    title: 'Main',
-    items: [
-      { label: 'Dashboard',  href: '/admin',            icon: LayoutDashboard, exact: true },
-      { label: 'Products',   href: '/admin/products',   icon: Package                      },
-      { label: 'Categories', href: '/admin/categories', icon: Tag                          },
-      { label: 'Orders',     href: '/admin/orders',     icon: ShoppingBag                  },
-    ],
-  },
-  {
     title: 'Store',
     items: [
-      { label: 'Inventory',     href: '/admin/inventory',  icon: Boxes   },
-      { label: 'Customers',     href: '/admin/customers',  icon: Users   },
-      { label: 'Promotions',    href: '/admin/promotions', icon: Percent },
-      { label: 'Media Library', href: '/admin/media',      icon: Image   },
+      { label: 'Dashboard', href: '/admin',          icon: LayoutDashboard, exact: true },
+      { label: 'Products',  href: '/admin/products', icon: Package                      },
+      { label: 'Orders',    href: '/admin/orders',   icon: ShoppingBag                  },
+      { label: 'Offers',    href: '/admin/offers',   icon: Percent                      },
     ],
   },
   {
     title: 'Config',
     items: [
       { label: 'Settings', href: '/admin/settings', icon: Settings },
-      { label: 'Accounts', href: '/admin/accounts', icon: Shield   },
     ],
   },
 ]

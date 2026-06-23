@@ -29,6 +29,8 @@ model Product {
   ingredients    String?         @db.Text
   usage          String?         @db.Text
   isBestseller   Boolean         @default(false)
+  isOffer        Boolean         @default(false)
+  salePrice      Float?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 

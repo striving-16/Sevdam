@@ -1,48 +1,53 @@
-import { Hero }           from '@/components/home/hero'
-import { BrandMarquee }   from '@/components/home/brand-marquee'
-import { BestSellers }    from '@/components/home/best-sellers'
-import { FounderStory }   from '@/components/home/founder-story'
-import { CategoryStrip }  from '@/components/home/category-strip'
-import { NewArrivals }    from '@/components/home/new-arrivals'
-import { Testimonials }   from '@/components/home/testimonials'
-import { Newsletter }     from '@/components/home/newsletter'
-import { getFeaturedProducts } from '@/actions/product-actions'
-import { DEMO_FEATURED }  from '@/lib/demo-products'
+import { Hero }              from '@/components/home/hero'
+import { BrandMarquee }      from '@/components/home/brand-marquee'
+import { BestSellers }       from '@/components/home/best-sellers'
+import { FounderStory }      from '@/components/home/founder-story'
+import { Offers }            from '@/components/home/offers'
+import { NewArrivals }       from '@/components/home/new-arrivals'
+import { Testimonials }      from '@/components/home/testimonials'
+import { Newsletter }        from '@/components/home/newsletter'
+import { getFeaturedProducts, getOfferProducts } from '@/actions/product-actions'
+import { DEMO_FEATURED, DEMO_NEW_ARRIVALS } from '@/lib/demo-products'
 import type { Product } from '@/types'
 
 export default async function HomePage() {
-  let products: Product[] = []
+  let featured: Product[] = []
+  let offers:   Product[] = []
+
   try {
-    products = await getFeaturedProducts(4)
+    ;[featured, offers] = await Promise.all([
+      getFeaturedProducts(4),
+      getOfferProducts(4),
+    ])
   } catch {
-    /* DB not yet connected — demo products render as fallback */
-    products = DEMO_FEATURED
+    featured = DEMO_FEATURED
+    offers   = []
   }
 
   return (
     <>
-      {/* 1 — Hero: full-screen campaign with founder + BS monogram */}
+      {/* 1 — Hero */}
       <Hero />
 
-      {/* 2 — Brand Marquee: trust signals + values */}
+      {/* 2 — Brand Marquee */}
       <BrandMarquee />
 
-      {/* 3 — Best Sellers: featured editorial product grid */}
-      <BestSellers products={products} />
+      {/* 3 — Best Sellers */}
+      <BestSellers products={featured} />
 
-      {/* 4 — Founder Story: emotional brand narrative */}
+      {/* 4 — Founder Story */}
       <FounderStory />
 
-      {/* 5 — Shop by Category: luxury category navigation */}
-      <CategoryStrip />
+      {/* 5 — Offers (replaces category strip — hidden when no active offers) */}
+      <Offers products={offers} />
 
-      {/* 6 — New Arrivals: latest drops editorial grid */}
+      {/* 6 — New Arrivals */}
       <NewArrivals />
 
-      {/* 7 — Testimonials: trust and social proof */}
+      {/* 7 — Testimonials */}
       <Testimonials />
 
-      {/* 8 — Newsletter: join the beauty circle */}
+      {/* 8 — Newsletter */}
       <Newsletter />
     </>
   )

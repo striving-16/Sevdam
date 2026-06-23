@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Loader2, Upload, X, Link as LinkIcon, Star, Palette, Plus } from 'lucide-react'
+import { Loader2, Upload, X, Link as LinkIcon, Star, Palette, Plus, Tag } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -285,6 +285,7 @@ export function ProductForm({ product }: { product?: Product }) {
   const [nameValue, setNameValue]     = useState(product?.name_en ?? '')
   const [isBestseller, setBestseller] = useState(product?.isBestseller ?? false)
   const [hasVariants, setHasVariants] = useState(product?.hasVariants ?? false)
+  const [isOffer, setIsOffer]         = useState(product?.isOffer ?? false)
 
   async function formAction(_prev: State, formData: FormData): Promise<State> {
     if (!imageUrl) return { error: 'Please add a product image' }
@@ -304,6 +305,11 @@ export function ProductForm({ product }: { product?: Product }) {
       brand:          (formData.get('brand') as string) || null,
       tags:           [] as string[],
       isBestseller,
+      isOffer,
+      salePrice:      isOffer ? (Number(formData.get('salePrice')) || null) : null,
+      benefits:       (formData.get('benefits') as string) || null,
+      ingredients:    (formData.get('ingredients') as string) || null,
+      usage:          (formData.get('usage') as string) || null,
     }
 
     try {
@@ -491,6 +497,51 @@ export function ProductForm({ product }: { product?: Product }) {
         <GalleryEditor urls={gallery} onChange={setGallery} />
       </div>
 
+      {/* Benefits */}
+      <div className="space-y-2">
+        <Label htmlFor="benefits" className="text-[12px] font-light tracking-wide text-neutral-600">
+          Benefits <span className="text-[10px] text-neutral-400">(optional)</span>
+        </Label>
+        <Textarea
+          id="benefits"
+          name="benefits"
+          defaultValue={product?.benefits ?? ''}
+          placeholder="Key product benefits shown on the product page…"
+          rows={3}
+          className="resize-none rounded-lg border-neutral-200 text-[14px] focus-visible:ring-neutral-300"
+        />
+      </div>
+
+      {/* Usage */}
+      <div className="space-y-2">
+        <Label htmlFor="usage" className="text-[12px] font-light tracking-wide text-neutral-600">
+          How to Use <span className="text-[10px] text-neutral-400">(optional)</span>
+        </Label>
+        <Textarea
+          id="usage"
+          name="usage"
+          defaultValue={product?.usage ?? ''}
+          placeholder="Application instructions…"
+          rows={3}
+          className="resize-none rounded-lg border-neutral-200 text-[14px] focus-visible:ring-neutral-300"
+        />
+      </div>
+
+      {/* Ingredients */}
+      <div className="space-y-2">
+        <Label htmlFor="ingredients" className="text-[12px] font-light tracking-wide text-neutral-600">
+          Ingredients <span className="text-[10px] text-neutral-400">(optional)</span>
+        </Label>
+        <Textarea
+          id="ingredients"
+          name="ingredients"
+          defaultValue={product?.ingredients ?? ''}
+          placeholder="Full INCI ingredient list…"
+          rows={3}
+          className="resize-none rounded-lg border-neutral-200 text-[14px] focus-visible:ring-neutral-300"
+        />
+      </div>
+
       {/* Has Variants toggle */}
       <div className="space-y-2">
         <Label className="text-[12px] font-light tracking-wide text-neutral-600">
@@ -510,6 +561,51 @@ export function ProductForm({ product }: { product?: Product }) {
           Homepage Visibility
         </Label>
         <BestsellerToggle value={isBestseller} onChange={setBestseller} />
+      </div>
+
+      {/* Offer toggle + sale price */}
+      <div className="space-y-2">
+        <Label className="text-[12px] font-light tracking-wide text-neutral-600">
+          Offer / Promotion
+        </Label>
+        <button
+          type="button"
+          onClick={() => setIsOffer((v) => !v)}
+          className={[
+            'flex w-full items-center justify-between rounded-xl border px-4 py-3.5 transition-all duration-200',
+            isOffer ? 'border-amber-300 bg-amber-50' : 'border-neutral-200 bg-white hover:border-neutral-300',
+          ].join(' ')}
+        >
+          <div className={`flex items-center gap-3 ${isOffer ? 'text-amber-800' : 'text-neutral-700'}`}>
+            <Tag size={15} strokeWidth={1.5} className={isOffer ? 'text-amber-500' : 'text-neutral-400'} />
+            <div className="text-left">
+              <p className="text-[13px] font-normal">On Offer</p>
+              <p className={`text-[11px] font-light ${isOffer ? 'text-amber-700' : 'text-neutral-400'}`}>
+                {isOffer ? 'Shown in the Offers section with sale price' : 'Not currently on offer'}
+              </p>
+            </div>
+          </div>
+          <div className={['relative h-5 w-9 rounded-full transition-colors duration-200', isOffer ? 'bg-amber-400' : 'bg-neutral-200'].join(' ')}>
+            <div className={['absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-200', isOffer ? 'left-4' : 'left-0.5'].join(' ')} />
+          </div>
+        </button>
+        {isOffer && (
+          <div className="flex items-center gap-2 pl-1">
+            <Label htmlFor="salePrice" className="shrink-0 text-[12px] font-light text-neutral-600">
+              Sale Price (MRU)
+            </Label>
+            <Input
+              id="salePrice"
+              name="salePrice"
+              type="number"
+              step="1"
+              min="1"
+              defaultValue={product?.salePrice ?? ''}
+              placeholder="e.g. 350"
+              className="h-9 w-36 rounded-lg border-neutral-200 text-[13px]"
+            />
+          </div>
+        )}
       </div>
 
       {state?.error && (

@@ -117,6 +117,30 @@ export async function updateProductStock(id: string, stock: number) {
   revalidatePath('/')
 }
 
+export async function getOfferProducts(limit = 8): Promise<Product[]> {
+  return db.product.findMany({
+    where: { isOffer: true },
+    include: WITH_VARIANTS,
+    orderBy: { updatedAt: 'desc' },
+    take: limit,
+  }) as unknown as Promise<Product[]>
+}
+
+export async function toggleProductOffer(
+  productId: string,
+  isOffer: boolean,
+  salePrice: number | null,
+): Promise<void> {
+  await requireAdmin()
+  await db.product.update({
+    where: { id: productId },
+    data: { isOffer, salePrice: isOffer ? salePrice : null },
+  })
+  revalidatePath('/')
+  revalidatePath('/products')
+  revalidatePath('/admin/offers')
+}
+
 export async function uploadProductImageAction(formData: FormData): Promise<string> {
   await requireAdmin()
   const file = formData.get('file') as File

@@ -166,15 +166,13 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
           )}
 
           {!soldOut && (
-            <div className="absolute inset-x-0 bottom-0 z-10 translate-y-full pb-5 text-center opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-              <div className="mx-4 bg-white/90 py-3 backdrop-blur-sm">
-                <button
-                  onClick={handleAdd}
-                  className="text-[9.5px] font-light uppercase tracking-[0.22em] text-[#111111] transition-colors hover:text-[#C7A98B]"
-                >
-                  {added ? '✓ Added to Bag' : 'Add to Bag'}
-                </button>
-              </div>
+            <div className="absolute inset-x-0 bottom-0 z-10 translate-y-full transition-all duration-500 group-hover:translate-y-0">
+              <button
+                onClick={handleAdd}
+                className="w-full bg-[#111111]/90 py-3.5 text-[9px] font-light uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-colors hover:bg-[#111111]"
+              >
+                {added ? '✓ Added' : 'Add to Bag'}
+              </button>
             </div>
           )}
         </div>
@@ -235,9 +233,9 @@ function ArrivalCard({ product, index }: { product: Product; index: number }) {
         {!soldOut && (
           <button
             onClick={handleAdd}
-            className="mt-1.5 block text-[8.5px] font-light uppercase tracking-[0.22em] text-[#C7A98B] underline underline-offset-3 decoration-[#C7A98B]/40 transition-all hover:decoration-[#C7A98B] lg:hidden"
+            className="mt-2 w-full rounded-full border border-[#111111] py-2.5 text-[9px] font-light uppercase tracking-[0.22em] text-[#111111] transition-all hover:bg-[#111111] hover:text-white lg:hidden"
           >
-            {added ? '✓ Added' : '+ Add to Bag'}
+            {added ? '✓ Added' : 'Add to Bag'}
           </button>
         )}
       </div>
