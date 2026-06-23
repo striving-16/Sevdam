@@ -3,14 +3,11 @@
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useTransition } from 'react'
 import { cn } from '@/lib/utils'
+import { MAKEUP_CATEGORIES, CATEGORY_LABELS } from '@/lib/validations'
 
 const FILTERS = [
-  { value: '',              label: 'All' },
-  { value: 'SKINCARE',     label: 'Skincare' },
-  { value: 'HAIRCARE',     label: 'Hair Care' },
-  { value: 'TREATMENT',    label: 'Treatments' },
-  { value: 'KOREAN_BEAUTY',label: 'Korean Beauty' },
-  { value: 'COSMETICS',    label: 'Cosmetics' },
+  { value: '', label: 'All' },
+  ...MAKEUP_CATEGORIES.map((c) => ({ value: c, label: CATEGORY_LABELS[c] })),
 ]
 
 export function CategoryFilter() {

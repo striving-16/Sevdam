@@ -23,12 +23,18 @@ const LOCALE_OPTIONS: { code: Locale; native: string }[] = [
 ]
 
 const NAV_LEFT  = [
-  { label: 'Collection', href: '/products'        },
-  { label: 'About',      href: '/about'           },
+  { label: 'Collection', href: '/products' },
 ]
 const NAV_RIGHT = [
-  { label: 'Our Story',  href: '/about'           },
-  { label: 'Contact',    href: '/contact'         },
+  { label: 'Our Story',  href: '/about'   },
+  { label: 'Contact',    href: '/contact' },
+]
+
+const MOBILE_NAV = [
+  { label: 'Home',       href: '/'        },
+  { label: 'Collection', href: '/products' },
+  { label: 'Our Story',  href: '/about'   },
+  { label: 'Contact',    href: '/contact' },
 ]
 
 export function Navbar() {
@@ -187,7 +193,7 @@ export function Navbar() {
               </div>
 
               <nav className="flex flex-col items-center gap-1">
-                {[...NAV_LEFT, ...NAV_RIGHT].map((l, i) => (
+                {MOBILE_NAV.map((l, i) => (
                   <motion.div
                     key={l.href + l.label}
                     initial={{ opacity: 0, y: 16 }}
