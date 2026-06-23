@@ -3,12 +3,14 @@ import Credentials from 'next-auth/providers/credentials'
 import { compare } from 'bcryptjs'
 import { db } from '@/lib/db'
 import { loginSchema } from '@/lib/validations'
+import { authConfig } from '@/lib/auth-config'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       credentials: {
-        email: { label: 'Email', type: 'email' },
+        email:    { label: 'Email',    type: 'email'    },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
@@ -27,22 +29,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  session: { strategy: 'jwt' },
-  pages: { signIn: '/login' },
-  callbacks: {
-    authorized({ auth: session, request: { nextUrl } }) {
-      const isLoggedIn = !!session?.user
-      const isAdminRoute = nextUrl.pathname.startsWith('/admin')
-      if (isAdminRoute && !isLoggedIn) return false
-      return true
-    },
-    jwt({ token, user }) {
-      if (user) token.role = user.name
-      return token
-    },
-    session({ session, token }) {
-      if (session.user) session.user.name = token.role as string
-      return session
-    },
-  },
 })
