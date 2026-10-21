@@ -147,21 +147,23 @@ API credits (negligible per the usage above).
 
 ### Sentry
 
-Already wired into the correct Next.js 16 instrumentation convention
-(`instrumentation.ts` + `instrumentation-client.ts`), gated by
-`enabled: !!dsn` — **fully inert with no DSN set**, which is the current
-state (`NEXT_PUBLIC_SENTRY_DSN` is empty). To turn it on:
+Wired into the Next.js 16 instrumentation convention (`instrumentation.ts`
++ `instrumentation-client.ts`), gated by `enabled: !!dsn`.
 
-1. Create a Sentry project (sentry.io), get its DSN.
-2. Set `NEXT_PUBLIC_SENTRY_DSN` in Vercel (and `.env.local` for dev).
-3. **Controlled verification test** — after deploying with a real DSN, hit
-   a route that deliberately throws (or temporarily add one), confirm the
-   error appears in the Sentry dashboard, then remove the test route. Do
-   not consider Sentry "working" without having seen a real event land —
-   the gating logic being correct is not the same as proof it reports.
-4. Source maps / release tracking (`withSentryConfig`) are not yet wired
-   up — needs a Sentry org/project slug + auth token, deliberately deferred
-   until the basic DSN path is confirmed working.
+**Status: DSN set in local `.env.local` and verified working in dev** —
+a temporary route was added that deliberately threw, hit once, and the
+Sentry debug logger confirmed `Captured error event` → `Flushing
+events...` → `Done flushing events` with no transport errors, using the
+real DSN. The test route was then deleted and the temporary debug flag
+reverted (see git history for the exact before/after). **Still needed:**
+check the Sentry dashboard for a "Sentry verification test — <timestamp>"
+issue to get the final human confirmation that it was received, not just
+sent — and set `NEXT_PUBLIC_SENTRY_DSN` in **Vercel's** Environment
+Variables too, since `.env.local` only affects local dev.
+
+Source maps / release tracking (`withSentryConfig`) are not yet wired up —
+needs a Sentry org/project slug + auth token, deliberately deferred until
+production use justifies the extra build complexity.
 
 ### Vercel Analytics
 
