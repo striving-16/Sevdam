@@ -95,6 +95,17 @@ body {
 ::-webkit-scrollbar-thumb { background: #D8C3A5; }
 ::-webkit-scrollbar-thumb:hover { background: #C7A98B; }
 
+/* ── Mobile form zoom fix ──────────────────────────────────────────────────────
+   iOS Safari auto-zooms the page when a focused input's font-size is below
+   16px. Every form in this app sets its own smaller size via Tailwind
+   (text-[13px] etc.), so this is enforced globally rather than per field.
+   Desktop is untouched; pinch-to-zoom is untouched. */
+@media (max-width: 767px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    ANIMATIONS
 ───────────────────────────────────────────────────────────────────────────── */
