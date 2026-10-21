@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 import { getProducts } from '@/actions/product-actions'
 import { DEMO_PRODUCTS } from '@/lib/demo-products'
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://besmasevdam.com'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const products = await getProducts().catch(() => DEMO_PRODUCTS)
