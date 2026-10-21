@@ -66,8 +66,3 @@ export function I18nProvider({ children, initialLocale = 'en' }: I18nProviderPro
 export function useTranslation() {
   return useContext(I18nContext)
 }
-
-/** Replace `{key}` placeholders — e.g. interpolate('Only {n} left', { n: 3 }) */
-export function interpolate(template: string, vars: Record<string, string | number>): string {
-  return template.replace(/\{(\w+)\}/g, (_, key) => String(vars[key] ?? `{${key}}`))
-}

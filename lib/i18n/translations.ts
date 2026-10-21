@@ -1,5 +1,10 @@
 export type Locale = 'en' | 'fr' | 'ar'
 
+/** Replace `{key}` placeholders — e.g. interpolate('Only {n} left', { n: 3 }) */
+export function interpolate(template: string, vars: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (_, key) => String(vars[key] ?? `{${key}}`))
+}
+
 export type Translations = {
   common: {
     addToBag: string
