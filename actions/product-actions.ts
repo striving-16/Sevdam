@@ -7,6 +7,7 @@ import { updateTag } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { uploadProductImage, deleteProductImage } from '@/lib/cloudinary'
+import { normalizeHex, FALLBACK_HEX } from '@/lib/color-extraction'
 import type { Product } from '@/types'
 
 async function requireAdmin() {
@@ -21,12 +22,13 @@ const WITH_VARIANTS = {
 // ─── Shade input type (passed from product form) ──────────────────────────────
 
 export type ShadeInput = {
-  id?:       string
-  shadeName: string
-  hexColor:  string
-  stock:     number
-  image:     string
-  sku?:      string | null
+  id?:          string
+  shadeName:    string
+  hexColor:     string
+  colorSource?: 'manual' | 'suggested'
+  stock:        number
+  image:        string
+  sku?:         string | null
 }
 
 // ─── Read ─────────────────────────────────────────────────────────────────────
@@ -110,12 +112,13 @@ export async function createProduct(input: ProductInput, shades: ShadeInput[] = 
       ...(shades.length > 0 && {
         variants: {
           create: shades.map((s, idx) => ({
-            shadeName: s.shadeName,
-            hexColor:  s.hexColor  || '#000000',
-            stock:     s.stock     ?? 0,
-            image:     s.image     || null,
-            sku:       s.sku       || null,
-            sortOrder: idx,
+            shadeName:   s.shadeName,
+            hexColor:    normalizeHex(s.hexColor) ?? FALLBACK_HEX,
+            colorSource: s.colorSource ?? 'manual',
+            stock:       s.stock     ?? 0,
+            image:       s.image     || null,
+            sku:         s.sku       || null,
+            sortOrder:   idx,
           })),
         },
       }),
@@ -141,13 +144,14 @@ export async function updateProduct(id: string, input: Partial<ProductInput>, sh
     if (shades.length > 0) {
       await db.variant.createMany({
         data: shades.map((s, idx) => ({
-          productId: id,
-          shadeName: s.shadeName,
-          hexColor:  s.hexColor  || '#000000',
-          stock:     s.stock     ?? 0,
-          image:     s.image     || null,
-          sku:       s.sku       || null,
-          sortOrder: idx,
+          productId:   id,
+          shadeName:   s.shadeName,
+          hexColor:    normalizeHex(s.hexColor) ?? FALLBACK_HEX,
+          colorSource: s.colorSource ?? 'manual',
+          stock:       s.stock     ?? 0,
+          image:       s.image     || null,
+          sku:         s.sku       || null,
+          sortOrder:   idx,
         })),
       })
     }

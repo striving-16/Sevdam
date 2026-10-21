@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { createProduct, updateProduct, uploadProductImageAction, type ShadeInput } from '@/actions/product-actions'
+import { extractDominantColor, isValidHex, FALLBACK_HEX } from '@/lib/color-extraction'
 import { slugify } from '@/lib/utils'
 import { MAKEUP_CATEGORIES, CATEGORY_LABELS } from '@/lib/validations'
 import type { Product, ProductCategory } from '@/types'
@@ -175,6 +176,34 @@ function ShadeRow({
   onChange: (patch: Partial<ShadeInput>) => void
   onRemove: () => void
 }) {
+  const [extracting, setExtracting] = useState(false)
+  const swatchHex = isValidHex(shade.hexColor) ? shade.hexColor : FALLBACK_HEX
+
+  async function suggestColorFor(imageUrl: string, extraPatch: Partial<ShadeInput> = {}) {
+    setExtracting(true)
+    try {
+      const result = await extractDominantColor(imageUrl)
+      onChange(
+        result
+          ? { ...extraPatch, hexColor: result.hex, colorSource: 'suggested' }
+          : extraPatch
+      )
+    } finally {
+      setExtracting(false)
+    }
+  }
+
+  function handleImageChange(url: string) {
+    if (!url) { onChange({ image: '' }); return }
+    // Single onChange call once extraction resolves — avoids clobbering the
+    // image update with a stale `shades` snapshot from a second, separate call.
+    void suggestColorFor(url, { image: url })
+  }
+
+  function handleManualHex(value: string) {
+    onChange({ hexColor: value, colorSource: 'manual' })
+  }
+
   return (
     <div className="flex items-start gap-3 rounded-xl border border-neutral-100 bg-neutral-50/60 p-3">
       {/* Shade image */}
@@ -182,13 +211,13 @@ function ShadeRow({
         <ImageUpload
           compact
           value={shade.image}
-          onChange={(url) => onChange({ image: url })}
+          onChange={handleImageChange}
         />
       </div>
 
       <div className="flex flex-1 flex-col gap-2">
         {/* Name + color */}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Input
             value={shade.shadeName}
             onChange={(e) => onChange({ shadeName: e.target.value })}
@@ -198,31 +227,58 @@ function ShadeRow({
           <div className="flex h-9 items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2">
             <input
               type="color"
-              value={shade.hexColor}
-              onChange={(e) => onChange({ hexColor: e.target.value })}
+              value={swatchHex}
+              onChange={(e) => handleManualHex(e.target.value)}
               className="h-5 w-5 cursor-pointer rounded border-0 bg-transparent p-0"
               title="Pick shade colour"
             />
             <input
               type="text"
               value={shade.hexColor}
-              onChange={(e) => onChange({ hexColor: e.target.value })}
+              onChange={(e) => handleManualHex(e.target.value)}
               maxLength={7}
               className="w-[72px] border-0 bg-transparent text-[12px] font-mono text-neutral-600 outline-none"
               placeholder="#000000"
             />
+            {shade.image && (
+              <button
+                type="button"
+                onClick={() => suggestColorFor(shade.image)}
+                disabled={extracting}
+                title="Re-suggest colour from the shade image"
+                className="flex h-5 w-5 items-center justify-center rounded text-neutral-400 hover:text-neutral-700 disabled:opacity-40"
+              >
+                {extracting ? <Loader2 size={12} className="animate-spin" /> : <Palette size={12} />}
+              </button>
+            )}
           </div>
+          {!isValidHex(shade.hexColor) && (
+            <span className="text-[10px] text-amber-500">Invalid hex — using fallback swatch</span>
+          )}
         </div>
 
-        {/* Stock */}
-        <div className="flex items-center gap-2">
+        {shade.colorSource === 'suggested' && isValidHex(shade.hexColor) && (
+          <p className="text-[10px] font-light italic text-neutral-400">
+            Suggested colour — an approximation, correct it if needed
+          </p>
+        )}
+
+        {/* Stock + SKU */}
+        <div className="flex flex-wrap items-center gap-2">
           <Label className="shrink-0 text-[11px] font-light text-neutral-500">Stock</Label>
           <Input
             type="number"
             min="0"
             value={shade.stock}
             onChange={(e) => onChange({ stock: Number(e.target.value) })}
-            className="h-8 w-24 rounded-lg border-neutral-200 text-[13px]"
+            className="h-8 w-20 rounded-lg border-neutral-200 text-[13px]"
+          />
+          <Label className="shrink-0 text-[11px] font-light text-neutral-500">SKU</Label>
+          <Input
+            value={shade.sku ?? ''}
+            onChange={(e) => onChange({ sku: e.target.value })}
+            placeholder="optional"
+            className="h-8 w-28 rounded-lg border-neutral-200 font-mono text-[12px]"
           />
           {!shade.image && (
             <span className="text-[10px] text-amber-500">← shade image required</span>
@@ -249,7 +305,7 @@ function ShadeEditor({
   onChange: (shades: ShadeInput[]) => void
 }) {
   function addShade() {
-    onChange([...shades, { shadeName: '', hexColor: '#C7A98B', stock: 0, image: '' }])
+    onChange([...shades, { shadeName: '', hexColor: FALLBACK_HEX, colorSource: 'manual', stock: 0, image: '', sku: '' }])
   }
 
   function updateShade(idx: number, patch: Partial<ShadeInput>) {
@@ -345,12 +401,13 @@ export function ProductForm({ product }: { product?: Product }) {
   const [isOffer, setIsOffer]         = useState(product?.isOffer ?? false)
   const [shades, setShades]           = useState<ShadeInput[]>(
     product?.variants?.map((v) => ({
-      id:        v.id,
-      shadeName: v.shadeName,
-      hexColor:  v.hexColor,
-      stock:     v.stock,
-      image:     v.image ?? '',
-      sku:       v.sku,
+      id:          v.id,
+      shadeName:   v.shadeName,
+      hexColor:    v.hexColor,
+      colorSource: v.colorSource,
+      stock:       v.stock,
+      image:       v.image ?? '',
+      sku:         v.sku,
     })) ?? []
   )
 

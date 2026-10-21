@@ -49,6 +49,7 @@ model Variant {
   productId   String
   shadeName   String      // e.g. "Rose Nude", "Ruby Red"
   hexColor    String      // e.g. "#D4847A"
+  colorSource String      @default("manual") // "manual" | "suggested" — never overwrite "manual" without explicit re-suggest
   image       String?     // Variant-specific image (optional)
   stock       Int         @default(0)
   sku         String?

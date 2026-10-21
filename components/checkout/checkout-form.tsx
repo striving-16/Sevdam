@@ -26,7 +26,7 @@ function buildMessage(
   phone: string,
   delivery: DeliveryType,
   address: string,
-  items: Array<{ product: { name_en: string; price: number }; quantity: number }>,
+  items: Array<{ product: { name_en: string; price: number }; variant?: { shadeName: string } | null; quantity: number }>,
   total: number
 ): string {
   const deliveryLabel: Record<DeliveryType, string> = {
@@ -35,9 +35,10 @@ function buildMessage(
     pickup: 'Store Pickup',
   }
 
-  const productLines = items.map(
-    (i) => `• ${i.product.name_en} x${i.quantity} → ${formatMRU(i.product.price * i.quantity)}`
-  )
+  const productLines = items.map((i) => {
+    const shade = i.variant ? ` (${i.variant.shadeName})` : ''
+    return `• ${i.product.name_en}${shade} x${i.quantity} → ${formatMRU(i.product.price * i.quantity)}`
+  })
 
   const lines = [
     '🛍️ New Order',
@@ -259,6 +260,9 @@ export function CheckoutForm() {
                 <div className="min-w-0">
                   <p className="text-[13px] font-normal leading-snug text-[#1D1D1F] line-clamp-2">
                     {item.product.name_en}
+                    {item.variant && (
+                      <span className="font-light text-[#8A8A8E]"> — {item.variant.shadeName}</span>
+                    )}
                   </p>
                   <p className="mt-0.5 text-[11px] font-light text-[#8A8A8E]">
                     Qty {item.quantity}

@@ -19,6 +19,7 @@ export type Variant = {
   productId: string
   shadeName: string
   hexColor: string
+  colorSource: 'manual' | 'suggested'
   image: string | null
   stock: number
   sku: string | null
