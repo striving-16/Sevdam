@@ -58,7 +58,7 @@ export default async function ProductPage({ params }: Props) {
         <nav className={`flex items-center gap-2 text-[10.5px] font-light text-[#C9A96E]/60 ${isRtl ? 'flex-row-reverse' : ''}`}>
           <Link href="/" className="hover:text-[#C9A96E] transition-colors">Home</Link>
           <span>/</span>
-          <Link href={`/categories/${product.category.toLowerCase()}`} className="hover:text-[#C9A96E] transition-colors">
+          <Link href={`/products?category=${product.category}`} className="hover:text-[#C9A96E] transition-colors">
             {categoryLabel}
           </Link>
           <span>/</span>

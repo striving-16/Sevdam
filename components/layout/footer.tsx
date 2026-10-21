@@ -77,8 +77,6 @@ export function Footer() {
           <div className={`flex flex-wrap items-center justify-center gap-x-8 gap-y-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
             {[
               { label: 'Collection',  href: '/products'      },
-              { label: 'Skincare',    href: '/categories/skincare' },
-              { label: 'Makeup',      href: '/categories/makeup'   },
               { label: 'About Us',    href: '/about'         },
               { label: 'Our Story',   href: '/about'         },
               { label: 'Contact',     href: '/contact'       },

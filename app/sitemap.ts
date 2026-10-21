@@ -13,16 +13,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  const categoryUrls: MetadataRoute.Sitemap = [
-    'skincare', 'haircare', 'perfumes', 'makeup',
-    'bodycare', 'mencare', 'babycare', 'tools',
-  ].map((slug) => ({
-    url: `${BASE_URL}/categories/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }))
-
   const staticUrls: MetadataRoute.Sitemap = [
     { url: BASE_URL,                  priority: 1.0, changeFrequency: 'daily'   },
     { url: `${BASE_URL}/products`,    priority: 0.9, changeFrequency: 'daily'   },
@@ -32,5 +22,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/returns`,     priority: 0.5, changeFrequency: 'monthly' },
   ]
 
-  return [...staticUrls, ...categoryUrls, ...productUrls]
+  return [...staticUrls, ...productUrls]
 }
