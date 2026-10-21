@@ -9,6 +9,8 @@ config({ path: resolve(process.cwd(), ".env.local"), override: false });
 
 export default defineConfig({
   datasource: {
-    url: process.env.DATABASE_URL ?? "",
+    // Migrations/CLI use the direct (non-pooled) connection — the pooler's
+    // session-mode pool_size is small and shared with runtime traffic.
+    url: process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? "",
   },
 });

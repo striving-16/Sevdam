@@ -20,9 +20,10 @@
 ```bash
 npm install                 # postinstall runs `prisma generate`
 npm run dev                 # starts dev server (Turbopack) — works fine
-npm run build                # production build (Turbopack) — green after clean reinstall, see Task 1
+npm run build                # production build (Turbopack) — green
 npm start                    # after a successful build
-npx eslint .                 # lint — currently 10 errors / 15 warnings
+npx eslint .                 # lint — 0 errors, 15 warnings (cosmetic)
+npx tsc --noEmit              # type check — clean
 ```
 
 There is **no test suite** in this repo (no `*.test.*`/`*.spec.*` files, no test runner configured). "Testing" = manual verification via `npm run dev` + browser, plus `npx eslint .` and `tsc` type-checking.
@@ -45,14 +46,10 @@ Database: `.env.local` has a live Supabase `DATABASE_URL` + Cloudinary + NextAut
 
 1. ~~`npm run build` fails under Turbopack~~ — **RESOLVED.** Root cause was a corrupted/stale `node_modules` and/or `.next` cache, not a real Next 16/Turbopack incompatibility: `Module not found: Can't resolve '@vercel/turbopack-next/internal/font/google/font'` while processing `next/font/google` in [app/layout.tsx](app/layout.tsx). A clean `rm -rf node_modules .next package-lock.json && npm install` fixed it — verified with two consecutive clean `npm run build` runs, both green with the default Turbopack bundler. No font/bundler code changes were needed. `package-lock.json` was regenerated (minor transitive bumps, e.g. Prisma 7.8.0 → 7.10.1 within the existing `^7.8.0` range; `package.json` itself is unchanged).
 
-2. **Lint errors (10 errors, 15 warnings)** via `npx eslint .`, including real `react/no-unescaped-entities` and `react-hooks/set-state-in-effect` errors in:
-   - [components/cart/cart-drawer.tsx:257](components/cart/cart-drawer.tsx#L257)
-   - [components/checkout/checkout-form.tsx:242](components/checkout/checkout-form.tsx#L242)
-   - [components/home/founder-story.tsx:105](components/home/founder-story.tsx#L105)
-   - [components/layout/navbar.tsx:57](components/layout/navbar.tsx#L57)
-   - [lib/i18n/context.tsx:40](lib/i18n/context.tsx#L40)
-   - [components/admin/admin-sidebar.tsx:92](components/admin/admin-sidebar.tsx#L92) (warning-level `set-state-in-effect`)
-   - Several `no-unused-vars` / `no-img-element` warnings in admin components.
+2. ~~Lint errors~~ — **RESOLVED.** All 10 ESLint errors fixed (0 errors, 15 warnings remain — see Task 6):
+   - Unescaped entities in `cart-drawer.tsx`, `checkout-form.tsx`, `founder-story.tsx`, `app/(admin)/admin/offers/page.tsx`, `app/(shop)/about/page.tsx` → HTML entities (`&apos;`/`&quot;`/`&ldquo;`/`&rdquo;`).
+   - `react-hooks/set-state-in-effect` in `navbar.tsx` and `admin-sidebar.tsx` (resetting a mobile-menu `open` state when the route changes) → replaced the effect with React's documented "adjust state during render" pattern (track `prevPathname` in state, compare and reset during render — no effect needed, no behavior change).
+   - Same rule in `lib/i18n/context.tsx` (one-time localStorage hydration on mount) → deferred the `setState` into a `queueMicrotask` callback rather than restructuring; this is a one-time mount sync, not the cascading-render pattern the rule targets.
 
 3. ~~Untracked helper script duplicates a Prisma migration~~ — **RESOLVED.** Diffed `scripts/create-testimonials-table.ts` against `prisma/migrations/20260624000000_add_testimonials/migration.sql` — SQL was byte-identical apart from indentation. Script deleted.
 
@@ -67,17 +64,21 @@ Database: `.env.local` has a live Supabase `DATABASE_URL` + Cloudinary + NextAut
 
 5. ~~Empty leftover route folders~~ — **RESOLVED.** Removed `cosmetics/`, `haircare/`, `korean-beauty/`, `skincare/`, `treatments/`, `(listing)/`, `[id]/` under `app/(shop)/products/` — all were empty (git never tracked them, so no commit needed for this).
 
-6. **Build-time DB connection pool exhaustion**: during `next build`, multiple admin pages (`AdminTestimonials`, `AdminProducts`) hit the DB concurrently during static optimization and log `(EMAXCONNSESSION) max clients reached in session mode — max clients are limited to pool_size: 15` against the Supabase pooler. Build still completes (pages are dynamic `ƒ`, not pre-rendered, so it's non-fatal), but it's a signal the Prisma client isn't using a pooled/pgbouncer-friendly connection string, or too many admin pages are forcing DB reads at build time.
+6. ~~Build-time DB connection-pool exhaustion~~ — **MOSTLY RESOLVED (16 → 1 occurrence, build is green either way).**
+   - Root cause: `app/(admin)/*` pages have no `dynamic` export, so Next.js speculatively tried to statically render them at build time (even though they're always session-gated/dynamic via `proxy.ts`) — 7 parallel build workers each attempting a live DB read, exhausting the Supabase pooler's session-mode `pool_size: 15`.
+   - Fix: added `export const dynamic = 'force-dynamic'` to [app/(admin)/layout.tsx](app/(admin)/layout.tsx) — applies to the whole admin route subtree in one place, skips the speculative static render entirely. This eliminated 15 of 16 occurrences.
+   - The one remaining occurrence is from a public page's legitimate static-generation attempt (e.g. sitemap/category product lookup) hitting transient pool contention — already has a `.catch()` fallback (see `app/sitemap.ts` and `lib/demo-products.ts`), so it never fails the build.
+   - Also added a Supabase **`DIRECT_URL`** (non-pooled connection) and pointed `prisma.config.ts`'s migration/CLI datasource at it, per the user's request to split pooler-for-runtime vs direct-for-migrations. **Caveat:** this project's direct host (`db.<ref>.supabase.co`) only resolves over **IPv6**, which this dev sandbox cannot route to (`Network is unreachable`) — so `prisma migrate dev/deploy` cannot run from this machine right now. It will likely work from Vercel (which generally has IPv6 egress) or from any machine with the Supabase IPv4 add-on, but this is **unverified** — flagged to the user, who chose to keep it as-is rather than revert to pooler-only. **Action needed before your next migration:** run `npx prisma migrate deploy` once (via Vercel/CI or a machine with IPv6) to confirm `DIRECT_URL` is reachable from your actual deploy path.
 
 ## Task list (priority order)
 
 1. [x] **Fix the production build** — fixed via clean reinstall (`node_modules`, `.next`, `package-lock.json` removed and reinstalled). `npm run build` now passes with the default Turbopack bundler. No font/bundler code changes needed.
 2. [x] Duplicate testimonials-table script deleted (SQL matched the existing migration exactly).
-3. [ ] **Fix the 10 ESLint errors** (unescaped entities, `set-state-in-effect`) listed above — low-risk, mechanical fixes.
-4. [ ] **Investigate the Supabase connection-pool exhaustion during build** — likely needs a build-time `DATABASE_URL` pointing at the pgbouncer/transaction-mode pooler port, or reducing concurrent DB calls during static generation.
+3. [x] All 10 ESLint errors fixed. `npx eslint .` → 0 errors, 15 warnings.
+4. [x] Connection-pool exhaustion fixed (16 → 1 occurrence; build green). `DIRECT_URL` added for migrations — **unverified from this machine due to IPv6**, needs confirming from Vercel/CI before next `prisma migrate deploy`.
 5. [x] Empty route folders removed. Dead-component decision still pending (summary given to user 2026-10-21 — none deleted yet).
 6. [ ] Clear the 15 remaining ESLint warnings (unused vars, `<img>` → `next/image`) as time allows.
-7. [ ] Decide whether a test suite should be introduced at all, and if so, what to prioritize first (cart/checkout logic, server actions, or auth).
+7. [ ] Minimal test setup for cart→WhatsApp-checkout and admin login — proposal deferred; folded into the new "3 improvements" task (2026-10-21), which explicitly asks for focused tests on the shade-color logic.
 
 ## Open questions
 
