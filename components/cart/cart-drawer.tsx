@@ -254,7 +254,7 @@ export function CartDrawer() {
                         className="mt-4 rounded-xl border border-[#E8E0D6] bg-white/60 p-4 text-center"
                       >
                         <p className="text-[11.5px] font-light leading-[1.7] text-[#9E8E80]">
-                          We'll prepare your order — just come by to pick it up at our store.
+                          We&apos;ll prepare your order — just come by to pick it up at our store.
                         </p>
                       </motion.div>
                     )}

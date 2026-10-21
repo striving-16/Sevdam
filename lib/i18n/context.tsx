@@ -37,7 +37,7 @@ export function I18nProvider({ children, initialLocale = 'en' }: I18nProviderPro
   useEffect(() => {
     const saved = localStorage.getItem('store-locale') as Locale | null
     if (saved && VALID.includes(saved)) {
-      setLocaleState(saved)
+      queueMicrotask(() => setLocaleState(saved))
     }
   }, [])
 

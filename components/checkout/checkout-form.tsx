@@ -239,7 +239,7 @@ export function CheckoutForm() {
             Order on WhatsApp
           </button>
           <p className="mt-3 text-center text-[10px] font-light text-[#AEAEB2]">
-            You'll be redirected to WhatsApp to confirm your order.
+            You&apos;ll be redirected to WhatsApp to confirm your order.
           </p>
         </div>
 
