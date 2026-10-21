@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Cormorant_Garamond, Tajawal } from 'next/font/google'
 import { cookies } from 'next/headers'
+import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
 import { I18nProvider } from '@/lib/i18n/context'
 import type { Locale } from '@/lib/i18n/translations'
@@ -75,6 +76,7 @@ export default async function RootLayout({
           {children}
         </I18nProvider>
         <Toaster position="bottom-right" />
+        <Analytics />
       </body>
     </html>
   )
