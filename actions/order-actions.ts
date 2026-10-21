@@ -2,11 +2,12 @@
 
 import { db } from '@/lib/db'
 import { orderSchema, type OrderInput } from '@/lib/validations'
+import { resolveOrderLines, calculateOrderTotal } from '@/lib/order-logic'
 import { revalidatePath } from 'next/cache'
 import { updateTag } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import type { CartItem, Order, OrderStatus } from '@/types'
+import type { CartItem, Order, OrderStatus, Product } from '@/types'
 
 async function requireAdmin() {
   const session = await auth()
@@ -76,47 +77,8 @@ export async function placeOrder(
     include: { variants: true },
   })
   const productById = new Map(products.map((p) => [p.id, p]))
-
-  type ResolvedLine = {
-    productId: string
-    variantId: string | null
-    variantName: string | null
-    quantity: number
-    price: number
-  }
-
-  const lines: ResolvedLine[] = cartItems.map((item) => {
-    const product = productById.get(item.product.id)
-    if (!product) throw new Error(`"${item.product.name_en}" is no longer available.`)
-
-    if (item.variant) {
-      const variant = product.variants.find((v) => v.id === item.variant!.id)
-      if (!variant) throw new Error(`The "${item.variant.shadeName}" shade of "${product.name_en}" is no longer available.`)
-      if (variant.stock < item.quantity) {
-        throw new Error(`"${product.name_en}" (${variant.shadeName}) is out of stock or has insufficient quantity.`)
-      }
-      return {
-        productId: product.id,
-        variantId: variant.id,
-        variantName: variant.shadeName,
-        quantity: item.quantity,
-        price: product.price,
-      }
-    }
-
-    if (product.stock < item.quantity) {
-      throw new Error(`"${product.name_en}" is out of stock or has insufficient quantity.`)
-    }
-    return {
-      productId: product.id,
-      variantId: null,
-      variantName: null,
-      quantity: item.quantity,
-      price: product.price,
-    }
-  })
-
-  const totalPrice = lines.reduce((sum, l) => sum + l.price * l.quantity, 0)
+  const lines = resolveOrderLines(cartItems, products as unknown as Product[])
+  const totalPrice = calculateOrderTotal(lines)
 
   let order
   try {
