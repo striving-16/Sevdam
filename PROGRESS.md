@@ -54,35 +54,34 @@ Database: `.env.local` has a live Supabase `DATABASE_URL` + Cloudinary + NextAut
    - [components/admin/admin-sidebar.tsx:92](components/admin/admin-sidebar.tsx#L92) (warning-level `set-state-in-effect`)
    - Several `no-unused-vars` / `no-img-element` warnings in admin components.
 
-3. **Untracked helper script duplicates a Prisma migration**: [scripts/create-testimonials-table.ts](scripts/create-testimonials-table.ts) manually runs the same `CREATE TABLE IF NOT EXISTS "Testimonial"` SQL that's already in [prisma/migrations/20260624000000_add_testimonials](prisma/migrations/20260624000000_add_testimonials). This looks like a manual fallback (probably because `prisma migrate deploy` isn't wired into the Vercel build command, so the migration never auto-applies in production). Needs a decision — see Q2.
+3. ~~Untracked helper script duplicates a Prisma migration~~ — **RESOLVED.** Diffed `scripts/create-testimonials-table.ts` against `prisma/migrations/20260624000000_add_testimonials/migration.sql` — SQL was byte-identical apart from indentation. Script deleted.
 
-4. **Dead/unused homepage components** — not imported anywhere in `app/` or `components/`:
-   - `components/home/brand-statement.tsx`
-   - `components/home/new-arrivals.tsx`
-   - `components/home/routine-section.tsx`
-   - `components/home/special-offers.tsx`
-   - `components/home/category-filter.tsx`
-   - `components/home/category-strip.tsx`
-   - `components/home/featured-products.tsx`
+4. **Dead/unused homepage components** — not imported anywhere in `app/` or `components/`. Reviewed 2026-10-21; awaiting decision on which to wire in vs delete:
+   - `components/home/brand-statement.tsx` — "Our Philosophy" 3-pillar editorial section. Finished, but hardcoded English (not i18n-wired).
+   - `components/home/new-arrivals.tsx` — "New Drops" grid, i18n-aware, has its own demo-data fallback. Finished, drop-in ready.
+   - `components/home/routine-section.tsx` — dark 3-step routine section, fully i18n-wired (en/fr/ar), RTL-aware. Finished, drop-in ready.
+   - `components/home/special-offers.tsx` — 3-card offer grid. **Links to `/categories/skincare`, `/categories/haircare`, `/categories/perfumes` which don't match real category slugs** — needs real content before use.
+   - `components/home/category-filter.tsx` — scrollable category pill nav, i18n-wired, RTL-aware. Finished, drop-in ready.
+   - `components/home/category-strip.tsx` — 5-tile editorial category grid (Lips/Face/Eyes/Skincare/Accessories). Finished, hardcoded English.
+   - `components/home/featured-products.tsx` — generic featured-products grid, i18n-wired. Finished but redundant with the already-wired `best-sellers.tsx`.
 
-5. **Empty leftover route folders** under `app/(shop)/products/` with no `page.tsx` inside (safe no-ops, but clutter): `cosmetics/`, `haircare/`, `korean-beauty/`, `skincare/`, `treatments/`, `(listing)/`, `[id]/`.
+5. ~~Empty leftover route folders~~ — **RESOLVED.** Removed `cosmetics/`, `haircare/`, `korean-beauty/`, `skincare/`, `treatments/`, `(listing)/`, `[id]/` under `app/(shop)/products/` — all were empty (git never tracked them, so no commit needed for this).
 
 6. **Build-time DB connection pool exhaustion**: during `next build`, multiple admin pages (`AdminTestimonials`, `AdminProducts`) hit the DB concurrently during static optimization and log `(EMAXCONNSESSION) max clients reached in session mode — max clients are limited to pool_size: 15` against the Supabase pooler. Build still completes (pages are dynamic `ƒ`, not pre-rendered, so it's non-fatal), but it's a signal the Prisma client isn't using a pooled/pgbouncer-friendly connection string, or too many admin pages are forcing DB reads at build time.
 
 ## Task list (priority order)
 
 1. [x] **Fix the production build** — fixed via clean reinstall (`node_modules`, `.next`, `package-lock.json` removed and reinstalled). `npm run build` now passes with the default Turbopack bundler. No font/bundler code changes needed.
-2. [ ] **Decide on and resolve the duplicate testimonials-table script** (Task/Q2 below), then remove or formalize whichever approach isn't kept.
+2. [x] Duplicate testimonials-table script deleted (SQL matched the existing migration exactly).
 3. [ ] **Fix the 10 ESLint errors** (unescaped entities, `set-state-in-effect`) listed above — low-risk, mechanical fixes.
 4. [ ] **Investigate the Supabase connection-pool exhaustion during build** — likely needs a build-time `DATABASE_URL` pointing at the pgbouncer/transaction-mode pooler port, or reducing concurrent DB calls during static generation.
-5. [ ] Clean up the 7 dead/unused homepage components and the empty route folders (only after confirming with user — see "Don't delete without asking").
+5. [x] Empty route folders removed. Dead-component decision still pending (summary given to user 2026-10-21 — none deleted yet).
 6. [ ] Clear the 15 remaining ESLint warnings (unused vars, `<img>` → `next/image`) as time allows.
 7. [ ] Decide whether a test suite should be introduced at all, and if so, what to prioritize first (cart/checkout logic, server actions, or auth).
 
 ## Open questions
 
 - **Q1 — Brand palette:** memory from an earlier session says the luxury redesign standardized on gold `#D4AF37` / ivory `#FDF8F3` / near-black `#1A1A18`, but the current homepage/testimonials code uses `#F7F5F2` / `#111111` / accent `#C7A98B`. Is this an intentional palette evolution, or should it be reconciled back to the original spec?
-- **Q2 — `scripts/create-testimonials-table.ts`:** keep it as a permanent "run manually against prod if migrations didn't apply" utility, wire `prisma migrate deploy` into the actual build/deploy command instead, or just delete it since the migration file already covers the same SQL?
 - **Q3 — Dead components:** confirm it's OK to delete the 7 unused `components/home/*` files and empty route folders listed above, or are any of them intended for upcoming work?
 - **Q4 — Build fix approach:** for Task 1, is `next/font/local` (fully self-hosted, no network dependency) the preferred fix, or would you rather just pin `build`/`start` to `--webpack` and move on?
 - **Q5 — Scope of "finish the project":** is there a specific feature list / checklist from you (beyond what's in the code) that defines "done," or should this task list above be treated as the full scope?
