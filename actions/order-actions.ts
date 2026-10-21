@@ -13,6 +13,41 @@ async function requireAdmin() {
   if (!session?.user) redirect('/login')
 }
 
+// Restricted shape for customer-facing order lookups (order confirmation,
+// /track-order) — deliberately excludes customerName/customerPhone/
+// customerAddress so it's safe to return without an auth check.
+export type PublicOrder = {
+  id: string
+  status: OrderStatus
+  deliveryType: string
+  totalPrice: number
+  createdAt: Date
+  items: {
+    id: string
+    quantity: number
+    price: number
+    variantName: string | null
+    product: { name_en: string; name_ar: string; imageUrl: string; slug: string } | null
+  }[]
+}
+
+const PUBLIC_ORDER_SELECT = {
+  id: true,
+  status: true,
+  deliveryType: true,
+  totalPrice: true,
+  createdAt: true,
+  items: {
+    select: {
+      id: true,
+      quantity: true,
+      price: true,
+      variantName: true,
+      product: { select: { name_en: true, name_ar: true, imageUrl: true, slug: true } },
+    },
+  },
+} as const
+
 export async function placeOrder(
   customerInfo: OrderInput,
   cartItems: CartItem[]
@@ -79,17 +114,28 @@ export async function placeOrder(
 }
 
 export async function getOrders(): Promise<Order[]> {
+  await requireAdmin()
   return db.order.findMany({
     include: { items: { include: { product: true } } },
     orderBy: { createdAt: 'desc' },
   }) as unknown as Promise<Order[]>
 }
 
+/** Admin-only — full customer details. Use `getOrderConfirmation` for public pages. */
 export async function getOrderById(id: string): Promise<Order | null> {
+  await requireAdmin()
   return db.order.findUnique({
     where: { id },
     include: { items: { include: { product: true } } },
   }) as unknown as Promise<Order | null>
+}
+
+/** Public — safe for the order-confirmation page. No customer name/phone/address. */
+export async function getOrderConfirmation(id: string): Promise<PublicOrder | null> {
+  return db.order.findUnique({
+    where: { id },
+    select: PUBLIC_ORDER_SELECT,
+  }) as unknown as Promise<PublicOrder | null>
 }
 
 export async function updateOrderStatus(id: string, status: OrderStatus) {
@@ -146,12 +192,13 @@ export async function createAdminOrder(
   return { orderId: order.id }
 }
 
-export async function getOrdersByPhone(phone: string): Promise<Order[]> {
+/** Public — used by /track-order. Restricted shape, same reasoning as getOrderConfirmation. */
+export async function getOrdersByPhone(phone: string): Promise<PublicOrder[]> {
   const trimmed = phone.trim()
   if (!trimmed) return []
   return db.order.findMany({
     where: { customerPhone: { contains: trimmed } },
-    include: { items: { include: { product: true } } },
+    select: PUBLIC_ORDER_SELECT,
     orderBy: { createdAt: 'desc' },
-  }) as unknown as Promise<Order[]>
+  }) as unknown as Promise<PublicOrder[]>
 }

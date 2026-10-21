@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Check } from 'lucide-react'
-import { getOrderById } from '@/actions/order-actions'
+import { getOrderConfirmation } from '@/actions/order-actions'
 import { formatPrice, ORDER_STATUS_LABELS } from '@/lib/utils'
 import { getServerT } from '@/lib/i18n/server'
 import { interpolate } from '@/lib/i18n/context'
@@ -9,15 +9,23 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import type { Metadata } from 'next'
 
+const DELIVERY_LABELS: Record<string, string> = {
+  home:    'Home Delivery',
+  express: 'Express Delivery',
+  pickup:  'Store Pickup',
+}
+
 interface Props {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ name?: string }>
 }
 
 export const metadata: Metadata = { title: 'Order Confirmed' }
 
-export default async function OrderConfirmationPage({ params }: Props) {
+export default async function OrderConfirmationPage({ params, searchParams }: Props) {
   const { id } = await params
-  const [order, { t, dir }] = await Promise.all([getOrderById(id), getServerT()])
+  const { name } = await searchParams
+  const [order, { t, dir }] = await Promise.all([getOrderConfirmation(id), getServerT()])
   const isRtl = dir === 'rtl'
 
   if (!order) notFound()
@@ -33,7 +41,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
           {t.orderConfirmation.title}
         </h1>
         <p className="mt-3 text-[14px] font-light leading-relaxed text-[#78716C]">
-          {interpolate(t.orderConfirmation.sub, { name: order.customerName })}
+          {name ? interpolate(t.orderConfirmation.sub, { name }) : t.orderConfirmation.title}
         </p>
       </div>
 
@@ -63,7 +71,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
             {t.orderConfirmation.deliveryLabel}
           </p>
           <p className={`text-[13px] font-light text-[#44403C] max-w-[200px] ${isRtl ? 'text-left' : 'text-right'}`}>
-            {order.customerAddress}
+            {DELIVERY_LABELS[order.deliveryType] ?? order.deliveryType}
           </p>
         </div>
 

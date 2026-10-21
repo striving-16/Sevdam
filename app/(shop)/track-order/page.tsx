@@ -2,9 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { Phone, Search, Package, ChevronRight, Loader2 } from 'lucide-react'
-import { getOrdersByPhone } from '@/actions/order-actions'
+import { getOrdersByPhone, type PublicOrder } from '@/actions/order-actions'
 import { formatPrice, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '@/lib/utils'
-import type { Order } from '@/types'
 
 const DELIVERY_LABELS: Record<string, string> = {
   home:    'Home Delivery',
@@ -14,7 +13,7 @@ const DELIVERY_LABELS: Record<string, string> = {
 
 export default function TrackOrderPage() {
   const [phone, setPhone]     = useState('')
-  const [orders, setOrders]   = useState<Order[] | null>(null)
+  const [orders, setOrders]   = useState<PublicOrder[] | null>(null)
   const [pending, start]      = useTransition()
   const [searched, setSearched] = useState(false)
 
@@ -105,7 +104,7 @@ export default function TrackOrderPage() {
   )
 }
 
-function OrderCard({ order }: { order: Order }) {
+function OrderCard({ order }: { order: PublicOrder }) {
   const [open, setOpen] = useState(false)
   const statusColor = ORDER_STATUS_COLORS[order.status] ?? 'bg-neutral-50 text-neutral-600 border-neutral-200'
   const statusLabel = ORDER_STATUS_LABELS[order.status] ?? order.status
