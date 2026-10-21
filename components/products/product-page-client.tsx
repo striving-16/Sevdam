@@ -230,10 +230,11 @@ export function ProductPageClient({
           {/* Gold hairline */}
           <div className="my-7 h-px bg-[#EDE5DA]" />
 
-          {/* Add to Bag + WhatsApp */}
+          {/* Add to Bag + WhatsApp — WhatsApp is hidden when sold out so it
+              never offers an "order" shortcut for something unavailable. */}
           <div className="space-y-3">
             <AddToCartButton product={product} selectedVariant={selectedVariant} />
-            <ProductWhatsAppButton product={product} selectedVariant={selectedVariant} />
+            {!soldOut && <ProductWhatsAppButton product={product} selectedVariant={selectedVariant} />}
           </div>
         </div>
       </div>
