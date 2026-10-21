@@ -151,8 +151,15 @@ export async function updateProduct(id: string, input: Partial<ProductInput>, sh
   if (shades !== undefined) {
     // Replace all variants atomically — clear the cover pointer first since
     // it has a FK to the old variant rows we're about to delete.
+    const oldVariants = await db.variant.findMany({ where: { productId: id }, select: { image: true } })
     await db.product.update({ where: { id }, data: { coverVariantId: null } })
     await db.variant.deleteMany({ where: { productId: id } })
+
+    // Clean up Cloudinary assets for shade images that aren't reused in the
+    // new shade list — otherwise every edit leaves the old image orphaned.
+    const keptImages = new Set(shades.map((s) => s.image).filter(Boolean))
+    const toDelete = oldVariants.map((v) => v.image).filter((img): img is string => !!img && !keptImages.has(img))
+    await Promise.all(toDelete.map((img) => deleteProductImage(img).catch(() => {})))
 
     if (shades.length > 0) {
       const created = await db.variant.createManyAndReturn({
@@ -190,9 +197,14 @@ export async function updateProductGallery(id: string, gallery: string[]): Promi
 
 export async function deleteProduct(id: string) {
   await requireAdmin()
-  const product = await db.product.findUnique({ where: { id } })
+  const product = await db.product.findUnique({ where: { id }, include: { variants: { select: { image: true } } } })
   if (!product) throw new Error('Product not found')
-  if (product.imageUrl) await deleteProductImage(product.imageUrl).catch(() => {})
+
+  const images = new Set<string>()
+  if (product.imageUrl) images.add(product.imageUrl)
+  for (const v of product.variants) if (v.image) images.add(v.image)
+  await Promise.all([...images].map((img) => deleteProductImage(img).catch(() => {})))
+
   await db.product.delete({ where: { id } })
   updateTag('products')
   revalidatePath('/products')

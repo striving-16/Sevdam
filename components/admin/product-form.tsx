@@ -447,13 +447,21 @@ export function ProductForm({ product }: { product?: Product }) {
   )
 
   async function formAction(_prev: State, formData: FormData): Promise<State> {
-    if (!imageUrl) return { error: 'Please add a product image' }
-
     if (hasVariants) {
       if (shades.length === 0) return { error: 'Add at least one shade for a variant product' }
       const missing = shades.findIndex((s) => !s.shadeName.trim() || !s.image)
       if (missing !== -1) return { error: `Shade ${missing + 1}: shade name and image are required` }
+    } else if (!imageUrl) {
+      return { error: 'Please add a product image' }
     }
+
+    // Variant products derive their cover image from the cover shade — the
+    // storefront already shows the cover shade's image everywhere (product
+    // card, product page), so a separate top-level upload would just be a
+    // second copy of the same photo. Only non-variant products need one.
+    const effectiveImageUrl = hasVariants
+      ? (shades.find((s) => s.isCover)?.image || shades[0]?.image || '')
+      : imageUrl
 
     const payload = {
       name_en:        formData.get('name_en')        as string,
@@ -463,7 +471,7 @@ export function ProductForm({ product }: { product?: Product }) {
       description_ar: (formData.get('description_ar') as string) || '',
       price:          Number(formData.get('price')),
       stock:          hasVariants ? 0 : stockValue,
-      imageUrl,
+      imageUrl:       effectiveImageUrl,
       gallery:        [] as string[],
       hasVariants,
       category:       ((formData.get('category') as string) || 'LIPSTICK') as ProductCategory,
@@ -503,13 +511,17 @@ export function ProductForm({ product }: { product?: Product }) {
   return (
     <form action={action} className="max-w-2xl space-y-7">
 
-      {/* Cover image */}
-      <div className="space-y-2">
-        <Label className="text-[12px] font-light tracking-wide text-neutral-600">
-          Cover Image <span className="text-red-400">*</span>
-        </Label>
-        <ImageUpload value={imageUrl} onChange={setImageUrl} />
-      </div>
+      {/* Cover image — only for simple products. Variant products use the
+          cover shade's image instead (set below), since that's already
+          what the storefront displays. */}
+      {!hasVariants && (
+        <div className="space-y-2">
+          <Label className="text-[12px] font-light tracking-wide text-neutral-600">
+            Cover Image <span className="text-red-400">*</span>
+          </Label>
+          <ImageUpload value={imageUrl} onChange={setImageUrl} />
+        </div>
+      )}
 
       {/* Name EN + Slug */}
       <div className="grid gap-5 sm:grid-cols-2">
@@ -663,6 +675,7 @@ export function ProductForm({ product }: { product?: Product }) {
           <div className="rounded-xl border border-[#C9A96E]/20 bg-[#FDFAF6] p-4">
             <p className="mb-3 text-[11px] font-light text-[#9E8E80]">
               Each shade needs a name, hex colour, stock quantity, and a shade image (required — shown on product page when shade is selected).
+              The cover shade (★) also becomes the product&apos;s main image — no separate upload needed.
             </p>
             <ShadeEditor shades={shades} onChange={setShades} />
           </div>
