@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test lib/**/*.test.ts",
+    "backup:db": "node scripts/backup-database.ts",
+    "backup:cloudinary": "node scripts/backup-cloudinary.ts",
+    "restore:drill": "node scripts/restore-drill.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
