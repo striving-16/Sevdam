@@ -50,6 +50,10 @@ export function CheckoutForm() {
   const [errors, setErrors]     = useState<Record<string, string>>({})
   const [orderError, setOrderError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  // Stable for the lifetime of this form (incl. retries) — a fresh key per
+  // mount, so a dropped-response retry replays the same order instead of
+  // creating a second one, but a brand-new checkout session gets a new key.
+  const [idempotencyKey] = useState(() => crypto.randomUUID())
 
   const total        = totalPrice()
   const needsAddress = delivery !== 'pickup'
@@ -80,7 +84,8 @@ export function CheckoutForm() {
             customerAddress: needsAddress ? address : '',
             deliveryType: delivery,
           },
-          items
+          items,
+          idempotencyKey
         )
         clearCart()
         const params = new URLSearchParams({ name, phone })

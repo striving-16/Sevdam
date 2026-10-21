@@ -90,6 +90,7 @@ model Order {
   items           OrderItem[]
   customerId      String?
   customer        Customer?   @relation(fields: [customerId], references: [id])
+  idempotencyKey  String?     @unique // client-generated token; prevents duplicate orders from retries/double-submit
 
   @@index([customerPhone])
   @@index([status])

@@ -50,11 +50,23 @@ const PUBLIC_ORDER_SELECT = {
 
 export async function placeOrder(
   customerInfo: OrderInput,
-  cartItems: CartItem[]
+  cartItems: CartItem[],
+  idempotencyKey?: string
 ): Promise<{ orderId: string }> {
   const data = orderSchema.parse(customerInfo)
 
   if (cartItems.length === 0) throw new Error('Cart is empty')
+
+  // If this exact checkout attempt already went through (double-click,
+  // retried request after a dropped response, a second tab), replay the
+  // existing order instead of creating a duplicate.
+  if (idempotencyKey) {
+    const existing = await db.order.findUnique({
+      where: { idempotencyKey },
+      select: { id: true },
+    })
+    if (existing) return { orderId: existing.id }
+  }
 
   // Re-fetch every product (+ its variants) server-side — price and stock
   // are never trusted from the client's cart.
@@ -106,46 +118,72 @@ export async function placeOrder(
 
   const totalPrice = lines.reduce((sum, l) => sum + l.price * l.quantity, 0)
 
-  const order = await db.$transaction(async (tx) => {
-    const customer = await tx.customer.upsert({
-      where: { phone: data.customerPhone },
-      create: { name: data.customerName, phone: data.customerPhone, totalOrders: 1 },
-      update: { name: data.customerName, totalOrders: { increment: 1 } },
-    })
+  let order
+  try {
+    order = await db.$transaction(async (tx) => {
+      // Authoritative stock check happens HERE, not in the earlier read above.
+      // A conditional updateMany (stock >= quantity in the WHERE clause) is
+      // what makes this safe under concurrency: Postgres row-locks the target
+      // row for the duration of the UPDATE, so two simultaneous checkouts for
+      // the last unit serialize naturally — the second transaction's WHERE
+      // re-evaluates against the already-decremented value and matches zero
+      // rows, which we detect via `count` and roll back on. The earlier read
+      // (lines, above) only exists to fail fast with a friendly message in
+      // the common, non-racing case and to resolve price/variant identity.
+      for (const l of lines) {
+        const result = l.variantId
+          ? await tx.variant.updateMany({
+              where: { id: l.variantId, stock: { gte: l.quantity } },
+              data: { stock: { decrement: l.quantity } },
+            })
+          : await tx.product.updateMany({
+              where: { id: l.productId, stock: { gte: l.quantity } },
+              data: { stock: { decrement: l.quantity } },
+            })
 
-    const created = await tx.order.create({
-      data: {
-        ...data,
-        totalPrice,
-        customerId: customer.id,
-        items: {
-          create: lines.map((l) => ({
-            productId: l.productId,
-            variantId: l.variantId,
-            variantName: l.variantName,
-            quantity: l.quantity,
-            price: l.price,
-          })),
-        },
-      },
-    })
-
-    for (const l of lines) {
-      if (l.variantId) {
-        await tx.variant.update({
-          where: { id: l.variantId },
-          data: { stock: { decrement: l.quantity } },
-        })
-      } else {
-        await tx.product.update({
-          where: { id: l.productId },
-          data: { stock: { decrement: l.quantity } },
-        })
+        if (result.count === 0) {
+          const product = productById.get(l.productId)
+          const label = l.variantName ? `"${product?.name_en}" (${l.variantName})` : `"${product?.name_en}"`
+          throw new Error(`${label} just sold out — please remove it from your cart and try again.`)
+        }
       }
-    }
 
-    return created
-  })
+      const customer = await tx.customer.upsert({
+        where: { phone: data.customerPhone },
+        create: { name: data.customerName, phone: data.customerPhone, totalOrders: 1 },
+        update: { name: data.customerName, totalOrders: { increment: 1 } },
+      })
+
+      const created = await tx.order.create({
+        data: {
+          ...data,
+          totalPrice,
+          customerId: customer.id,
+          idempotencyKey: idempotencyKey ?? null,
+          items: {
+            create: lines.map((l) => ({
+              productId: l.productId,
+              variantId: l.variantId,
+              variantName: l.variantName,
+              quantity: l.quantity,
+              price: l.price,
+            })),
+          },
+        },
+      })
+
+      return created
+    })
+  } catch (err) {
+    // Two requests with the same idempotency key racing each other: the
+    // loser hits the unique-constraint violation (P2002), not a real error —
+    // the winner's order already exists, so replay it instead of failing.
+    if (idempotencyKey && typeof err === 'object' && err !== null && 'code' in err && err.code === 'P2002') {
+      const existing = await db.order.findUnique({ where: { idempotencyKey }, select: { id: true } })
+      if (existing) return { orderId: existing.id }
+    }
+    throw err
+  }
 
   updateTag('products')
   revalidatePath('/products')
