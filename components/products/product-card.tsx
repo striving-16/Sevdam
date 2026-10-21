@@ -8,7 +8,7 @@ import { Plus, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCart } from '@/hooks/use-cart'
 import { useTranslation } from '@/lib/i18n/context'
-import { formatPrice, cn } from '@/lib/utils'
+import { formatPrice, cn, getCoverVariant } from '@/lib/utils'
 import { CATEGORY_LABELS } from '@/lib/validations'
 import type { Product, Variant } from '@/types'
 
@@ -37,8 +37,8 @@ export function ProductCard({
   const categoryLabel = CATEGORY_LABELS[product.category] ?? product.category
 
   const hasVariants  = product.hasVariants && product.variants.length > 0
-  const firstVariant = hasVariants ? product.variants[0] : null
-  const [selected, setSelected] = useState<Variant | null>(firstVariant)
+  const coverVariant = hasVariants ? getCoverVariant(product) : null
+  const [selected, setSelected] = useState<Variant | null>(coverVariant)
   const [added,    setAdded]    = useState(false)
 
   const displayImage = (selected?.image ?? null) || product.imageUrl

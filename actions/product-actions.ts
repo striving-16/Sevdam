@@ -29,6 +29,7 @@ export type ShadeInput = {
   stock:        number
   image:        string
   sku?:         string | null
+  isCover?:     boolean
 }
 
 // ─── Read ─────────────────────────────────────────────────────────────────────
@@ -102,28 +103,37 @@ export async function getNewArrivals(limit = 4): Promise<Product[]> {
 
 // ─── Write ────────────────────────────────────────────────────────────────────
 
+/** Picks the cover variant by sortOrder (not array position — createManyAndReturn doesn't guarantee input order). */
+function resolveCoverVariantId(shades: ShadeInput[], created: { id: string; sortOrder: number }[]): string | null {
+  if (created.length === 0) return null
+  const coverIdx = Math.max(0, shades.findIndex((s) => s.isCover))
+  return created.find((v) => v.sortOrder === coverIdx)?.id ?? created[0].id
+}
+
 export async function createProduct(input: ProductInput, shades: ShadeInput[] = []) {
   await requireAdmin()
   const data = productSchema.parse(input)
 
-  const product = await db.product.create({
-    data: {
-      ...data,
-      ...(shades.length > 0 && {
-        variants: {
-          create: shades.map((s, idx) => ({
-            shadeName:   s.shadeName,
-            hexColor:    normalizeHex(s.hexColor) ?? FALLBACK_HEX,
-            colorSource: s.colorSource ?? 'manual',
-            stock:       s.stock     ?? 0,
-            image:       s.image     || null,
-            sku:         s.sku       || null,
-            sortOrder:   idx,
-          })),
-        },
-      }),
-    },
-  })
+  const product = await db.product.create({ data })
+
+  if (shades.length > 0) {
+    const created = await db.variant.createManyAndReturn({
+      data: shades.map((s, idx) => ({
+        productId:   product.id,
+        shadeName:   s.shadeName,
+        hexColor:    normalizeHex(s.hexColor) ?? FALLBACK_HEX,
+        colorSource: s.colorSource ?? 'manual',
+        stock:       s.stock     ?? 0,
+        image:       s.image     || null,
+        sku:         s.sku       || null,
+        sortOrder:   idx,
+      })),
+    })
+    await db.product.update({
+      where: { id: product.id },
+      data: { coverVariantId: resolveCoverVariantId(shades, created) },
+    })
+  }
 
   updateTag('products')
   revalidatePath('/products')
@@ -139,10 +149,13 @@ export async function updateProduct(id: string, input: Partial<ProductInput>, sh
   const product = await db.product.update({ where: { id }, data })
 
   if (shades !== undefined) {
-    // Replace all variants atomically
+    // Replace all variants atomically — clear the cover pointer first since
+    // it has a FK to the old variant rows we're about to delete.
+    await db.product.update({ where: { id }, data: { coverVariantId: null } })
     await db.variant.deleteMany({ where: { productId: id } })
+
     if (shades.length > 0) {
-      await db.variant.createMany({
+      const created = await db.variant.createManyAndReturn({
         data: shades.map((s, idx) => ({
           productId:   id,
           shadeName:   s.shadeName,
@@ -153,6 +166,10 @@ export async function updateProduct(id: string, input: Partial<ProductInput>, sh
           sku:         s.sku       || null,
           sortOrder:   idx,
         })),
+      })
+      await db.product.update({
+        where: { id },
+        data: { coverVariantId: resolveCoverVariantId(shades, created) },
       })
     }
   }

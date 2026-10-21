@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AddToCartButton } from '@/components/products/add-to-cart-button'
 import { ProductWhatsAppButton } from '@/components/products/product-whatsapp-button'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, getCoverVariant } from '@/lib/utils'
 import type { Product, Variant } from '@/types'
 
 interface Props {
@@ -21,11 +21,11 @@ export function ProductPageClient({
   product, allImages, name, description,
   categoryLabel, isRtl,
 }: Props) {
-  const hasVariants   = product.hasVariants && product.variants.length > 0
-  const firstVariant  = hasVariants ? product.variants[0] : null
+  const hasVariants  = product.hasVariants && product.variants.length > 0
+  const coverVariant = hasVariants ? getCoverVariant(product) : null
 
-  const [activeImage,    setActiveImage]    = useState(allImages[0] ?? product.imageUrl)
-  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(firstVariant)
+  const [activeImage,    setActiveImage]    = useState(coverVariant?.image || allImages[0] || product.imageUrl)
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(coverVariant)
 
   function selectVariant(v: Variant) {
     setSelectedVariant(v)

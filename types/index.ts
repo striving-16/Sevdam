@@ -38,6 +38,7 @@ export type Product = {
   imageUrl: string
   gallery: string[]
   hasVariants: boolean
+  coverVariantId?: string | null
   variants: Variant[]
   category: ProductCategory
   brand?: string | null

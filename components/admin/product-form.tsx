@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { createProduct, updateProduct, uploadProductImageAction, type ShadeInput } from '@/actions/product-actions'
 import { extractDominantColor, isValidHex, FALLBACK_HEX } from '@/lib/color-extraction'
-import { slugify } from '@/lib/utils'
+import { cn, slugify } from '@/lib/utils'
 import { MAKEUP_CATEGORIES, CATEGORY_LABELS } from '@/lib/validations'
 import type { Product, ProductCategory } from '@/types'
 
@@ -171,10 +171,12 @@ function ShadeRow({
   shade,
   onChange,
   onRemove,
+  onSetCover,
 }: {
   shade: ShadeInput
   onChange: (patch: Partial<ShadeInput>) => void
   onRemove: () => void
+  onSetCover: () => void
 }) {
   const [extracting, setExtracting] = useState(false)
   const swatchHex = isValidHex(shade.hexColor) ? shade.hexColor : FALLBACK_HEX
@@ -286,13 +288,29 @@ function ShadeRow({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={onRemove}
-        className="mt-0.5 flex-shrink-0 rounded-lg p-1.5 text-neutral-300 transition-colors hover:bg-red-50 hover:text-red-400"
-      >
-        <Trash2 size={14} strokeWidth={1.5} />
-      </button>
+      <div className="flex flex-shrink-0 flex-col items-center gap-1">
+        <button
+          type="button"
+          onClick={onSetCover}
+          disabled={shade.isCover}
+          title={shade.isCover ? 'Cover shade — shown by default on the product card and page' : 'Set as cover shade'}
+          className={cn(
+            'rounded-lg p-1.5 transition-colors',
+            shade.isCover
+              ? 'cursor-default text-[#C9A96E]'
+              : 'text-neutral-300 hover:bg-neutral-100 hover:text-neutral-500',
+          )}
+        >
+          <Star size={14} strokeWidth={1.5} className={shade.isCover ? 'fill-[#C9A96E]' : ''} />
+        </button>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="rounded-lg p-1.5 text-neutral-300 transition-colors hover:bg-red-50 hover:text-red-400"
+        >
+          <Trash2 size={14} strokeWidth={1.5} />
+        </button>
+      </div>
     </div>
   )
 }
@@ -305,7 +323,10 @@ function ShadeEditor({
   onChange: (shades: ShadeInput[]) => void
 }) {
   function addShade() {
-    onChange([...shades, { shadeName: '', hexColor: FALLBACK_HEX, colorSource: 'manual', stock: 0, image: '', sku: '' }])
+    onChange([...shades, {
+      shadeName: '', hexColor: FALLBACK_HEX, colorSource: 'manual', stock: 0, image: '', sku: '',
+      isCover: shades.length === 0,
+    }])
   }
 
   function updateShade(idx: number, patch: Partial<ShadeInput>) {
@@ -313,8 +334,18 @@ function ShadeEditor({
     onChange(next)
   }
 
+  function setCover(idx: number) {
+    onChange(shades.map((s, i) => ({ ...s, isCover: i === idx })))
+  }
+
   function removeShade(idx: number) {
-    onChange(shades.filter((_, i) => i !== idx))
+    const removed = shades[idx]
+    const next = shades.filter((_, i) => i !== idx)
+    // If the cover shade was removed, promote the new first shade.
+    if (removed?.isCover && next.length > 0 && !next.some((s) => s.isCover)) {
+      next[0] = { ...next[0], isCover: true }
+    }
+    onChange(next)
   }
 
   return (
@@ -325,6 +356,7 @@ function ShadeEditor({
           shade={shade}
           onChange={(patch) => updateShade(i, patch)}
           onRemove={() => removeShade(i)}
+          onSetCover={() => setCover(i)}
         />
       ))}
       <button
@@ -400,7 +432,7 @@ export function ProductForm({ product }: { product?: Product }) {
   const [hasVariants, setHasVariants] = useState(product?.hasVariants ?? false)
   const [isOffer, setIsOffer]         = useState(product?.isOffer ?? false)
   const [shades, setShades]           = useState<ShadeInput[]>(
-    product?.variants?.map((v) => ({
+    product?.variants?.map((v, i) => ({
       id:          v.id,
       shadeName:   v.shadeName,
       hexColor:    v.hexColor,
@@ -408,6 +440,9 @@ export function ProductForm({ product }: { product?: Product }) {
       stock:       v.stock,
       image:       v.image ?? '',
       sku:         v.sku,
+      // Cover shade, or — for products saved before this feature existed,
+      // where coverVariantId is still null — fall back to the first shade.
+      isCover:     product?.coverVariantId ? v.id === product.coverVariantId : i === 0,
     })) ?? []
   )
 
