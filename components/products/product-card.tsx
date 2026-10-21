@@ -91,18 +91,24 @@ export function ProductCard({
           aria-label={name}
           className="absolute inset-0"
         >
-          <Image
-            src={displayImage}
-            alt={name}
-            fill
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-            sizes={
-              featured
-                ? '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 40vw'
-                : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw'
-            }
-            loading="lazy"
-          />
+          {displayImage ? (
+            <Image
+              src={displayImage}
+              alt={name}
+              fill
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+              sizes={
+                featured
+                  ? '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 40vw'
+                  : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw'
+              }
+              loading="lazy"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#EDE5DA]">
+              <span className="font-display text-[11px] italic text-[#B8A890]">Besma Sevdam</span>
+            </div>
+          )}
         </Link>
 
         {/* Floating + button */}
@@ -178,42 +184,46 @@ export function ProductCard({
           {formatPrice(product.price)}
         </p>
 
-        {/* Shade swatches */}
-        {hasVariants && (
-          <div className={cn('mt-3.5 flex flex-wrap items-center', featured ? 'gap-2.5' : 'gap-2')}>
-            {product.variants.slice(0, maxSwatches).map((v) => (
-              <button
-                key={v.id}
-                type="button"
-                title={v.shadeName}
-                onClick={(e) => handleShadeClick(e, v)}
-                aria-label={v.shadeName}
-                aria-pressed={selected?.id === v.id}
-                className="flex-shrink-0 rounded-full focus:outline-none"
-                style={{
-                  width:           featured ? 24 : 20,
-                  height:          featured ? 24 : 20,
-                  backgroundColor: v.hexColor,
-                  boxShadow:       selected?.id === v.id
-                    ? `0 0 0 2.5px #F3EFE9, 0 0 0 4px ${v.hexColor}`
-                    : '0 0 0 0.5px rgba(0,0,0,0.16)',
-                  transform:       selected?.id === v.id ? 'scale(1.2)' : 'scale(1)',
-                  transition:      'transform 0.25s ease, box-shadow 0.25s ease',
-                }}
-              />
-            ))}
-            {product.variants.length > maxSwatches && (
-              <span className="text-[9.5px] font-light text-[#9E8E80]">
-                +{product.variants.length - maxSwatches}
-              </span>
-            )}
-          </div>
-        )}
+        {/* Shade swatches — fixed-height area, reserved even for products without shades */}
+        <div className="mt-3.5 min-h-[52px]">
+          {hasVariants && (
+            <>
+              <div className={cn('flex flex-wrap items-center', featured ? 'gap-2.5' : 'gap-2')}>
+                {product.variants.slice(0, maxSwatches).map((v) => (
+                  <button
+                    key={v.id}
+                    type="button"
+                    title={v.shadeName}
+                    onClick={(e) => handleShadeClick(e, v)}
+                    aria-label={v.shadeName}
+                    aria-pressed={selected?.id === v.id}
+                    className="flex-shrink-0 rounded-full focus:outline-none"
+                    style={{
+                      width:           featured ? 24 : 20,
+                      height:          featured ? 24 : 20,
+                      backgroundColor: v.hexColor,
+                      boxShadow:       selected?.id === v.id
+                        ? `0 0 0 2.5px #F3EFE9, 0 0 0 4px ${v.hexColor}`
+                        : '0 0 0 0.5px rgba(0,0,0,0.16)',
+                      transform:       selected?.id === v.id ? 'scale(1.2)' : 'scale(1)',
+                      transition:      'transform 0.25s ease, box-shadow 0.25s ease',
+                    }}
+                  />
+                ))}
+                {product.variants.length > maxSwatches && (
+                  <span className="text-[9.5px] font-light text-[#9E8E80]">
+                    +{product.variants.length - maxSwatches}
+                  </span>
+                )}
+              </div>
 
-        {/* Selected shade label */}
-        {hasVariants && selected && (
-          <p className="mt-2 text-[9.5px] font-light text-[#9A9A9A]">{selected.shadeName}</p>
-        )}
+              {/* Selected shade label */}
+              {selected && (
+                <p className="mt-2 text-[9.5px] font-light text-[#9A9A9A]">{selected.shadeName}</p>
+              )}
+            </>
+          )}
+        </div>
 
         {/* Push CTA to bottom */}
         <div className="flex-1" />
