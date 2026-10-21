@@ -8,7 +8,7 @@ import { ShoppingBag, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCart } from '@/hooks/use-cart'
 import { useTranslation } from '@/lib/i18n/context'
-import { formatPrice, cn } from '@/lib/utils'
+import { formatPrice, cn, getCoverVariant } from '@/lib/utils'
 import { CATEGORY_LABELS } from '@/lib/validations'
 import type { Product, Variant } from '@/types'
 
@@ -32,8 +32,8 @@ export function ProductCard({
   const categoryLabel = CATEGORY_LABELS[product.category] ?? product.category
 
   const hasVariants  = product.hasVariants && product.variants.length > 0
-  const firstVariant = hasVariants ? product.variants[0] : null
-  const [selected, setSelected] = useState<Variant | null>(firstVariant)
+  const coverVariant = hasVariants ? getCoverVariant(product) : null
+  const [selected, setSelected] = useState<Variant | null>(coverVariant)
   const [added,    setAdded]    = useState(false)
 
   const displayImage = (selected?.image ?? null) || product.imageUrl
@@ -83,18 +83,24 @@ export function ProductCard({
           featured ? 'aspect-[5/6] lg:aspect-[3/4]' : 'aspect-[4/5]',
         )}
       >
-        <Image
-          src={displayImage}
-          alt={name}
-          fill
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-          sizes={
-            featured
-              ? '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 40vw'
-              : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw'
-          }
-          loading="lazy"
-        />
+        {displayImage ? (
+          <Image
+            src={displayImage}
+            alt={name}
+            fill
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+            sizes={
+              featured
+                ? '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 40vw'
+                : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw'
+            }
+            loading="lazy"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-[#EDE5DA]">
+            <span className="font-display text-[11px] italic text-[#B8A890]">Besma Sevdam</span>
+          </div>
+        )}
 
         {soldOut && (
           <div className="absolute inset-0 flex items-end justify-center pb-4">
@@ -139,41 +145,45 @@ export function ProductCard({
           {formatPrice(product.price)}
         </p>
 
-        {/* Swatches */}
-        {hasVariants && (
-          <div className={cn('mt-3 flex flex-wrap items-center', featured ? 'gap-2' : 'gap-1.5')}>
-            {product.variants.slice(0, maxSwatches).map((v) => (
-              <button
-                key={v.id}
-                type="button"
-                title={v.shadeName}
-                onClick={(e) => handleShadeClick(e, v)}
-                aria-label={v.shadeName}
-                aria-pressed={selected?.id === v.id}
-                className="flex-shrink-0 rounded-full focus:outline-none"
-                style={{
-                  width:           featured ? 20 : 16,
-                  height:          featured ? 20 : 16,
-                  backgroundColor: v.hexColor,
-                  boxShadow:       selected?.id === v.id
-                    ? `0 0 0 2px #F3EFE9, 0 0 0 3.5px ${v.hexColor}`
-                    : '0 0 0 0.5px rgba(0,0,0,0.14)',
-                  transform:       selected?.id === v.id ? 'scale(1.18)' : 'scale(1)',
-                  transition:      'transform 0.2s ease, box-shadow 0.2s ease',
-                }}
-              />
-            ))}
-            {product.variants.length > maxSwatches && (
-              <span className="text-[9px] font-light text-[#9E8E80]">
-                +{product.variants.length - maxSwatches}
-              </span>
-            )}
-          </div>
-        )}
+        {/* Swatches — fixed-height area, reserved even for products without shades */}
+        <div className="mt-3 min-h-[40px]">
+          {hasVariants && (
+            <>
+              <div className={cn('flex flex-wrap items-center', featured ? 'gap-2' : 'gap-1.5')}>
+                {product.variants.slice(0, maxSwatches).map((v) => (
+                  <button
+                    key={v.id}
+                    type="button"
+                    title={v.shadeName}
+                    onClick={(e) => handleShadeClick(e, v)}
+                    aria-label={v.shadeName}
+                    aria-pressed={selected?.id === v.id}
+                    className="flex-shrink-0 rounded-full focus:outline-none"
+                    style={{
+                      width:           featured ? 20 : 16,
+                      height:          featured ? 20 : 16,
+                      backgroundColor: v.hexColor,
+                      boxShadow:       selected?.id === v.id
+                        ? `0 0 0 2px #F3EFE9, 0 0 0 3.5px ${v.hexColor}`
+                        : '0 0 0 0.5px rgba(0,0,0,0.14)',
+                      transform:       selected?.id === v.id ? 'scale(1.18)' : 'scale(1)',
+                      transition:      'transform 0.2s ease, box-shadow 0.2s ease',
+                    }}
+                  />
+                ))}
+                {product.variants.length > maxSwatches && (
+                  <span className="text-[9px] font-light text-[#9E8E80]">
+                    +{product.variants.length - maxSwatches}
+                  </span>
+                )}
+              </div>
 
-        {hasVariants && selected && (
-          <p className="mt-1.5 text-[9px] font-light text-[#B0A49A]">{selected.shadeName}</p>
-        )}
+              {selected && (
+                <p className="mt-1.5 text-[9px] font-light text-[#B0A49A]">{selected.shadeName}</p>
+              )}
+            </>
+          )}
+        </div>
 
         {/* Spacer */}
         <div className="flex-1" />

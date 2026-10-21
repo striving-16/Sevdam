@@ -19,6 +19,7 @@ export type Variant = {
   productId: string
   shadeName: string
   hexColor: string
+  colorSource: 'manual' | 'suggested'
   image: string | null
   stock: number
   sku: string | null
@@ -37,6 +38,7 @@ export type Product = {
   imageUrl: string
   gallery: string[]
   hasVariants: boolean
+  coverVariantId?: string | null
   variants: Variant[]
   category: ProductCategory
   brand?: string | null

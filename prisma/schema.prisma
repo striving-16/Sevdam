@@ -34,12 +34,15 @@ model Product {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
-  variants       Variant[]
+  coverVariantId String?                        // Which shade is the product's cover image/default — null = use variants[0]
+  coverVariant   Variant?        @relation("ProductCover", fields: [coverVariantId], references: [id], onDelete: SetNull)
+  variants       Variant[]       @relation("ProductVariants")
   orderItems     OrderItem[]
 
   @@index([slug])
   @@index([category])
   @@index([brand])
+  @@index([coverVariantId])
 }
 
 // ─── Variants (shades / tones) ───────────────────────────────────────────────
@@ -49,13 +52,15 @@ model Variant {
   productId   String
   shadeName   String      // e.g. "Rose Nude", "Ruby Red"
   hexColor    String      // e.g. "#D4847A"
+  colorSource String      @default("manual") // "manual" | "suggested" — never overwrite "manual" without explicit re-suggest
   image       String?     // Variant-specific image (optional)
   stock       Int         @default(0)
   sku         String?
   sortOrder   Int         @default(0)
 
-  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  orderItems  OrderItem[]
+  product        Product     @relation("ProductVariants", fields: [productId], references: [id], onDelete: Cascade)
+  coverOfProduct Product[]   @relation("ProductCover")
+  orderItems     OrderItem[]
 
   @@index([productId])
 }
@@ -121,10 +126,12 @@ model Customer {
 // ─── Admin Users ─────────────────────────────────────────────────────────────
 
 model AdminUser {
-  id           String @id @default(cuid())
-  email        String @unique
-  passwordHash String
-  role         String @default("ADMIN")
+  id             String    @id @default(cuid())
+  email          String    @unique
+  passwordHash   String
+  role           String    @default("ADMIN")
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
 }
 
 // ─── Testimonials ─────────────────────────────────────────────────────────────

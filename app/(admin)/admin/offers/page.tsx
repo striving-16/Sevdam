@@ -29,7 +29,7 @@ export default function AdminOffersPage() {
       <div className="mb-8">
         <h1 className="text-[22px] font-light tracking-[-0.01em] text-neutral-800">Offers</h1>
         <p className="mt-1 text-[13px] font-light text-neutral-400">
-          Mark products as "on offer" with a sale price — they appear in the Offers section on your homepage.
+          Mark products as &quot;on offer&quot; with a sale price — they appear in the Offers section on your homepage.
         </p>
       </div>
 

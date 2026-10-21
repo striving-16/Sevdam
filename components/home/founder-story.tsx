@@ -102,7 +102,7 @@ export function FounderStory() {
             className="absolute bottom-6 right-6 z-20 max-w-[180px] bg-[#111111]/90 px-5 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-sm lg:bottom-10 lg:right-10"
           >
             <p className="font-display text-[12px] italic leading-[1.6] text-white/90">
-              "Every woman deserves to feel extraordinary."
+              &ldquo;Every woman deserves to feel extraordinary.&rdquo;
             </p>
             <p className="mt-2 text-[7.5px] font-light uppercase tracking-[0.3em] text-[#C7A98B]">
               Besma Sevdam

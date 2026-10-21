@@ -104,6 +104,9 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   <div>
                     <p className="text-[13px] font-light text-neutral-800">
                       {item.product?.name_en ?? 'Product'}
+                      {item.variantName && (
+                        <span className="text-neutral-400"> — {item.variantName}</span>
+                      )}
                     </p>
                     <p className="text-[12px] font-light text-neutral-400">
                       {formatPrice(item.price)} × {item.quantity}

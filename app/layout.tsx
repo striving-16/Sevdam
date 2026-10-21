@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Cormorant_Garamond, Tajawal } from 'next/font/google'
 import { cookies } from 'next/headers'
+import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
 import { I18nProvider } from '@/lib/i18n/context'
 import type { Locale } from '@/lib/i18n/translations'
@@ -28,7 +29,11 @@ const tajawal = Tajawal({
   display: 'swap',
 })
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+const ALLOW_INDEXING = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'Besma Sevdam — Luxury Beauty & Cosmetics',
     template: '%s | Besma Sevdam',
@@ -41,7 +46,13 @@ export const metadata: Metadata = {
     siteName: 'Besma Sevdam',
     title: 'Besma Sevdam — Luxury Beauty & Cosmetics',
     description: 'Premium beauty crafted for confidence, elegance, and timeless luxury.',
+    images: ['/images/founder-story.jpeg'],
   },
+  // No custom domain yet — kept out of search engines until
+  // NEXT_PUBLIC_ALLOW_INDEXING is flipped to "true" on a real domain.
+  robots: ALLOW_INDEXING
+    ? { index: true, follow: true }
+    : { index: false, follow: false },
 }
 
 const VALID_LOCALES: Locale[] = ['en', 'fr', 'ar']
@@ -65,6 +76,7 @@ export default async function RootLayout({
           {children}
         </I18nProvider>
         <Toaster position="bottom-right" />
+        <Analytics />
       </body>
     </html>
   )

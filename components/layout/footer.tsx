@@ -84,6 +84,8 @@ export function Footer() {
               { label: 'Contact',     href: '/contact'       },
               { label: 'Track Order', href: '/track-order'   },
               { label: 'Returns',     href: '/returns'       },
+              { label: 'Privacy',     href: '/privacy-policy'  },
+              { label: 'Terms',       href: '/terms-of-sale'   },
             ].map((l) => (
               <Link
                 key={l.href + l.label}

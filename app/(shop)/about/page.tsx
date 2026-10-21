@@ -49,7 +49,7 @@ export default function OurStoryPage() {
                 deserves makeup that is beautiful, authentic, and made for her.
               </p>
               <p>
-                I started this brand because I couldn't find what I was looking for:
+                I started this brand because I couldn&apos;t find what I was looking for:
                 products that felt luxurious without being inaccessible, that were honest about
                 what they do, and that came with real care and support.
               </p>

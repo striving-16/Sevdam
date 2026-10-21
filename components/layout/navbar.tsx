@@ -41,6 +41,11 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open,     setOpen]     = useState(false)
   const pathname = usePathname()
+  const [prevPathname, setPrevPathname] = useState(pathname)
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname)
+    setOpen(false)
+  }
   const { scrollY } = useScroll()
   const cartCount = useCart((s) => s.totalItems())
   const openCart  = useCart((s) => s.openCart)
@@ -53,8 +58,6 @@ export function Navbar() {
     document.body.style.overflow = open ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [open])
-
-  useEffect(() => { setOpen(false) }, [pathname])
 
   const closeMenu = useCallback(() => setOpen(false), [])
 

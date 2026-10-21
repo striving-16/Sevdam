@@ -1,8 +1,18 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import type { Product, Variant } from '@/types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+/** The shade a product should default to showing — the admin-chosen cover shade, or the first shade if none was set. */
+export function getCoverVariant(product: Pick<Product, 'coverVariantId' | 'variants'>): Variant | null {
+  if (!product.variants || product.variants.length === 0) return null
+  const cover = product.coverVariantId
+    ? product.variants.find((v) => v.id === product.coverVariantId)
+    : null
+  return cover ?? product.variants[0]
 }
 
 export function formatPrice(price: number): string {
