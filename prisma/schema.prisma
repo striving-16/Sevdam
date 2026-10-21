@@ -122,10 +122,12 @@ model Customer {
 // ─── Admin Users ─────────────────────────────────────────────────────────────
 
 model AdminUser {
-  id           String @id @default(cuid())
-  email        String @unique
-  passwordHash String
-  role         String @default("ADMIN")
+  id             String    @id @default(cuid())
+  email          String    @unique
+  passwordHash   String
+  role           String    @default("ADMIN")
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
 }
 
 // ─── Testimonials ─────────────────────────────────────────────────────────────
