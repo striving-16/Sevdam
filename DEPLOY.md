@@ -76,11 +76,19 @@ the backup drill in §5 does automatically.
 
 ### Database
 
-Supabase's own backup/PITR (point-in-time recovery) availability depends on
-your plan tier — **check Supabase Dashboard → Project Settings → Database
-→ Backups** and note what retention window and PITR option you actually
-have; free-tier projects typically have more limited retention than paid
-tiers, but confirm against what the dashboard shows rather than assuming.
+**Confirmed in the Supabase dashboard (2026-10-21): this project is on the
+Free plan, which includes NO project backups at all** — not daily, not
+PITR. Supabase's own words: "Free Plan does not include project backups.
+Upgrade to the Pro Plan for up to 7 days of scheduled backups." Pro adds
+daily backups retained ~7 days; PITR is a further add-on above that.
+
+**This means the scripts below are currently the only backup mechanism
+this project has.** A manual script that only runs when someone remembers
+to run it is a weak safety net — strongly consider either upgrading to
+Supabase Pro, or scheduling `backup:db` + `backup:cloudinary` to run
+automatically (e.g. a GitHub Action or Vercel Cron Job on a daily
+schedule, uploading the output somewhere durable like S3/Backblaze —
+not inside this repo).
 
 Independent of that, this repo includes its own logical backup, since
 `pg_dump`/`psql` aren't guaranteed to be installed everywhere this project
@@ -176,9 +184,10 @@ Analytics. No action needed.
 
 ## 8. Known limitations on current free plans
 
-- **Supabase (Free)**: confirm actual backup/PITR retention in the
-  dashboard — do not assume a specific window without checking, since this
-  varies by plan and can change.
+- **Supabase (Free)**: confirmed **zero built-in backups** — no daily
+  snapshots, no PITR. This project's own `backup:db`/`backup:cloudinary`
+  scripts are the only safety net until you either upgrade to Pro or
+  automate those scripts on a schedule (see §5).
 - **Cloudinary (Free)**: 25 monthly credits, usage currently negligible
   (~0.18/25). No automatic versioning/trash — this project's own
   `deleteProductImage` calls are the only deletion path, and
