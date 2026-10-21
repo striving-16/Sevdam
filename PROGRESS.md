@@ -22,11 +22,12 @@ npm install                 # postinstall runs `prisma generate`
 npm run dev                 # starts dev server (Turbopack) — works fine
 npm run build                # production build (Turbopack) — green
 npm start                    # after a successful build
-npx eslint .                 # lint — 0 errors, 15 warnings (cosmetic)
+npx eslint .                 # lint — 0 errors, 14 warnings (cosmetic)
 npx tsc --noEmit              # type check — clean
+npm test                     # node --test — 18/18 passing
 ```
 
-There is **no test suite** in this repo (no `*.test.*`/`*.spec.*` files, no test runner configured). "Testing" = manual verification via `npm run dev` + browser, plus `npx eslint .` and `tsc` type-checking.
+Test runner: Node's built-in `node --test` (zero new dependencies — a `vitest` install was attempted first but hit a real `@types/node` peer conflict against the project's pinned `^20`). Currently only covers `lib/color-extraction.ts` (hex validation, pixel-filtering math, manual-vs-suggested state transitions). No component/integration tests exist yet — UI flows are verified manually via `npm run dev` + Playwright-driven browser checks, not as committed automated tests.
 
 Database: `.env.local` has a live Supabase `DATABASE_URL` + Cloudinary + NextAuth secrets already configured, so `npm run dev` connects to a real (shared/dev) database — be careful with destructive admin actions while testing.
 
@@ -40,7 +41,9 @@ Database: `.env.local` has a live Supabase `DATABASE_URL` + Cloudinary + NextAut
 - Dynamic testimonials (most recent commit `d319b89`): full CRUD wired end-to-end — `actions/testimonial-actions.ts` → `components/home/testimonials.tsx`/`testimonials-list.tsx` on the storefront, `app/(admin)/admin/testimonials/testimonials-panel.tsx` in admin. Looks functionally complete.
 - Demo product fallback (`lib/demo-products.ts`) used across sitemap/category/product pages so the site still renders if the DB is briefly unreachable during build/deploy.
 - i18n scaffolding for en/fr/ar with RTL support in the root layout.
-- `git status` is clean except one new untracked file: `scripts/create-testimonials-table.ts`.
+- Mobile forms no longer trigger iOS Safari's auto-zoom (global 16px-on-mobile CSS rule).
+- Product cards are consistently sized with aligned CTAs across all grids, with a fixed-height shade-swatch area and a fallback for missing images.
+- Admin shade/variant editing is consolidated into one UI (`ShadeEditor` inside `ProductForm`) with SKU, a canvas-based color-suggestion feature (upload → suggested hex → manual correction → persists), and a "re-suggest" action. Storefront shade selection (image swap, cart, WhatsApp checkout) was already correct and is now fully covered end to end, including a fix for the cart-checkout WhatsApp message that previously dropped the selected shade.
 
 ## What's broken or incomplete
 
@@ -70,22 +73,32 @@ Database: `.env.local` has a live Supabase `DATABASE_URL` + Cloudinary + NextAut
    - The one remaining occurrence is from a public page's legitimate static-generation attempt (e.g. sitemap/category product lookup) hitting transient pool contention — already has a `.catch()` fallback (see `app/sitemap.ts` and `lib/demo-products.ts`), so it never fails the build.
    - Also added a Supabase **`DIRECT_URL`** (non-pooled connection) and pointed `prisma.config.ts`'s migration/CLI datasource at it, per the user's request to split pooler-for-runtime vs direct-for-migrations. **Caveat:** this project's direct host (`db.<ref>.supabase.co`) only resolves over **IPv6**, which this dev sandbox cannot route to (`Network is unreachable`) — so `prisma migrate dev/deploy` cannot run from this machine right now. It will likely work from Vercel (which generally has IPv6 egress) or from any machine with the Supabase IPv4 add-on, but this is **unverified** — flagged to the user, who chose to keep it as-is rather than revert to pooler-only. **Action needed before your next migration:** run `npx prisma migrate deploy` once (via Vercel/CI or a machine with IPv6) to confirm `DIRECT_URL` is reachable from your actual deploy path.
 
+7. **Pre-existing Prisma migration-history drift (discovered 2026-10-21, not caused by this session's changes).** Running `prisma migrate dev` to add the `colorSource` column reported that the live Supabase schema doesn't match what a clean replay of `prisma/migrations/*` would produce, and offered to **reset the entire "public" schema (drop all data)** to reconcile — this was refused immediately; nothing was reset, all data confirmed intact afterward. Likely cause: the schema has been modified directly against the live DB at some point outside of Prisma migrations (the `scripts/create-testimonials-table.ts` pattern removed earlier in this session is one example of that habit). Worked around for this one change by hand-writing the migration SQL, applying it directly, and reconciling with `prisma migrate resolve --applied` (safe, no shadow-DB diffing involved) — but the underlying drift is still there. **Recommended before your next schema change:** run `npx prisma migrate diff --from-url <direct-or-pooler-url> --to-schema-datamodel prisma/schema.prisma --script` to see exactly what's drifted, then either reconcile migration history or accept doing future migrations by hand the same way.
+
 ## Task list (priority order)
 
 1. [x] **Fix the production build** — fixed via clean reinstall (`node_modules`, `.next`, `package-lock.json` removed and reinstalled). `npm run build` now passes with the default Turbopack bundler. No font/bundler code changes needed.
 2. [x] Duplicate testimonials-table script deleted (SQL matched the existing migration exactly).
-3. [x] All 10 ESLint errors fixed. `npx eslint .` → 0 errors, 15 warnings.
+3. [x] All 10 ESLint errors fixed. `npx eslint .` → 0 errors, 14 warnings.
 4. [x] Connection-pool exhaustion fixed (16 → 1 occurrence; build green). `DIRECT_URL` added for migrations — **unverified from this machine due to IPv6**, needs confirming from Vercel/CI before next `prisma migrate deploy`.
 5. [x] Empty route folders removed. Dead-component decision still pending (summary given to user 2026-10-21 — none deleted yet).
-6. [ ] Clear the 15 remaining ESLint warnings (unused vars, `<img>` → `next/image`) as time allows.
-7. [ ] Minimal test setup for cart→WhatsApp-checkout and admin login — proposal deferred; folded into the new "3 improvements" task (2026-10-21), which explicitly asks for focused tests on the shade-color logic.
+6. [x] Mobile input-zoom fix (global 16px CSS rule on `input`/`select`/`textarea` under 768px).
+7. [x] Product card sizing/alignment fixed across all grids (fixed-height swatch area, image fallback).
+8. [x] Shade color management: canvas-based suggestion, manual correction with persistence, SKU field, consolidated shade UI (removed the redundant `VariantManager` panel), `colorSource` migration, checkout WhatsApp-message shade fix, focused tests (`npm test`, 18/18 passing). See 2026-10-21 session below for details and one caveat.
+9. [ ] Clear the 14 remaining ESLint warnings (unused vars, `<img>` → `next/image`) as time allows.
+10. [ ] **Pre-existing Prisma migration-history drift** discovered while adding the `colorSource` migration — see note below. Worth a dedicated cleanup session before the next schema change that needs `prisma migrate dev`'s normal (non-manual) path.
 
 ## Open questions
 
 - **Q1 — Brand palette:** memory from an earlier session says the luxury redesign standardized on gold `#D4AF37` / ivory `#FDF8F3` / near-black `#1A1A18`, but the current homepage/testimonials code uses `#F7F5F2` / `#111111` / accent `#C7A98B`. Is this an intentional palette evolution, or should it be reconciled back to the original spec?
-- **Q3 — Dead components:** confirm it's OK to delete the 7 unused `components/home/*` files and empty route folders listed above, or are any of them intended for upcoming work?
-- **Q4 — Build fix approach:** for Task 1, is `next/font/local` (fully self-hosted, no network dependency) the preferred fix, or would you rather just pin `build`/`start` to `--webpack` and move on?
+- **Q3 — Dead components:** confirm it's OK to delete the 7 unused `components/home/*` files listed above, or are any of them intended for upcoming work?
 - **Q5 — Scope of "finish the project":** is there a specific feature list / checklist from you (beyond what's in the code) that defines "done," or should this task list above be treated as the full scope?
+- **Q6 — Migration drift (Task 10 above):** want a dedicated session to investigate and reconcile the Prisma migration-history drift, or keep doing schema changes by hand (write migration.sql + apply directly + `migrate resolve`) as a standing practice?
+- **Q7 — `DIRECT_URL` verification:** can you confirm (via a Vercel/CI deploy or a machine with IPv6) that `prisma migrate deploy` actually reaches `DIRECT_URL` before you next need to run a migration from somewhere other than this sandbox?
+
+## Session log
+
+**2026-10-21 — "3 improvements" task:** mobile input-zoom fix, consistent product-card sizing, and shade color management (suggestion + manual correction + storefront/checkout wiring). Plan approved, one sub-decision (consolidate the two shade-editing UIs into one) confirmed by the user before implementation. All 3 parts verified with Playwright against the real dev DB/Cloudinary account and committed in order (4 commits total for this task). Build/lint/typecheck/tests all green as of the last commit.
 
 ---
-*Waiting for approval before making any code changes (Phase 2).*
+*Next session: resolve Q1/Q3/Q5–Q7 above, then continue down the task list (ESLint warnings, migration drift).*
