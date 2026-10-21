@@ -1,0 +1,60 @@
+name: Scheduled database + asset backup
+
+on:
+  schedule:
+    # 03:00 UTC daily. Adjust to taste — this store's data volume is small,
+    # so daily costs nothing meaningful in Actions minutes or B2 storage.
+    - cron: '0 3 * * *'
+  workflow_dispatch: {} # lets you trigger a manual backup from the Actions tab
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run database backup (read-only against production)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run backup:db
+
+      - name: Find this run's backup folder
+        id: find
+        run: echo "dir=$(ls -d backups/*/ | tail -n 1)" >> "$GITHUB_OUTPUT"
+
+      - name: Run Cloudinary asset backup (read-only)
+        env:
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+        run: npm run backup:cloudinary -- "${{ steps.find.outputs.dir }}"
+
+      - name: Encrypt the backup
+        env:
+          PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          tar -czf backup.tar.gz -C "${{ steps.find.outputs.dir }}" .
+          gpg --batch --yes --symmetric --cipher-algo AES256 \
+            --passphrase "$PASSPHRASE" -o backup.tar.gz.gpg backup.tar.gz
+          rm backup.tar.gz
+
+      - name: Upload to Backblaze B2 (outside Supabase, outside GitHub)
+        env:
+          RCLONE_CONFIG_B2_TYPE: b2
+          RCLONE_CONFIG_B2_ACCOUNT: ${{ secrets.B2_ACCOUNT_ID }}
+          RCLONE_CONFIG_B2_KEY: ${{ secrets.B2_APPLICATION_KEY }}
+        run: |
+          curl -s https://rclone.org/install.sh | sudo bash
+          rclone copy backup.tar.gz.gpg "B2:${{ secrets.B2_BUCKET_NAME }}/sevdam-backups/" \
+            --b2-chunk-size 8M
+
+      - name: Clean up runner-local files
+        if: always()
+        run: rm -rf backups backup.tar.gz.gpg

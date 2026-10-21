@@ -11,8 +11,9 @@
  */
 import { config } from 'dotenv'
 import { Pool } from 'pg'
-import { mkdirSync, writeFileSync } from 'fs'
+import { mkdirSync, writeFileSync, copyFileSync, cpSync } from 'fs'
 import { join } from 'path'
+import { execSync } from 'child_process'
 
 config({ path: '.env.local' })
 config()
@@ -35,7 +36,26 @@ async function main() {
     console.log(`✓ ${table}: ${rows.length} rows`)
   }
 
-  writeFileSync(join(dir, '_manifest.json'), JSON.stringify({ createdAt: new Date().toISOString(), rowCounts: manifest }, null, 2))
+  // Snapshot the schema alongside the data — without this, restoring the
+  // JSON later requires separately tracking down which git commit's
+  // prisma/schema.prisma matches this backup. Self-contained is safer.
+  const schemaDir = join(dir, 'schema')
+  mkdirSync(schemaDir, { recursive: true })
+  copyFileSync(join(process.cwd(), 'prisma', 'schema.prisma'), join(schemaDir, 'schema.prisma'))
+  cpSync(join(process.cwd(), 'prisma', 'migrations'), join(schemaDir, 'migrations'), { recursive: true })
+
+  let gitCommit: string | null = null
+  try {
+    gitCommit = execSync('git rev-parse HEAD', { cwd: process.cwd() }).toString().trim()
+  } catch {
+    // Not fatal — git may be unavailable in some environments.
+  }
+
+  writeFileSync(
+    join(dir, '_manifest.json'),
+    JSON.stringify({ createdAt: new Date().toISOString(), gitCommit, rowCounts: manifest }, null, 2)
+  )
+  console.log(`✓ schema: prisma/schema.prisma + migrations/ snapshotted${gitCommit ? ` (git ${gitCommit.slice(0, 8)})` : ''}`)
   console.log(`\nBackup written to: ${dir}`)
   console.log('Note: AdminUser.json contains password HASHES (not plaintext passwords) — still sensitive, keep this directory out of git (already gitignored) and store it securely.')
 

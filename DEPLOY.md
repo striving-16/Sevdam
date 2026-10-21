@@ -74,74 +74,137 @@ the backup drill in §5 does automatically.
 
 ## 5. Backups & recovery
 
-### Database
+### Why this exists
 
-**Confirmed in the Supabase dashboard (2026-10-21): this project is on the
-Free plan, which includes NO project backups at all** — not daily, not
-PITR. Supabase's own words: "Free Plan does not include project backups.
-Upgrade to the Pro Plan for up to 7 days of scheduled backups." Pro adds
-daily backups retained ~7 days; PITR is a further add-on above that.
+**Confirmed in the Supabase dashboard: this project is on the Free plan,
+which includes NO project backups at all** — not daily, not PITR.
+Supabase's own words: "Free Plan does not include project backups. Upgrade
+to the Pro Plan for up to 7 days of scheduled backups." Until you upgrade
+or this changes, **the scripts in this section are the only backup
+mechanism this project has.**
 
-**This means the scripts below are currently the only backup mechanism
-this project has.** A manual script that only runs when someone remembers
-to run it is a weak safety net — strongly consider either upgrading to
-Supabase Pro, or scheduling `backup:db` + `backup:cloudinary` to run
-automatically (e.g. a GitHub Action or Vercel Cron Job on a daily
-schedule, uploading the output somewhere durable like S3/Backblaze —
-not inside this repo).
+### What gets backed up
 
-Independent of that, this repo includes its own logical backup, since
-`pg_dump`/`psql` aren't guaranteed to be installed everywhere this project
-is operated from:
+The schema is 8 tables (see `prisma/schema.prisma` for the authoritative
+definition): `Category`, `Product`, `Variant`, `Customer`, `Order`,
+`OrderItem`, `AdminUser`, `Testimonial` — plus Cloudinary-hosted product/
+shade images, which the database only stores URLs for (a DB backup alone
+does **not** back up the actual photos).
+
+We tried the "proper" route first — the Supabase CLI's `db dump`, which
+wraps `pg_dump` — but it requires Docker or Podman, and setting either up
+on this machine would mean installing WSL2 first (likely a restart). Given
+that cost for a store this size, we used a logical (row-level JSON) backup
+instead: equivalent for disaster recovery, zero new system dependencies.
 
 ```bash
 npm run backup:db
-# → backups/<timestamp>/{Category,Product,Variant,Customer,Order,OrderItem,AdminUser,Testimonial}.json
+# → backups/<timestamp>/{Category,...,Testimonial}.json
+# → backups/<timestamp>/_manifest.json           (row counts + git commit)
+# → backups/<timestamp>/schema/schema.prisma      (schema snapshot)
+# → backups/<timestamp>/schema/migrations/        (full migration history snapshot)
 ```
 
-This is read-only against the database. The output directory is gitignored
-(`/backups/`) — it contains real customer data and `AdminUser` password
-**hashes** (not plaintext, but still sensitive). Store exported backups
-somewhere secure (encrypted drive, password manager's file storage, etc.),
-never in git or chat.
-
-**Restore drill** — proves a backup is actually restorable without ever
-touching real data (restores into a throwaway Postgres schema, verifies
-row counts, then drops the schema):
-
-```bash
-npm run restore:drill -- backups/<timestamp-folder>
-```
-
-This has been run successfully against the live database as part of this
-audit — all 8 tables restored with exact matching row counts, then cleaned
-up. It is **not** a "restore into production" tool. If a real disaster
-ever requires restoring production data, that is a manual, supervised
-action (recreate the tables from the JSON backup, or use Supabase's own
-PITR/backup restore if your plan includes it) — deliberately not automated
-into a one-command script that could be run unattended against live data.
-
-### Cloudinary assets
-
-Database rows store Cloudinary URLs, not the images themselves — a DB
-backup alone does not back up product photos. Use:
+Read-only against the database — issues `SELECT * FROM "<table>"` per
+table, nothing else. The schema is snapshotted alongside the data so each
+backup folder is self-contained: you don't need to separately track down
+which git commit's `prisma/schema.prisma` matches a given backup.
 
 ```bash
 npm run backup:cloudinary -- backups/<timestamp-folder>
 # → backups/<timestamp>/cloudinary/*.{jpg,png,...} + _manifest.json
 ```
 
-Downloads every asset under `store/products` to a local folder (read-only
-against Cloudinary — never deletes or modifies). Verified against the live
-account: free-tier plan, ~88 objects, ~179 MB, 0.18/25 monthly credits used
-at time of writing — plenty of headroom, no action needed there yet.
+Downloads every asset under `store/products` (read-only against
+Cloudinary — never deletes or modifies). Verified against the live
+account: Free plan, ~88 objects, ~179 MB, 0.18/25 monthly credits used at
+time of writing — plenty of headroom.
 
-### Suggested cadence
+### Keeping backups safe
 
-Run both backup scripts together before any risky change (migration,
-bulk admin edit) and on a regular schedule (weekly is reasonable at this
-data volume). They take seconds to run and cost nothing beyond Cloudinary
-API credits (negligible per the usage above).
+- The output directory is gitignored (`/backups/`) — **never commit it.**
+- `AdminUser.json` contains password **hashes** (bcrypt, not plaintext) —
+  still sensitive, since a hash is something to protect even though it
+  isn't directly usable. `Customer.json`/`Order.json` contain real names,
+  phone numbers, addresses.
+- Treat any backup folder you keep around (locally or uploaded somewhere)
+  as sensitive: store it encrypted at rest, don't email it, don't put it
+  in a shared/public cloud folder without encryption.
+- The scheduled workflow below (§5c) encrypts the backup with a passphrase
+  before it ever leaves the GitHub Actions runner.
+
+### Restore — two tiers
+
+**1. Quick drill (same database, zero risk)** — proves a backup is
+structurally restorable without ever touching real data: restores every
+table into a throwaway Postgres schema (`restore_drill_<timestamp>`),
+verifies row counts match, then drops the schema.
+
+```bash
+npm run restore:drill -- backups/<timestamp-folder>
+```
+
+Run successfully against the live database as part of this audit — all 8
+tables restored with exact matching row counts, schema cleanly dropped
+after. This is **not** a "restore into production" tool, and never touches
+the real `public` schema.
+
+**2. Full restore drill (separate Supabase project)** — the real test of
+"can this store be stood back up from nothing but a backup folder." This
+needs a project only you can create:
+
+1. In your Supabase dashboard, create a **new, separate, free-tier
+   project** — just for this test, delete it afterward.
+2. Copy its connection string (Settings → Database → Connection string,
+   **session pooler**, port 5432).
+3. In your own terminal (never paste the connection string into chat):
+   ```bash
+   RESTORE_TARGET_URL="postgres://...your-new-test-project..." \
+     npm run restore:new-project -- backups/<timestamp-folder>
+   ```
+4. This rebuilds the schema from scratch using the backup's own
+   snapshotted migration files, then loads every row, then verifies row
+   counts against the backup's manifest.
+
+**Safety guard, already tested**: the script refuses to run if
+`RESTORE_TARGET_URL` resolves to the same host as this project's own
+`DATABASE_URL`/`DIRECT_URL` — confirmed by deliberately pointing it at
+production, which it correctly rejected before making any connection to
+the target at all. It is not possible to accidentally point this at your
+live store.
+
+If a real disaster ever requires restoring **production** itself (not a
+drill), that's a manual, supervised action — recreate the tables from a
+backup folder's migrations + JSON, or use Supabase's own PITR/backup
+restore if you've upgraded to a plan that includes it — deliberately not
+automated into a script that could run unattended against live data.
+
+### Scheduling — keep this from depending on anyone remembering
+
+A backup that only runs when someone remembers to run it is a weak safety
+net. `.github/workflows/backup.yml` runs both backup scripts daily via
+GitHub Actions (free for this usage level), encrypts the result, and
+uploads it to Backblaze B2 (S3-compatible, 10GB free tier — genuinely
+outside both Supabase and GitHub). To activate it, add these repo secrets
+(Settings → Secrets and variables → Actions) — **none of these should ever
+be pasted into chat or committed**:
+
+| Secret | Where to get it |
+|---|---|
+| `DATABASE_URL` | Same value as your local `.env.local` |
+| `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | Same as `.env.local` |
+| `BACKUP_ENCRYPTION_PASSPHRASE` | A new, long random passphrase — generate one, store it in a password manager. Losing this means losing the ability to decrypt backups, so keep it somewhere durable. |
+| `B2_ACCOUNT_ID` / `B2_APPLICATION_KEY` / `B2_BUCKET_NAME` | Create a free Backblaze B2 account, create a bucket, create an "application key" scoped to just that bucket |
+
+Without these secrets configured, the workflow will fail at the relevant
+step — it won't silently skip or do something unexpected. The workflow
+file is in the repo now but inert until you add the secrets.
+
+### Suggested cadence outside the automated schedule
+
+Run both backup scripts manually before any risky change (schema
+migration, bulk admin edit) even with the daily schedule running — belt
+and suspenders for anything deliberately risky.
 
 ## 6. Monitoring
 
