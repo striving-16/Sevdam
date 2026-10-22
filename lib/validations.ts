@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { normalizePhone, isValidPhone } from './phone'
 
 // ─── Makeup category enum ─────────────────────────────────────────────────────
 
@@ -69,7 +70,11 @@ export const productSchema = z.object({
 
 export const orderSchema = z.object({
   customerName:    z.string().min(2).max(100),
-  customerPhone:   z.string().min(6).max(30),
+  // Stored normalized (8-digit Mauritanian local form) so track-order
+  // lookups can use an exact match instead of a substring search.
+  customerPhone:   z.string().min(6).max(30)
+    .transform(normalizePhone)
+    .refine(isValidPhone, 'Enter a valid 8-digit phone number'),
   customerAddress: z.string().default(''),
   deliveryType:    z.enum(DELIVERY_TYPES).default('home'),
 })

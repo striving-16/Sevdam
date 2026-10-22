@@ -1,5 +1,14 @@
 import type { CartItem, Product } from '@/types'
 
+/**
+ * Marks an error as safe and meaningful to show a customer verbatim (e.g.
+ * "sold out"), as opposed to an unexpected infrastructure failure (a DB
+ * connection hiccup, an unhandled Prisma error) whose raw message should
+ * never reach the UI. placeOrder's catch block uses this distinction to
+ * decide what the customer sees.
+ */
+export class OrderError extends Error {}
+
 export type ResolvedLine = {
   productId: string
   variantId: string | null
@@ -25,13 +34,13 @@ export function resolveOrderLines(
 
   return cartItems.map((item) => {
     const product = productById.get(item.product.id)
-    if (!product) throw new Error(`"${item.product.name_en}" is no longer available.`)
+    if (!product) throw new OrderError(`"${item.product.name_en}" is no longer available.`)
 
     if (item.variant) {
       const variant = product.variants.find((v) => v.id === item.variant!.id)
-      if (!variant) throw new Error(`The "${item.variant.shadeName}" shade of "${product.name_en}" is no longer available.`)
+      if (!variant) throw new OrderError(`The "${item.variant.shadeName}" shade of "${product.name_en}" is no longer available.`)
       if (variant.stock < item.quantity) {
-        throw new Error(`"${product.name_en}" (${variant.shadeName}) is out of stock or has insufficient quantity.`)
+        throw new OrderError(`"${product.name_en}" (${variant.shadeName}) is out of stock or has insufficient quantity.`)
       }
       return {
         productId: product.id,
@@ -43,7 +52,7 @@ export function resolveOrderLines(
     }
 
     if (product.stock < item.quantity) {
-      throw new Error(`"${product.name_en}" is out of stock or has insufficient quantity.`)
+      throw new OrderError(`"${product.name_en}" is out of stock or has insufficient quantity.`)
     }
     return {
       productId: product.id,

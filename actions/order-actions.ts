@@ -2,12 +2,24 @@
 
 import { db } from '@/lib/db'
 import { orderSchema, type OrderInput } from '@/lib/validations'
-import { resolveOrderLines, calculateOrderTotal } from '@/lib/order-logic'
+import { resolveOrderLines, calculateOrderTotal, OrderError } from '@/lib/order-logic'
+import * as Sentry from '@sentry/nextjs'
+import { normalizePhone, isValidPhone } from '@/lib/phone'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { revalidatePath } from 'next/cache'
 import { updateTag } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import type { CartItem, Order, OrderStatus, Product } from '@/types'
+
+async function getClientIp(): Promise<string> {
+  const h = await headers()
+  // x-forwarded-for can be a comma-separated chain (client, proxy1, proxy2...) — the first entry is the original client.
+  const forwarded = h.get('x-forwarded-for')
+  if (forwarded) return forwarded.split(',')[0].trim()
+  return h.get('x-real-ip') ?? 'unknown'
+}
 
 async function requireAdmin() {
   const session = await auth()
@@ -54,9 +66,15 @@ export async function placeOrder(
   cartItems: CartItem[],
   idempotencyKey?: string
 ): Promise<{ orderId: string }> {
+  const ip = await getClientIp()
+  const rateLimit = await checkRateLimit(`place-order:${ip}`, { max: 20, windowMs: 60_000 })
+  if (!rateLimit.allowed) {
+    throw new OrderError(`Too many order attempts. Please try again in ${rateLimit.retryAfterSeconds} seconds.`)
+  }
+
   const data = orderSchema.parse(customerInfo)
 
-  if (cartItems.length === 0) throw new Error('Cart is empty')
+  if (cartItems.length === 0) throw new OrderError('Cart is empty')
 
   // If this exact checkout attempt already went through (double-click,
   // retried request after a dropped response, a second tab), replay the
@@ -106,7 +124,7 @@ export async function placeOrder(
         if (result.count === 0) {
           const product = productById.get(l.productId)
           const label = l.variantName ? `"${product?.name_en}" (${l.variantName})` : `"${product?.name_en}"`
-          throw new Error(`${label} just sold out — please remove it from your cart and try again.`)
+          throw new OrderError(`${label} just sold out — please remove it from your cart and try again.`)
         }
       }
 
@@ -144,7 +162,16 @@ export async function placeOrder(
       const existing = await db.order.findUnique({ where: { idempotencyKey }, select: { id: true } })
       if (existing) return { orderId: existing.id }
     }
-    throw err
+
+    // OrderError is a deliberate, customer-safe message (sold out, cart
+    // empty, rate limited) — pass it through as-is. Anything else is an
+    // unexpected infrastructure failure (DB connection issue, pooler
+    // contention, etc.) whose raw message/stack must never reach the
+    // customer. Report it to Sentry so it's still diagnosable, then surface
+    // a generic, safe fallback instead of letting it crash the request.
+    if (err instanceof OrderError) throw err
+    Sentry.captureException(err)
+    throw new OrderError('We couldn\'t complete your order right now. Please try again in a moment, or contact us directly on WhatsApp.')
   }
 
   updateTag('products')
@@ -278,12 +305,36 @@ export async function createAdminOrder(
   return { orderId: order.id }
 }
 
-/** Public — used by /track-order. Restricted shape, same reasoning as getOrderConfirmation. */
+/**
+ * Public — used by /track-order. Restricted shape, same reasoning as
+ * getOrderConfirmation (no name/phone/address in the result).
+ *
+ * Security notes:
+ * - Exact match on a normalized phone number, not a substring search — a
+ *   search for "1234" used to return every order whose phone *contained*
+ *   that sequence, mixing unrelated customers' orders together.
+ * - Rate-limited per requester (IP), not per searched phone number — an
+ *   attacker enumerating customers tries a different phone each time, so
+ *   limiting "attempts against one phone" wouldn't slow that down at all.
+ * - A phone number alone is a weak credential (easy to guess/know for
+ *   someone who isn't the customer), but matches the "no customer account
+ *   system" requirement. The mitigations that make this acceptable: exact
+ *   match (not substring), rate limiting, and the response shape already
+ *   excluding name/phone/address — the worst a correct guess reveals is
+ *   order status/items/total, not who placed it or how to reach them.
+ */
 export async function getOrdersByPhone(phone: string): Promise<PublicOrder[]> {
-  const trimmed = phone.trim()
-  if (!trimmed) return []
+  const ip = await getClientIp()
+  const rateLimit = await checkRateLimit(`track-order:${ip}`, { max: 10, windowMs: 60_000 })
+  if (!rateLimit.allowed) {
+    throw new Error(`Too many requests. Please try again in ${rateLimit.retryAfterSeconds} seconds.`)
+  }
+
+  const normalized = normalizePhone(phone)
+  if (!isValidPhone(normalized)) return []
+
   return db.order.findMany({
-    where: { customerPhone: { contains: trimmed } },
+    where: { customerPhone: normalized },
     select: PUBLIC_ORDER_SELECT,
     orderBy: { createdAt: 'desc' },
   }) as unknown as Promise<PublicOrder[]>

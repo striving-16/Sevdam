@@ -8,6 +8,7 @@ import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { uploadProductImage, deleteProductImage } from '@/lib/cloudinary'
 import { normalizeHex, FALLBACK_HEX } from '@/lib/color-extraction'
+import { validateImageUpload, detectImageType } from '@/lib/image-validation'
 import type { Product } from '@/types'
 
 async function requireAdmin() {
@@ -239,9 +240,18 @@ export async function toggleProductOffer(
 export async function uploadProductImageAction(formData: FormData): Promise<string> {
   await requireAdmin()
   const file = formData.get('file') as File
-  if (!file || file.size === 0) throw new Error('No file provided')
-  const bytes = await file.arrayBuffer()
-  const buffer = Buffer.from(bytes)
-  const dataUrl = `data:${file.type};base64,${buffer.toString('base64')}`
+  if (!file) throw new Error('No file provided')
+  const buffer = Buffer.from(await file.arrayBuffer())
+
+  const validation = validateImageUpload(buffer)
+  if (!validation.ok) throw new Error(validation.error)
+
+  // Use the content-sniffed type, not the browser-supplied file.type — a
+  // renamed .html/.svg file with a spoofed MIME type would otherwise be
+  // trusted here even though validateImageUpload already rejected its
+  // actual bytes as non-image (this just makes the data: URL's declared
+  // type match what the bytes really are, for the real image case).
+  const detectedType = detectImageType(buffer)!
+  const dataUrl = `data:image/${detectedType};base64,${buffer.toString('base64')}`
   return uploadProductImage(dataUrl)
 }

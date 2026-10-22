@@ -147,6 +147,16 @@ model Testimonial {
   createdAt DateTime @default(now())
 }
 
+// ─── Rate limiting (serverless-safe — backed by the shared DB, not in-memory) ─
+
+model RateLimitHit {
+  id        String   @id @default(cuid())
+  key       String   // e.g. "track-order:22411234" or "place-order:ip:1.2.3.4"
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
+
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum OrderStatus {
