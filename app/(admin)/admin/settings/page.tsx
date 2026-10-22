@@ -1,4 +1,6 @@
-﻿import { WHATSAPP_NUMBER, SOCIAL_LINKS } from '@/lib/config'
+﻿import { SOCIAL_LINKS } from '@/lib/config'
+import { getWhatsAppNumber } from '@/actions/settings-actions'
+import { WhatsAppSettingForm } from '@/components/admin/whatsapp-setting-form'
 
 export const metadata = { title: 'Settings - Admin' }
 
@@ -14,7 +16,8 @@ function SettingRow({ label, value, note }: { label: string; value: string; note
   )
 }
 
-export default function AdminSettingsPage() {
+export default async function AdminSettingsPage() {
+  const whatsappNumber = await getWhatsAppNumber()
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="mb-8">
@@ -32,11 +35,7 @@ export default function AdminSettingsPage() {
             Store Info
           </p>
           <SettingRow label="Store Name" value="[Configure in lib/config.ts]" />
-          <SettingRow
-            label="WhatsApp Number"
-            value={`+${WHATSAPP_NUMBER}`}
-            note="Used for customer orders"
-          />
+          <WhatsAppSettingForm currentNumber={whatsappNumber} />
           <SettingRow label="Currency" value="[Configure in lib/config.ts]" />
           <SettingRow label="Country" value="[Configure in lib/config.ts]" />
         </div>
@@ -62,10 +61,8 @@ export default function AdminSettingsPage() {
         </div>
 
         <p className="text-center text-[11px] font-light text-neutral-400">
-          To update WhatsApp number or social links, edit{' '}
-          <code className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-neutral-600">
-            lib/config.ts
-          </code>
+          Social links, currency, and country are configured via environment
+          variables and <code className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-neutral-600">lib/config.ts</code>.
         </p>
 
       </div>

@@ -15,16 +15,23 @@ function WhatsAppIcon() {
 interface Props {
   product: Product
   selectedVariant?: Variant | null
+  whatsappNumber: string | null
   className?: string
 }
 
-export function ProductWhatsAppButton({ product, selectedVariant = null, className = '' }: Props) {
+export function ProductWhatsAppButton({ product, selectedVariant = null, whatsappNumber, className = '' }: Props) {
   const shadePart = selectedVariant ? ` (Shade: ${selectedVariant.shadeName})` : ''
   const message   = `Hi! I'd like to order: ${product.name_en}${shadePart} — ${formatPrice(product.price)}`
+  const link = whatsAppUrl(whatsappNumber, message)
+
+  // No destination configured — never show a link to nowhere. The full
+  // checkout flow independently surfaces a config error on /admin/settings;
+  // this quick-order shortcut just doesn't appear rather than being broken.
+  if (!link) return null
 
   return (
     <a
-      href={whatsAppUrl(message)}
+      href={link}
       target="_blank"
       rel="noopener noreferrer"
       className={`flex w-full items-center justify-center gap-2.5 rounded-full py-3.5 text-[12px] font-light uppercase tracking-[0.12em] text-white transition-all duration-300 hover:brightness-110 hover:shadow-[0_4px_20px_rgba(37,211,102,0.3)] ${className}`}

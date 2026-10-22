@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getProductBySlug, getProducts } from '@/actions/product-actions'
+import { getCategories } from '@/actions/category-actions'
+import { getWhatsAppNumber } from '@/actions/settings-actions'
 import { getServerT } from '@/lib/i18n/server'
 import { ProductPageClient } from '@/components/products/product-page-client'
 import { CATEGORY_LABELS } from '@/lib/validations'
@@ -34,13 +36,20 @@ export default async function ProductPage({ params }: Props) {
   const { slug } = await params
   const { dir, locale } = await getServerT()
 
-  const product = await getProductBySlug(slug).catch(() => null)
+  const [product, categories, whatsappNumber] = await Promise.all([
+    getProductBySlug(slug).catch(() => null),
+    getCategories().catch(() => []),
+    getWhatsAppNumber().catch(() => null),
+  ])
 
   if (!product) notFound()
 
-  const isRtl         = dir === 'rtl'
-  const isAr          = locale === 'ar'
-  const categoryLabel = CATEGORY_LABELS[product.category] ?? product.category
+  const isRtl = dir === 'rtl'
+  const isAr  = locale === 'ar'
+  const matchedCategory = categories.find((c) => c.slug === product.category)
+  const categoryLabel = matchedCategory
+    ? ((isAr && matchedCategory.name_ar) ? matchedCategory.name_ar : matchedCategory.name)
+    : (CATEGORY_LABELS[product.category] ?? product.category)
   const name          = (isAr && product.name_ar) ? product.name_ar : product.name_en
   const description   = (isAr && product.description_ar) ? product.description_ar : product.description_en
 
@@ -74,6 +83,7 @@ export default async function ProductPage({ params }: Props) {
         description={description}
         categoryLabel={categoryLabel}
         isRtl={isRtl}
+        whatsappNumber={whatsappNumber}
       />
 
     </div>

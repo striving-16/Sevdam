@@ -2,10 +2,11 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, MessageCircle } from 'lucide-react'
 import { getOrderById } from '@/actions/order-actions'
+import { getWhatsAppNumber } from '@/actions/settings-actions'
 import { OrderStatusSelect } from '@/components/admin/order-status-select'
 import { formatPrice, ORDER_STATUS_LABELS } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
-import { WHATSAPP_NUMBER } from '@/lib/config'
+import { whatsAppUrl } from '@/lib/config'
 
 const DELIVERY_LABELS: Record<string, string> = {
   home:    'Home Delivery',
@@ -21,9 +22,11 @@ export const metadata = { title: 'Order Detail — Admin' }
 
 export default async function AdminOrderDetailPage({ params }: Props) {
   const { id } = await params
-  const order = await getOrderById(id)
+  const [order, whatsappNumber] = await Promise.all([getOrderById(id), getWhatsAppNumber()])
 
   if (!order) notFound()
+
+  const waLink = whatsAppUrl(whatsappNumber, `Hi ${order.customerName}, regarding your order #${order.id.slice(-8).toUpperCase()} — `)
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -81,15 +84,21 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             )}
           </div>
 
-          <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi ${order.customerName}, regarding your order #${order.id.slice(-8).toUpperCase()} — `)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-5 flex w-fit items-center gap-2 rounded-full border border-[#25D366] px-4 py-2.5 text-[13px] font-light text-[#25D366] transition-colors hover:bg-[#25D366] hover:text-white"
-          >
-            <MessageCircle size={14} strokeWidth={1.5} />
-            Contact on WhatsApp
-          </a>
+          {waLink ? (
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 flex w-fit items-center gap-2 rounded-full border border-[#25D366] px-4 py-2.5 text-[13px] font-light text-[#25D366] transition-colors hover:bg-[#25D366] hover:text-white"
+            >
+              <MessageCircle size={14} strokeWidth={1.5} />
+              Contact on WhatsApp
+            </a>
+          ) : (
+            <p className="mt-5 w-fit rounded-full border border-amber-200 bg-amber-50 px-4 py-2.5 text-[12px] text-amber-700">
+              WhatsApp number not configured — set it in Settings.
+            </p>
+          )}
         </div>
 
         {/* Order items */}

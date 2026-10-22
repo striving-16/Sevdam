@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Plus, Minus, Truck, Package } from 'lucide-react'
+import { toast } from 'sonner'
 import { useCart } from '@/hooks/use-cart'
 import { useTranslation } from '@/lib/i18n/context'
 import { formatPrice, cn } from '@/lib/utils'
@@ -11,7 +12,7 @@ import { whatsAppUrl } from '@/lib/config'
 
 type Mode = 'delivery' | 'pickup'
 
-export function CartDrawer() {
+export function CartDrawer({ whatsappNumber }: { whatsappNumber: string | null }) {
   const isOpen       = useCart((s) => s.isOpen)
   const closeCart    = useCart((s) => s.closeCart)
   const items        = useCart((s) => s.items)
@@ -54,7 +55,12 @@ export function CartDrawer() {
 
   function handleConfirm() {
     if (!canConfirm) return
-    window.open(whatsAppUrl(buildMessage()), '_blank')
+    const link = whatsAppUrl(whatsappNumber, buildMessage())
+    if (!link) {
+      toast.error('WhatsApp ordering is temporarily unavailable. Please contact us directly.')
+      return
+    }
+    window.open(link, '_blank')
   }
 
   return (

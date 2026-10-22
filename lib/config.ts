@@ -1,9 +1,3 @@
-// `||` (not `??`) deliberately — an env var set to an empty string ("" in
-// .env.local/Vercel) must still fall back, not win, since `??` only catches
-// null/undefined and would otherwise silently point WhatsApp links at no
-// number at all.
-export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '22234350808'
-
 export const SOCIAL_LINKS = {
   tiktok:    process.env.NEXT_PUBLIC_TIKTOK_URL    || 'https://www.tiktok.com/@besma.sevdam',
   instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://www.instagram.com/sevdambeautybs?igsh=MWtiNG9wdjZmcWoyMw==',
@@ -11,7 +5,15 @@ export const SOCIAL_LINKS = {
   facebook:  process.env.NEXT_PUBLIC_FACEBOOK_URL  || '',
 }
 
-export function whatsAppUrl(message?: string) {
-  const base = `https://wa.me/${WHATSAPP_NUMBER}`
+/**
+ * Builds a wa.me link. `number` must be resolved by the caller via
+ * getWhatsAppNumber() (actions/settings-actions.ts) — there is deliberately
+ * no hardcoded fallback here. Returns null rather than a link to an unknown
+ * number, so the UI can show a clear "not configured" state instead of a
+ * silently-broken or silently-wrong order destination.
+ */
+export function whatsAppUrl(number: string | null, message?: string): string | null {
+  if (!number) return null
+  const base = `https://wa.me/${number}`
   return message ? `${base}?text=${encodeURIComponent(message)}` : base
 }

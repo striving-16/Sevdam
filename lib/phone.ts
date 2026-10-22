@@ -15,3 +15,18 @@ export function normalizePhone(raw: string): string {
 export function isValidPhone(normalized: string): boolean {
   return /^\d{8}$/.test(normalized)
 }
+
+/**
+ * The WhatsApp destination (wa.me/<number>) needs the FULL international
+ * number — country code included, no "+", no spaces — unlike customer order
+ * phone numbers above which are always local 8-digit Mauritanian numbers.
+ * Deliberately permissive on length (8–15 digits) since this is a business
+ * contact number, not necessarily Mauritanian.
+ */
+export function normalizeWhatsAppNumber(raw: string): string {
+  return raw.replace(/\D/g, '')
+}
+
+export function isValidWhatsAppNumber(normalized: string): boolean {
+  return /^\d{8,15}$/.test(normalized)
+}

@@ -1,10 +1,12 @@
 ﻿import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { ProductForm } from '@/components/admin/product-form'
+import { getCategories } from '@/actions/category-actions'
 
 export const metadata = { title: 'New Product â€” Admin' }
 
-export default function NewProductPage() {
+export default async function NewProductPage() {
+  const categories = await getCategories()
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <Link
@@ -17,7 +19,7 @@ export default function NewProductPage() {
       <div className="mb-8">
         <h1 className="text-[22px] font-light tracking-[-0.01em] text-neutral-800">New Product</h1>
       </div>
-      <ProductForm />
+      <ProductForm categories={categories} />
     </div>
   )
 }

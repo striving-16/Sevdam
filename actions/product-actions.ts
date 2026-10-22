@@ -111,9 +111,15 @@ function resolveCoverVariantId(shades: ShadeInput[], created: { id: string; sort
   return created.find((v) => v.sortOrder === coverIdx)?.id ?? created[0].id
 }
 
+async function assertCategoryExists(slug: string) {
+  const exists = await db.category.findUnique({ where: { slug }, select: { id: true } })
+  if (!exists) throw new Error(`Category "${slug}" does not exist. Create it first under Admin → Categories.`)
+}
+
 export async function createProduct(input: ProductInput, shades: ShadeInput[] = []) {
   await requireAdmin()
   const data = productSchema.parse(input)
+  await assertCategoryExists(data.category)
 
   const product = await db.product.create({ data })
 
@@ -146,6 +152,7 @@ export async function createProduct(input: ProductInput, shades: ShadeInput[] = 
 export async function updateProduct(id: string, input: Partial<ProductInput>, shades?: ShadeInput[]) {
   await requireAdmin()
   const data = productSchema.partial().parse(input)
+  if (data.category) await assertCategoryExists(data.category)
 
   const product = await db.product.update({ where: { id }, data })
 

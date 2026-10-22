@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { getProductById } from '@/actions/product-actions'
+import { getCategories } from '@/actions/category-actions'
 import { ProductForm } from '@/components/admin/product-form'
 
 interface Props {
@@ -12,7 +13,7 @@ export const metadata = { title: 'Edit Product — Admin' }
 
 export default async function EditProductPage({ params }: Props) {
   const { id } = await params
-  const product = await getProductById(id)
+  const [product, categories] = await Promise.all([getProductById(id), getCategories()])
 
   if (!product) notFound()
 
@@ -30,7 +31,7 @@ export default async function EditProductPage({ params }: Props) {
         <p className="mt-1 text-[13px] font-light text-neutral-400">{product.name_en}</p>
       </div>
 
-      <ProductForm product={product} />
+      <ProductForm product={product} categories={categories} />
     </div>
   )
 }

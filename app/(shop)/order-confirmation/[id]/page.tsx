@@ -6,6 +6,7 @@ import { formatPrice, ORDER_STATUS_LABELS } from '@/lib/utils'
 import { getServerT } from '@/lib/i18n/server'
 import { interpolate } from '@/lib/i18n/translations'
 import { whatsAppUrl } from '@/lib/config'
+import { getWhatsAppNumber } from '@/actions/settings-actions'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import type { Metadata } from 'next'
@@ -61,7 +62,7 @@ export const metadata: Metadata = { title: 'Order Confirmed' }
 export default async function OrderConfirmationPage({ params, searchParams }: Props) {
   const { id } = await params
   const { name = '', phone = '', address = '' } = await searchParams
-  const [order, { t, dir }] = await Promise.all([getOrderConfirmation(id), getServerT()])
+  const [order, { t, dir }, whatsappNumber] = await Promise.all([getOrderConfirmation(id), getServerT(), getWhatsAppNumber()])
   const isRtl = dir === 'rtl'
 
   if (!order) notFound()
@@ -69,6 +70,7 @@ export default async function OrderConfirmationPage({ params, searchParams }: Pr
   const siteUrl  = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const trackUrl = `${siteUrl}/track-order`
   const waMessage = buildConfirmationMessage(order, name, phone, address, trackUrl)
+  const waLink = whatsAppUrl(whatsappNumber, waMessage)
 
   return (
     <div className="mx-auto max-w-lg px-6 pb-24 pt-[140px]" dir={dir}>
@@ -148,16 +150,22 @@ export default async function OrderConfirmationPage({ params, searchParams }: Pr
       </div>
 
       {/* Send on WhatsApp — a real tap, not an auto-open, so iOS Safari never blocks it */}
-      <a
-        href={whatsAppUrl(waMessage)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-8 flex w-full items-center justify-center gap-2.5 rounded-2xl py-5 text-[13px] font-medium uppercase tracking-[0.08em] text-white transition-all duration-300 hover:brightness-105 active:scale-[0.99]"
-        style={{ backgroundColor: '#25D366', boxShadow: '0 4px 24px rgba(37, 211, 102, 0.28)' }}
-      >
-        <WhatsAppIcon size={19} />
-        Send Order on WhatsApp
-      </a>
+      {waLink ? (
+        <a
+          href={waLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-8 flex w-full items-center justify-center gap-2.5 rounded-2xl py-5 text-[13px] font-medium uppercase tracking-[0.08em] text-white transition-all duration-300 hover:brightness-105 active:scale-[0.99]"
+          style={{ backgroundColor: '#25D366', boxShadow: '0 4px 24px rgba(37, 211, 102, 0.28)' }}
+        >
+          <WhatsAppIcon size={19} />
+          Send Order on WhatsApp
+        </a>
+      ) : (
+        <p className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-5 text-center text-[13px] text-amber-700">
+          WhatsApp sending is temporarily unavailable — your order is saved as {`#${order.id.slice(-8).toUpperCase()}`}. Please contact us directly.
+        </p>
+      )}
 
       <p className="mt-4 text-center text-[11px] font-light text-[#78716C]">
         Lost this page?{' '}

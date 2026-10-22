@@ -55,7 +55,9 @@ export const productSchema = z.object({
   imageUrl:       z.string().min(1, 'Image is required'),
   gallery:        z.array(z.string()).default([]),
   hasVariants:    z.boolean().default(false),
-  category:       z.enum(MAKEUP_CATEGORIES).default('LIPSTICK'),
+  // Matched against live Category rows at the action layer, not a static
+  // enum — the valid set is admin-managed data now, not a compile-time list.
+  category:       z.string().min(1, 'Category is required'),
   brand:          z.string().optional().nullable(),
   tags:           z.array(z.string()).default([]),
   benefits:       z.string().optional().nullable(),
@@ -83,8 +85,17 @@ export const orderSchema = z.object({
 
 export const categorySchema = z.object({
   name:        z.string().min(1).max(100),
-  slug:        z.string().min(1).regex(/^[a-z0-9-]+$/),
+  name_ar:     z.string().default(''),
+  // Loose on purpose: this value is stored directly on Product.category and
+  // must accommodate the existing uppercase/underscore convention already
+  // in use by live products (e.g. "LIPSTICK") alongside any lowercase-hyphen
+  // slug an admin creates for a brand-new category — both are just strings
+  // matched for equality, not parsed as URL segments.
+  slug:        z.string().min(1).max(60).regex(/^[A-Za-z0-9_-]+$/, 'Letters, numbers, hyphens, and underscores only'),
   description: z.string().optional().nullable(),
+  image:       z.string().optional().nullable(),
+  isActive:    z.boolean().default(true),
+  sortOrder:   z.coerce.number().int().default(0),
 })
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────

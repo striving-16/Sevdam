@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
-import { normalizePhone, isValidPhone } from './phone.ts'
+import { normalizePhone, isValidPhone, normalizeWhatsAppNumber, isValidWhatsAppNumber } from './phone.ts'
 
 describe('normalizePhone', () => {
   test('passes through a plain 8-digit local number', () => {
@@ -51,5 +51,26 @@ describe('isValidPhone', () => {
 
   test('rejects non-digit content', () => {
     assert.equal(isValidPhone('abcdefgh'), false)
+  })
+})
+
+describe('normalizeWhatsAppNumber / isValidWhatsAppNumber', () => {
+  test('strips non-digit characters from a full international number', () => {
+    assert.equal(normalizeWhatsAppNumber('+222 36 23 45 67'), '22236234567')
+    assert.equal(normalizeWhatsAppNumber('222-36-23-45-67'), '22236234567')
+  })
+
+  test('accepts a valid full international number (country code + local number)', () => {
+    assert.equal(isValidWhatsAppNumber('22236234567'), true)
+  })
+
+  test('rejects empty and excessively long input', () => {
+    assert.equal(isValidWhatsAppNumber(''), false)
+    assert.equal(isValidWhatsAppNumber('1'.repeat(20)), false)
+  })
+
+  test('never silently produces a valid-looking number from garbage input', () => {
+    const normalized = normalizeWhatsAppNumber('not a number at all')
+    assert.equal(isValidWhatsAppNumber(normalized), false)
   })
 })

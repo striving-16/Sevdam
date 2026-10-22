@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { getProducts } from '@/actions/product-actions'
+import { getActiveCategories } from '@/actions/category-actions'
 import { ProductGrid, ProductGridSkeleton } from '@/components/products/product-grid'
 import { ProductSearch } from '@/components/products/product-search'
 import { CategoryFilter } from '@/components/products/category-filter'
@@ -18,10 +19,11 @@ export default async function ProductsPage({ searchParams }: Props) {
   const isRtl = dir === 'rtl'
 
   let products: Product[] = []
+  let categories: Awaited<ReturnType<typeof getActiveCategories>> = []
   try {
-    products = await getProducts(q, category)
+    ;[products, categories] = await Promise.all([getProducts(q, category), getActiveCategories()])
   } catch {
-    // DB unavailable — show empty grid
+    // DB unavailable — show empty grid, no filters
   }
 
   return (
@@ -46,7 +48,7 @@ export default async function ProductsPage({ searchParams }: Props) {
       <div className="mb-8 space-y-4">
         <ProductSearch placeholder={t.products.searchPlaceholder} />
         <Suspense>
-          <CategoryFilter />
+          <CategoryFilter categories={categories} />
         </Suspense>
       </div>
 
@@ -55,7 +57,7 @@ export default async function ProductsPage({ searchParams }: Props) {
         <p className={`mb-5 text-[12px] font-light text-[#78716C] ${isRtl ? 'text-right' : ''}`}>
           {products.length} product{products.length !== 1 ? 's' : ''}
           {q ? ` for "${q}"` : ''}
-          {category ? ` in ${category.replace('_', ' ').toLowerCase()}` : ''}
+          {category ? ` in ${categories.find((c) => c.slug === category)?.name ?? category.replace('_', ' ').toLowerCase()}` : ''}
         </p>
       )}
 

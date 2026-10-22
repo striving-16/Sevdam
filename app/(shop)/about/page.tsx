@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { whatsAppUrl } from '@/lib/config'
+import { getWhatsAppNumber } from '@/actions/settings-actions'
 
 export const metadata: Metadata = {
   title: 'Our Story — Besma Sevdam',
@@ -26,7 +27,9 @@ const VALUES = [
   },
 ]
 
-export default function OurStoryPage() {
+export default async function OurStoryPage() {
+  const whatsappNumber = await getWhatsAppNumber()
+  const waLink = whatsAppUrl(whatsappNumber)
   return (
     <main className="bg-[#FDFAF7] pt-[100px]">
 
@@ -67,14 +70,16 @@ export default function OurStoryPage() {
               >
                 Shop the Collection
               </Link>
-              <a
-                href={whatsAppUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[12px] font-light uppercase tracking-[0.15em] text-[#78716C] underline-offset-4 hover:underline"
-              >
-                Say Hello
-              </a>
+              {waLink && (
+                <a
+                  href={waLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[12px] font-light uppercase tracking-[0.15em] text-[#78716C] underline-offset-4 hover:underline"
+                >
+                  Say Hello
+                </a>
+              )}
             </div>
           </div>
 

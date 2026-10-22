@@ -69,10 +69,17 @@ model Variant {
 
 model Category {
   id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
+  name        String                       // English label
+  name_ar     String   @default("")        // Arabic label — "" means not yet translated, falls back to `name`
+  slug        String   @unique             // Matches Product.category values — not a hard FK, see note on Product below
   description String?
+  image       String?                      // Cloudinary URL, optional
+  isActive    Boolean  @default(true)       // Inactive = hidden from public filters/forms, but existing products keep working
+  sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
 }
 
 // ─── Orders ──────────────────────────────────────────────────────────────────
@@ -145,6 +152,17 @@ model Testimonial {
   stars     Int      @default(5)
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
+}
+
+// ─── Store settings (simple key/value — WhatsApp number, etc.) ──────────────
+// A plain key/value table on purpose: a handful of scattered scalar settings
+// don't need a bespoke column each, and this reuses the existing DB instead
+// of a new config service. One row per setting, admin-editable.
+
+model StoreSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 // ─── Rate limiting (serverless-safe — backed by the shared DB, not in-memory) ─

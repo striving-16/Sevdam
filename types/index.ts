@@ -1,18 +1,7 @@
-export type ProductCategory =
-  | 'FOUNDATION'
-  | 'CONCEALER'
-  | 'PRIMER'
-  | 'LIPSTICK'
-  | 'LIP_GLOSS'
-  | 'LIP_LINER'
-  | 'BLUSH'
-  | 'EYESHADOW'
-  | 'MASCARA'
-  | 'EYELINER'
-  | 'SETTING_SPRAY'
-  | 'HIGHLIGHTER'
-  | 'BRONZER'
-  | 'POWDER'
+// Was a fixed string-literal union; categories are now admin-managed data
+// (see the Category model), so the valid set is determined at runtime, not
+// compile time. Kept as a named alias for readability at existing call sites.
+export type ProductCategory = string
 
 export type Variant = {
   id: string
@@ -96,9 +85,14 @@ export type Customer = {
 export type StoreCategory = {
   id: string
   name: string
+  name_ar: string
   slug: string
   description?: string | null
+  image?: string | null
+  isActive: boolean
+  sortOrder: number
   createdAt: Date
+  updatedAt: Date
 }
 
 export type AdminUser = {

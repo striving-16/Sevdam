@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { whatsAppUrl } from '@/lib/config'
+import { getWhatsAppNumber } from '@/actions/settings-actions'
 
 export const metadata: Metadata = {
   title: 'Returns & Exchanges',
@@ -30,7 +32,9 @@ const EXCLUDED = [
   'Products damaged due to misuse or improper storage',
 ]
 
-export default function ReturnsPage() {
+export default async function ReturnsPage() {
+  const whatsappNumber = await getWhatsAppNumber()
+  const waLink = whatsAppUrl(whatsappNumber, 'Hi, I would like to return my order.')
   return (
     <main className="bg-white pt-[100px]">
 
@@ -99,14 +103,20 @@ export default function ReturnsPage() {
             <p className="mb-6 text-[14px] font-light leading-[1.85] text-[#78716C]">
               Ready to return or exchange? Contact us on WhatsApp and we&apos;ll take care of the rest.
             </p>
-            <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? ''}?text=Hi%2C%20I%20would%20like%20to%20return%20my%20order.`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 rounded-full bg-[#1C1917] px-7 py-3 text-[12px] font-light uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#3D3530]"
-            >
-              Contact us on WhatsApp
-            </a>
+            {waLink ? (
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 rounded-full bg-[#1C1917] px-7 py-3 text-[12px] font-light uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#3D3530]"
+              >
+                Contact us on WhatsApp
+              </a>
+            ) : (
+              <p className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3 text-[13px] text-amber-700">
+                WhatsApp contact is temporarily unavailable. Please check back soon.
+              </p>
+            )}
             <p className="mt-5 text-[11px] font-light text-[#B8AFA8]">
               Or email us at{' '}
               <Link href="/contact" className="underline underline-offset-2 hover:text-[#78716C]">

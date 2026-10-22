@@ -11,8 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { createProduct, updateProduct, uploadProductImageAction, type ShadeInput } from '@/actions/product-actions'
 import { extractDominantColor, isValidHex, FALLBACK_HEX } from '@/lib/color-extraction'
 import { cn, slugify } from '@/lib/utils'
-import { MAKEUP_CATEGORIES, CATEGORY_LABELS } from '@/lib/validations'
-import type { Product, ProductCategory } from '@/types'
+import type { Product, ProductCategory, StoreCategory } from '@/types'
 
 type State = { error?: string; success?: boolean } | null
 
@@ -421,7 +420,7 @@ function Toggle({
 
 // ── Main form ─────────────────────────────────────────────────────────────────
 
-export function ProductForm({ product }: { product?: Product }) {
+export function ProductForm({ product, categories = [] }: { product?: Product; categories?: StoreCategory[] }) {
   const router = useRouter()
   const isEdit = !!product
 
@@ -455,6 +454,8 @@ export function ProductForm({ product }: { product?: Product }) {
       return { error: 'Please add a product image' }
     }
 
+    if (!formData.get('category')) return { error: 'Please select a category' }
+
     // Variant products derive their cover image from the cover shade — the
     // storefront already shows the cover shade's image everywhere (product
     // card, product page), so a separate top-level upload would just be a
@@ -474,7 +475,7 @@ export function ProductForm({ product }: { product?: Product }) {
       imageUrl:       effectiveImageUrl,
       gallery:        [] as string[],
       hasVariants,
-      category:       ((formData.get('category') as string) || 'LIPSTICK') as ProductCategory,
+      category:       (formData.get('category') as string) as ProductCategory,
       brand:          'Besma Sevdam',
       tags:           [] as string[],
       isBestseller,
@@ -608,18 +609,24 @@ export function ProductForm({ product }: { product?: Product }) {
         <Label htmlFor="category" className="text-[12px] font-light tracking-wide text-neutral-600">
           Category
         </Label>
-        <select
-          id="category"
-          name="category"
-          defaultValue={product?.category ?? 'LIPSTICK'}
-          className={`${FIELD_CLS} w-full cursor-pointer appearance-none rounded-lg border border-neutral-200 bg-white px-3 text-[14px]`}
-        >
-          {MAKEUP_CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {CATEGORY_LABELS[c]}
-            </option>
-          ))}
-        </select>
+        {categories.length === 0 ? (
+          <p className="rounded-lg bg-amber-50 px-3 py-2.5 text-[12px] text-amber-700">
+            No categories exist yet. <a href="/admin/categories" className="underline">Create one</a> before adding products.
+          </p>
+        ) : (
+          <select
+            id="category"
+            name="category"
+            defaultValue={product?.category ?? categories[0]?.slug}
+            className={`${FIELD_CLS} w-full cursor-pointer appearance-none rounded-lg border border-neutral-200 bg-white px-3 text-[14px]`}
+          >
+            {categories.map((c) => (
+              <option key={c.id} value={c.slug}>
+                {c.name}{!c.isActive ? ' (hidden)' : ''}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* Description EN */}

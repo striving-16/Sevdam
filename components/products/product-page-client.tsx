@@ -15,11 +15,12 @@ interface Props {
   description:   string
   categoryLabel: string
   isRtl:        boolean
+  whatsappNumber: string | null
 }
 
 export function ProductPageClient({
   product, allImages, name, description,
-  categoryLabel, isRtl,
+  categoryLabel, isRtl, whatsappNumber,
 }: Props) {
   const hasVariants  = product.hasVariants && product.variants.length > 0
   const coverVariant = hasVariants ? getCoverVariant(product) : null
@@ -234,7 +235,7 @@ export function ProductPageClient({
               never offers an "order" shortcut for something unavailable. */}
           <div className="space-y-3">
             <AddToCartButton product={product} selectedVariant={selectedVariant} />
-            {!soldOut && <ProductWhatsAppButton product={product} selectedVariant={selectedVariant} />}
+            {!soldOut && <ProductWhatsAppButton product={product} selectedVariant={selectedVariant} whatsappNumber={whatsappNumber} />}
           </div>
         </div>
       </div>

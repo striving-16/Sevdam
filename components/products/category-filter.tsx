@@ -3,18 +3,18 @@
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useTransition } from 'react'
 import { cn } from '@/lib/utils'
-import { MAKEUP_CATEGORIES, CATEGORY_LABELS } from '@/lib/validations'
+import type { StoreCategory } from '@/types'
 
-const FILTERS = [
-  { value: '', label: 'All' },
-  ...MAKEUP_CATEGORIES.map((c) => ({ value: c, label: CATEGORY_LABELS[c] })),
-]
-
-export function CategoryFilter() {
+export function CategoryFilter({ categories }: { categories: StoreCategory[] }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [, startTransition] = useTransition()
+
+  const FILTERS = [
+    { value: '', label: 'All' },
+    ...categories.map((c) => ({ value: c.slug, label: c.name })),
+  ]
 
   const active = searchParams.get('category') ?? ''
 

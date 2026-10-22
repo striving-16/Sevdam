@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
 import type { Metadata } from 'next'
-import { SOCIAL_LINKS, WHATSAPP_NUMBER, whatsAppUrl } from '@/lib/config'
+import { SOCIAL_LINKS, whatsAppUrl } from '@/lib/config'
+import { getWhatsAppNumber } from '@/actions/settings-actions'
 
 export const metadata: Metadata = {
   title: 'Contact — Besma Sevdam',
@@ -37,8 +38,10 @@ const SOCIALS = [
   },
 ]
 
-export default function ContactPage() {
-  const displayNumber = `+${WHATSAPP_NUMBER.replace(/^(\d{3})(\d{8})$/, '$1 $2')}`
+export default async function ContactPage() {
+  const whatsappNumber = await getWhatsAppNumber()
+  const waLink = whatsAppUrl(whatsappNumber)
+  const displayNumber = whatsappNumber ? `+${whatsappNumber.replace(/^(\d{3})(\d{8})$/, '$1 $2')}` : null
 
   return (
     <main className="bg-[#FDFAF7] pt-[100px]">
@@ -66,34 +69,42 @@ export default function ContactPage() {
           {/* Left — WhatsApp + details */}
           <div>
             {/* WhatsApp CTA */}
-            <a
-              href={whatsAppUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex w-full items-center justify-center gap-3.5 rounded-2xl py-6 text-[14px] font-light text-white transition-all duration-300 hover:brightness-105 active:scale-[0.99]"
-              style={{ backgroundColor: '#25D366', boxShadow: '0 4px 32px rgba(37,211,102,0.25)' }}
-            >
-              <span className="transition-transform duration-300 group-hover:scale-110">
-                <WhatsAppSVG size={22} />
-              </span>
-              Chat with us on WhatsApp
-            </a>
+            {waLink ? (
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex w-full items-center justify-center gap-3.5 rounded-2xl py-6 text-[14px] font-light text-white transition-all duration-300 hover:brightness-105 active:scale-[0.99]"
+                style={{ backgroundColor: '#25D366', boxShadow: '0 4px 32px rgba(37,211,102,0.25)' }}
+              >
+                <span className="transition-transform duration-300 group-hover:scale-110">
+                  <WhatsAppSVG size={22} />
+                </span>
+                Chat with us on WhatsApp
+              </a>
+            ) : (
+              <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-6 text-center text-[13px] text-amber-700">
+                WhatsApp contact is temporarily unavailable. Please check back soon.
+              </p>
+            )}
 
             <p className="mt-4 text-center text-[11px] font-light text-[#B8AFA8]">
               Average response time: under 5 minutes
             </p>
 
             {/* Contact info */}
-            <div className="mt-12 flex items-start gap-5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E8E0D8] bg-white">
-                <MessageCircle size={16} strokeWidth={1.5} className="text-[#C9A882]" />
+            {displayNumber && (
+              <div className="mt-12 flex items-start gap-5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E8E0D8] bg-white">
+                  <MessageCircle size={16} strokeWidth={1.5} className="text-[#C9A882]" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-light uppercase tracking-[0.24em] text-[#C9A882]">WhatsApp</p>
+                  <p className="mt-1 text-[16px] font-light tracking-wide text-[#1C1917]">{displayNumber}</p>
+                  <p className="mt-0.5 text-[12px] font-light text-[#B8AFA8]">Tap to open WhatsApp — we reply fast</p>
+                </div>
               </div>
-              <div>
-                <p className="text-[10px] font-light uppercase tracking-[0.24em] text-[#C9A882]">WhatsApp</p>
-                <p className="mt-1 text-[16px] font-light tracking-wide text-[#1C1917]">{displayNumber}</p>
-                <p className="mt-0.5 text-[12px] font-light text-[#B8AFA8]">Tap to open WhatsApp — we reply fast</p>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Right — Social media */}
