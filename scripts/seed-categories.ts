@@ -9,10 +9,15 @@
  *   npx tsx scripts/seed-categories.ts
  */
 import { config } from 'dotenv'
-import { db } from '../lib/db'
+import { Pool } from 'pg'
+import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
 
 config({ path: '.env.local' })
 config()
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
+const db = new PrismaClient({ adapter: new PrismaPg(pool) })
 
 const LABELS: Record<string, string> = {
   FOUNDATION:    'Foundation',
@@ -45,4 +50,4 @@ async function main() {
 
 main()
   .catch((err) => { console.error(err); process.exit(1) })
-  .finally(() => process.exit(0))
+  .finally(async () => { await db.$disconnect(); await pool.end() })
